@@ -1,0 +1,314 @@
+---
+/**
+ * Footer — 4 kolom (BLUEPRINT §8 Section 10).
+ *
+ * Kolom 4 (sosial media) HILANG SELURUHNYA saat `site.sosmed === null`
+ * — bukan dirender kosong. Saat ini `null`, jadi footer tampil 3 kolom.
+ * Sama untuk NIB di baris bawah.
+ *
+ * Mobile: kolom navigasi & kontak jadi <details> tertutup supaya footer
+ * tidak menjadi 900px. Batasnya ≤420px dalam keadaan tertutup (AC T03.3).
+ *
+ * Tahun copyright dihitung saat build — bukan hardcode.
+ */
+import { site } from '../../content/site';
+import { lokasi } from '../../content/lokasi';
+import { navItems } from './nav-items';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+
+const tahun = new Date().getFullYear();
+const headOffice = lokasi.find((l) => l.slug === 'head-office') ?? lokasi[0];
+
+// Nomor WA dirender sebagai nomor lokal yang terbaca manusia,
+// diturunkan dari satu sumber di site.ts (bukan string kedua).
+const waTampil = site.whatsapp.replace(/^62/, '0');
+---
+
+<footer class="mv-footer">
+  <div class="mv-footer__inner">
+    <div class="mv-footer__kolom mv-footer__kolom--merek">
+      <span class="mv-footer__merek">{site.brand}</span>
+      <p class="mv-footer__official t-body-s">Official brand by {site.namaCV}</p>
+      <p class="mv-footer__tagline t-body-s">{site.tagline}</p>
+    </div>
+
+    <details class="mv-footer__kolom mv-footer__detail" name="footer">
+      <summary class="mv-footer__judul t-eyebrow">Navigasi</summary>
+      <ul class="mv-footer__list">
+        {
+          navItems.map((item) => (
+            <li>
+              <a class="mv-footer__link t-body-s" href={item.href}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </details>
+
+    <details class="mv-footer__kolom mv-footer__detail" name="footer">
+      <summary class="mv-footer__judul t-eyebrow">Kontak</summary>
+      <ul class="mv-footer__list">
+        <li>
+          <a class="mv-footer__link t-body-s" href={`https://wa.me/${site.whatsapp}`}>
+            WhatsApp {waTampil}
+          </a>
+        </li>
+        <li>
+          <a class="mv-footer__link t-body-s" href={`mailto:${site.email}`}>{site.email}</a>
+        </li>
+        {
+          headOffice && (
+            <li>
+              <address class="mv-footer__alamat t-body-s">
+                <span class="mv-footer__peran">{headOffice.peran}</span>
+                {headOffice.alamat}
+              </address>
+            </li>
+          )
+        }
+      </ul>
+    </details>
+
+    {
+      /* Kolom 4 hanya ada kalau datanya ada. `null` → kolom dihapus,
+        bukan dirender sebagai judul tanpa isi (guardrail 1). */
+    }
+    {
+      site.sosmed && site.sosmed.length > 0 && (
+        <details class="mv-footer__kolom mv-footer__detail" name="footer">
+          <summary class="mv-footer__judul t-eyebrow">Sosial Media</summary>
+          <ul class="mv-footer__list">
+            {site.sosmed.map((s) => (
+              <li>
+                <a
+                  class="mv-footer__link t-body-s"
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {s.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )
+    }
+  </div>
+
+  <div class="mv-footer__cta">
+    <WhatsAppButton konteks="footer" label="Hubungi Kami via WhatsApp" />
+  </div>
+
+  <div class="mv-footer__bawah">
+    {
+      /* Satu ekspresi utuh: dua ekspresi bersebelahan kehilangan spasi
+        di antaranya saat baris dipisah. */
+    }
+    <p class="t-body-s">{`© ${tahun} ${site.namaCV}. Seluruh hak cipta dilindungi.`}</p>
+    {site.nib && <p class="t-body-s">NIB: {site.nib}</p>}
+  </div>
+</footer>
+
+<style>
+  .mv-footer {
+    background-color: var(--color-surface);
+    border-block-start: var(--border-width) solid var(--color-border);
+    padding-block: var(--space-7);
+    padding-inline: var(--edge-pad);
+  }
+
+  .mv-footer__inner,
+  .mv-footer__cta,
+  .mv-footer__bawah {
+    max-inline-size: var(--container-max);
+    margin-inline: auto;
+  }
+
+  .mv-footer__inner {
+    display: grid;
+    /* auto-fit: kolom sosmed yang hilang tidak meninggalkan celah. */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: var(--space-6);
+  }
+
+  .mv-footer__merek {
+    display: block;
+    font-family: var(--font-display);
+    font-weight: var(--fw-display);
+    font-size: 22px;
+    letter-spacing: var(--ls-h1);
+    color: var(--color-text);
+  }
+
+  .mv-footer__official,
+  .mv-footer__tagline {
+    color: var(--color-text-2);
+    margin-block: var(--space-2) 0;
+  }
+
+  .mv-footer__judul {
+    color: var(--color-text);
+    list-style: none;
+    cursor: default;
+    padding-block: var(--space-2);
+  }
+
+  .mv-footer__judul::-webkit-details-marker {
+    display: none;
+  }
+
+  .mv-footer__judul::marker {
+    content: '';
+  }
+
+  .mv-footer__judul:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-footer__list {
+    list-style: none;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+
+  .mv-footer__link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+    color: var(--color-text-2);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .mv-footer__link:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .mv-footer__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-footer__alamat {
+    font-style: normal;
+    color: var(--color-text-2);
+    padding-block: var(--space-2);
+  }
+
+  .mv-footer__peran {
+    display: block;
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .mv-footer__cta {
+    margin-block-start: var(--space-7);
+  }
+
+  .mv-footer__bawah {
+    margin-block-start: var(--space-6);
+    padding-block-start: var(--space-5);
+    border-block-start: var(--border-width) solid var(--color-border);
+    color: var(--color-text-2);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+  }
+
+  .mv-footer__bawah p {
+    margin: 0;
+  }
+
+  /* ---------- desktop: <details> selalu terbuka, panah tak relevan ---------- */
+  @media (min-width: 768px) {
+    .mv-footer__detail > .mv-footer__list {
+      display: flex !important;
+    }
+  }
+
+  /* ---------- mobile: navigasi & kontak tertutup ---------- */
+  @media (max-width: 767.98px) {
+    .mv-footer {
+      padding-block: var(--space-6);
+    }
+
+    .mv-footer__inner {
+      grid-template-columns: 1fr;
+      gap: var(--space-3);
+    }
+
+    .mv-footer__detail {
+      border-block-start: var(--border-width) solid var(--color-border);
+    }
+
+    .mv-footer__judul {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-block-size: var(--tap-min);
+      cursor: pointer;
+    }
+
+    /* Penanda buka/tutup — hanya transform (§6.7). */
+    .mv-footer__judul::after {
+      content: '';
+      inline-size: 8px;
+      block-size: 8px;
+      border-inline-end: 2px solid currentColor;
+      border-block-end: 2px solid currentColor;
+      transform: rotate(45deg) translate(-2px, -2px);
+      transition: transform var(--dur-base) var(--ease);
+    }
+
+    .mv-footer__detail[open] .mv-footer__judul::after {
+      transform: rotate(-135deg) translate(-2px, -2px);
+    }
+
+    .mv-footer__cta {
+      margin-block-start: var(--space-5);
+    }
+
+    /* Tagline dibuang di mobile: sudah tampil di hero dan meta
+       description, dan tiga barisnya sendirian memakan ~40px dari
+       anggaran 420px (AC T03.3). */
+    .mv-footer__tagline {
+      display: none;
+    }
+
+    .mv-footer__bawah {
+      margin-block-start: var(--space-4);
+      padding-block-start: var(--space-4);
+    }
+  }
+</style>
+
+<script>
+  /* Di desktop <details> harus selalu terbuka; di mobile tertutup.
+     Atribut `open` tidak bisa diatur media query, jadi disinkronkan di sini.
+     Tanpa JS: kolom tetap dapat dibuka manual — <details> native. */
+  const mq = window.matchMedia('(min-width: 768px)');
+  const kolom = document.querySelectorAll<HTMLDetailsElement>('.mv-footer__detail');
+
+  const sync = (desktop: boolean): void => {
+    kolom.forEach((d) => {
+      d.open = desktop;
+      // Di desktop judul bukan kontrol — jangan biarkan masuk urutan Tab.
+      const s = d.querySelector('summary');
+      if (s) {
+        if (desktop) s.setAttribute('tabindex', '-1');
+        else s.removeAttribute('tabindex');
+      }
+    });
+  };
+
+  sync(mq.matches);
+  mq.addEventListener('change', (e) => sync(e.matches));
+</script>

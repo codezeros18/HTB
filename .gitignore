@@ -1,0 +1,95 @@
+# ─────────────────────────────────────────────────────────────
+# DOKUMEN KERJA INTERNAL
+# ─────────────────────────────────────────────────────────────
+# File-file di bawah berisi strategi bisnis, analisis persona,
+# daftar data yang belum diberikan klien, anomali pada materi
+# klien, dan catatan kritis terhadap company profile mereka.
+# Semua itu untuk konsumsi tim, bukan untuk dibaca klien atau
+# siapa pun yang mendapat akses ke repo ini.
+#
+# ⚠️ PERINGATAN: karena tidak masuk Git, file-file ini TIDAK
+# ikut tersinkron antar mesin. Kalau tim bekerja di lebih dari
+# satu komputer, salin manual (Drive/Dropbox) atau simpan di
+# repo privat terpisah. Kehilangan PROGRESS.md berarti
+# kehilangan seluruh memori teknis proyek — tidak ada tempat
+# lain yang mencatatnya.
+#
+# README.md SENGAJA TIDAK ADA DI DAFTAR INI. Itu dokumen publik
+# untuk repo dan boleh dibaca klien.
+BLUEPRINT.md
+TASKS.md
+PROMPTS.md
+PROGRESS.md
+CLAUDE.md
+/docs/internal/
+
+# ─────────────────────────────────────────────────────────────
+# Astro
+# ─────────────────────────────────────────────────────────────
+dist/
+.astro/
+.output/
+
+# ─────────────────────────────────────────────────────────────
+# Node
+# ─────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# ─────────────────────────────────────────────────────────────
+# Environment & rahasia
+# ─────────────────────────────────────────────────────────────
+# Kunci Web3Forms dan token analitik tidak boleh masuk Git.
+.env
+.env.*
+!.env.example
+
+# ─────────────────────────────────────────────────────────────
+# Hosting
+# ─────────────────────────────────────────────────────────────
+.netlify/
+.vercel/
+.wrangler/
+
+# ─────────────────────────────────────────────────────────────
+# Editor
+# ─────────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+
+# ─────────────────────────────────────────────────────────────
+# Sistem operasi
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+
+# ─────────────────────────────────────────────────────────────
+# Aset mentah dari klien
+# ─────────────────────────────────────────────────────────────
+# Foto asli dari klien sebelum dioptimasi. Ukurannya besar dan
+# tidak perlu masuk Git — yang masuk hanya hasil optimasinya
+# di public/images/.
+/assets-mentah/
+*.psd
+*.ai
+
+# Placeholder foto hero SEMENTARA (S04) — foto katalog H&M, tag merek
+# terlihat, dipakai hanya untuk uji visual lokal atas otorisasi eksplisit
+# (lihat PROGRESS.md S04.2-lanjutan). BUKAN aset MOTIVE — tidak boleh masuk
+# Git supaya tidak pernah ikut ter-commit/ter-deploy secara tidak sengaja.
+/public/images/hero/placeholder-sementara-JANGAN-DIPAKAI-LIVE.jpg
+
+# Company profile PDF dari klien (19 MB, sumber data S01). Bukan aset situs;
+# versi optimasi untuk unduhan publik ditangani di S10 di public/docs/.
+/Compro CV HTB.pdf
+/*.pdf

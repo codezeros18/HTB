@@ -1,0 +1,270 @@
+/* =============================================================
+   tokens.css — SUMBER TUNGGAL SELURUH TOKEN DESAIN MOTIVE
+   Nilai disalin persis dari BLUEPRINT.md §6.3–§6.7.
+   Komponen TIDAK BOLEH menulis hex — hanya var(--token) dari sini.
+
+   Struktur file:
+     1. PALET — ARAH A (AKTIF di :root)
+     2. PALET — ARAH B (blok komentar lengkap, siap tukar)
+     3. TIPOGRAFI  — identik di kedua arah
+     4. SPACING / RADIUS / BORDER / SHADOW / GRID / BREAKPOINT
+     5. MOTION
+   Menukar arah desain = ganti isi blok (1) dengan blok (2).
+   Tidak ada file lain yang perlu disentuh.
+   ============================================================= */
+
+/* ===== 1. PALET — ARAH A "UNIQLO CLEAN" (DEFAULT, AKTIF) =====
+   BLUEPRINT.md §6.3. Semua rasio kontras sudah dihitung.
+   Jangan mengembalikan #FF0000 — gagal WCAG AA (4.00:1). */
+:root {
+  --color-bg: #ffffff;
+  --color-surface: #f4f4f4;
+  --color-surface-alt: #ebebeb;
+  --color-text: #0f0f0f;
+  --color-text-2: #595959;
+  --color-border: #dcdcdc;
+  --color-border-strong: #767676;
+  --color-accent: #d6001c;
+  --color-accent-hover: #a80016;
+  --color-accent-soft: #fff1f2;
+  /* Jembatan: teks di atas tombol aksen. Arah A = putih (tak ada di
+     tabel §6.3 karena trivial); Arah B mendefinisikan #14191A. */
+  --color-accent-ink: #ffffff;
+  --color-focus: #0057d9;
+  --color-success: #0f7b3e;
+  --color-error: #b3261e;
+
+  /* Penyesuaian arah (dipakai di global.css) */
+  --fw-h3: 700; /* Arah B: 600 */
+  --font-smoothing: auto; /* Arah B: antialiased */
+  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.1); /* Arah B: none */
+}
+
+/* ===== 2. ARAH B — MOTIVE DARK — tukar seluruh blok ini dengan blok di atas =====
+   BLUEPRINT.md §6.4. Aktifkan dengan meng-uncomment blok :root di bawah
+   DAN meng-comment blok :root Arah A di atas. Tidak ada perubahan lain.
+
+   Aturan wajib Arah B (§6.4 / §6.5):
+     - Emas hanya untuk eyebrow, angka harga, garis pemisah, ikon, tombol.
+       TIDAK PERNAH untuk paragraf.
+     - Shadow tidak dipakai (--shadow-card: none).
+     - H3 memakai weight 600, bukan 700.
+     - -webkit-font-smoothing: antialiased wajib.
+     - Foto berlatar putih wajib dipotong latarnya sebelum arah ini tayang.
+
+:root {
+  --color-bg: #1E2426;
+  --color-surface: #293133;
+  --color-surface-alt: #333C3E;
+  --color-text: #F2F5F4;
+  --color-text-2: #A3AEAE;
+  --color-border: #3C4649;
+  --color-border-strong: #758184;
+  --color-accent: #E3B23C;
+  --color-accent-hover: #F2C75C;
+  --color-accent-ink: #14191A;
+  --color-focus: #8AB4F8;
+  --color-success: #4ADE80;
+  --color-error: #FF6B6B;
+
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg));
+
+  --fw-h3: 600;
+  --font-smoothing: antialiased;
+  --shadow-card: none;
+}
+   ===== AKHIR ARAH B ===== */
+
+/* ===== 3. TIPOGRAFI — identik di kedua arah (BLUEPRINT.md §6.5) ===== */
+:root {
+  /* Font stack — self-host, lihat @font-face di global.css.
+     Fallback face "* Fallback" memakai size-adjust agar swap tidak menggeser layout. */
+  --font-display: 'Archivo', 'Archivo Fallback', 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Inter', 'Inter Fallback', 'Segoe UI', Arial, sans-serif;
+
+  /* Type scale — DESKTOP (≥768px). fs / lh / tracking / weight */
+  --fs-display: 56px;
+  --lh-display: 1;
+  --ls-display: -0.02em;
+  --fw-display: 800;
+
+  --fs-h1: 40px;
+  --lh-h1: 1.05;
+  --ls-h1: -0.015em;
+  --fw-h1: 800;
+
+  --fs-h2: 28px;
+  --lh-h2: 1.15;
+  --ls-h2: -0.01em;
+  --fw-h2: 700;
+
+  --fs-h3: 20px;
+  --lh-h3: 1.25;
+  --ls-h3: 0em;
+  /* --fw-h3 didefinisikan di blok palet (berbeda antar arah) */
+
+  --fs-eyebrow: 12px;
+  --lh-eyebrow: 1.2;
+  --ls-eyebrow: 0.16em;
+  --fw-eyebrow: 700;
+
+  --fs-body-l: 17px;
+  --lh-body-l: 1.65;
+  --ls-body-l: 0em;
+
+  --fs-body-m: 15px;
+  --lh-body-m: 1.6;
+  --ls-body-m: 0em;
+
+  --fs-body-s: 13px;
+  --lh-body-s: 1.55;
+  --ls-body-s: 0.01em;
+
+  --fw-body: 400;
+  --fw-body-medium: 500;
+
+  --fs-btn: 13px;
+  --lh-btn: 1;
+  --ls-btn: 0.08em;
+  --fw-btn: 700;
+
+  --fs-tnum: 15px;
+  --lh-tnum: 1.45;
+  --ls-tnum: 0.01em;
+  --fw-tnum: 500;
+}
+
+/* Type scale — MOBILE (<768px). Hanya fs/lh/tracking yang berubah. */
+@media (max-width: 767.98px) {
+  :root {
+    --fs-display: 34px;
+    --lh-display: 1.05;
+    --ls-display: -0.015em;
+
+    --fs-h1: 27px;
+    --lh-h1: 1.1;
+    --ls-h1: -0.01em;
+
+    --fs-h2: 21px;
+    --lh-h2: 1.2;
+    --ls-h2: 0em;
+
+    --fs-h3: 18px;
+    --lh-h3: 1.3;
+    --ls-h3: 0em;
+
+    --fs-eyebrow: 11px;
+    --lh-eyebrow: 1.2;
+    --ls-eyebrow: 0.14em;
+
+    --fs-body-l: 16px;
+    --lh-body-l: 1.6;
+
+    --fs-body-m: 15px;
+    --lh-body-m: 1.6;
+
+    --fs-body-s: 13px;
+    --lh-body-s: 1.55;
+    --ls-body-s: 0.01em;
+  }
+}
+
+/* ===== 4. SPACING / RADIUS / BORDER / SHADOW / GRID / BREAKPOINT (BLUEPRINT.md §6.6) ===== */
+:root {
+  /* Spacing basis 8 */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  /* Padding vertikal section */
+  --section-pad-y: 96px;
+  --section-pad-y-gallery-b: 128px;
+
+  /* Radius — tidak ada pill, tidak ada radius >8px */
+  --radius-chip: 2px;
+  --radius-control: 4px;
+  --radius-modal: 8px;
+
+  /* Border */
+  --border-width: 1px;
+
+  /* Grid & container */
+  --container-max: 1280px;
+  --grid-columns: 12;
+  --grid-gutter: 24px;
+  --edge-pad: 24px;
+
+  /* Breakpoint (referensi; nilai kanonik ada di @theme Tailwind) */
+  --bp-xs: 360px;
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+}
+
+@media (max-width: 767.98px) {
+  :root {
+    --section-pad-y: 56px;
+    --edge-pad: 16px;
+  }
+}
+
+/* ===== 5. MOTION (BLUEPRINT.md §6.7) ===== */
+:root {
+  --dur-fast: 120ms; /* hover warna/border/ikon */
+  --dur-base: 180ms; /* tombol, tab, accordion */
+  --dur-slow: 240ms; /* masuk-layar: fade + translateY 12px */
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Masuk-layar (dipakai .mv-reveal di global.css) */
+  --reveal-shift: 12px;
+  --reveal-delay: 0ms;
+  --reveal-stagger: 60ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-fast: 0ms;
+    --dur-base: 0ms;
+    --dur-slow: 0ms;
+    --reveal-shift: 0px;
+    --reveal-stagger: 0ms;
+  }
+}
+
+/* ===== 6. KONTROL & KOMPONEN (turunan §6.6 + §7.8) =====
+   Ditambahkan di S02. Nilai turunan, bukan token desain baru:
+   tinggi kontrol dikunci 44px agar target sentuh WCAG 2.1 AA
+   (§7.8 "minimum 44×44px di mobile") terpenuhi di semua viewport. */
+:root {
+  /* Target sentuh minimum — §7.8 */
+  --tap-min: 44px;
+
+  /* Ring fokus — §7.8: 3px --color-focus, offset 2px, :focus-visible */
+  --focus-ring-width: 3px;
+  --focus-ring-offset: 2px;
+
+  /* Tombol */
+  --btn-h: var(--tap-min);
+  --btn-pad-x: var(--space-5); /* 24px */
+  --btn-pad-x-lg: var(--space-6); /* 32px */
+
+  /* SectionHeading — garis 56×2px (TASKS T02.1) */
+  --rule-w: 56px;
+  --rule-h: 2px;
+
+  /* Kotak logo klien — §6.8 (dipakai S07) */
+  --logo-box-w: 160px;
+  --logo-box-h: 80px;
+
+  /* Modal */
+  --modal-max-w: 640px;
+  --modal-backdrop: rgba(15, 15, 15, 0.55);
+}

@@ -1,0 +1,245 @@
+---
+/**
+ * Table — tabel semantik dengan kolom pertama sticky di mobile.
+ *
+ * Semantik wajib (§7.8): <caption>, <th scope="col">, <th scope="row">.
+ * BUKAN div-grid — screen reader kehilangan hubungan baris↔kolom.
+ *
+ * Kunci AC T02.4: pembungkus `overflow-x: auto` + `max-inline-size: 100%`
+ * membuat tabel 8 kolom bisa digeser SENDIRI tanpa membuat <body> ikut
+ * meluber di 360px. Angka memakai `tabular-nums` (kelas .t-tnum) supaya
+ * digit sejajar sempurna antar baris.
+ *
+ * Props:
+ *   caption         WAJIB. Judul tabel untuk screen reader.
+ *   captionVisible  tampilkan caption secara visual. Default false (sr-only).
+ *   kolom           label <th scope="col">. Elemen ke-0 = judul kolom
+ *                   header baris (mis. "UKURAN").
+ *   baris           TableRow[] — { header, sel[] }. `sel` null → sel kosong.
+ *   align           perataan sel data: 'start' | 'center' (default) | 'end'.
+ *   sticky          kolom pertama menempel saat digeser. Default true.
+ *   numerik         pakai tabular-nums pada sel data. Default true.
+ *   catatan         teks kecil di bawah tabel (mis. toleransi). null → tidak dirender.
+ */
+import type { TableRow } from './types';
+
+interface Props {
+  caption: string;
+  captionVisible?: boolean;
+  kolom: string[];
+  baris: TableRow[];
+  align?: 'start' | 'center' | 'end';
+  sticky?: boolean;
+  numerik?: boolean;
+  catatan?: string | null;
+  class?: string;
+  id?: string;
+}
+
+const {
+  caption,
+  captionVisible = false,
+  kolom,
+  baris,
+  align = 'center',
+  sticky = true,
+  numerik = true,
+  catatan = null,
+  class: className,
+  id,
+} = Astro.props;
+
+const [kolomHeader, ...kolomData] = kolom;
+---
+
+<figure class:list={['mv-table', className]} id={id}>
+  <div
+    class="mv-table__scroll"
+    data-mv-table-scroll
+    tabindex="0"
+    role="group"
+    aria-label={`${caption} — dapat digeser ke samping`}
+  >
+    <table class:list={['mv-table__el', sticky && 'is-sticky']}>
+      <caption class:list={[!captionVisible && 'sr-only', captionVisible && 't-body-s']}>
+        {caption}
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col" class="mv-table__corner t-body-s">{kolomHeader}</th>
+          {
+            kolomData.map((k) => (
+              <th scope="col" class="mv-table__th t-body-s" data-align={align}>
+                {k}
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          baris.map((row) => (
+            <tr>
+              <th scope="row" class="mv-table__rowhead t-body-s">
+                {row.header}
+              </th>
+              {row.sel.map((nilai) => (
+                <td
+                  class:list={['mv-table__td', numerik ? 't-tnum' : 't-body-m']}
+                  data-align={align}
+                  data-kosong={nilai === null ? '' : undefined}
+                >
+                  {nilai === null ? '' : nilai}
+                </td>
+              ))}
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <p class="mv-table__hint t-body-s" data-mv-table-hint hidden>
+    <span aria-hidden="true">←→</span> Geser tabel untuk melihat seluruh kolom
+  </p>
+
+  {catatan && <figcaption class="mv-table__catatan t-body-s">{catatan}</figcaption>}
+</figure>
+
+<style>
+  .mv-table {
+    margin: 0;
+    /* Jaring pengaman: figure tidak pernah lebih lebar dari induknya,
+       sehingga overflow selalu jatuh ke .mv-table__scroll — bukan ke <body>. */
+    max-inline-size: 100%;
+  }
+
+  .mv-table__scroll {
+    overflow-x: auto;
+    max-inline-size: 100%;
+    /* Momentum scroll di iOS + snap ringan supaya kolom tidak terpotong. */
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .mv-table__scroll:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-table__el {
+    border-collapse: collapse;
+    /* Kolom tidak boleh menyusut sampai teks terlipat — biarkan meluber
+       lalu digeser. Inilah yang membuat 8 kolom tetap terbaca di 360px. */
+    inline-size: 100%;
+    min-inline-size: max-content;
+  }
+
+  caption {
+    text-align: start;
+    color: var(--color-text-2);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .mv-table__th,
+  .mv-table__corner {
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    font-weight: 700;
+    text-align: start;
+    white-space: nowrap;
+    padding: var(--space-3) var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border-strong);
+  }
+
+  .mv-table__rowhead {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-weight: 500;
+    text-align: start;
+    white-space: nowrap;
+    padding: var(--space-3) var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .mv-table__td {
+    color: var(--color-text);
+    white-space: nowrap;
+    padding: var(--space-3) var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  /* Baris selang-seling — §6.3 --color-surface-alt */
+  tbody tr:nth-child(even) .mv-table__td {
+    background-color: var(--color-surface-alt);
+  }
+
+  tbody tr:nth-child(even) .mv-table__rowhead {
+    background-color: var(--color-surface-alt);
+  }
+
+  tbody tr:last-child .mv-table__td,
+  tbody tr:last-child .mv-table__rowhead {
+    border-block-end: 0;
+  }
+
+  [data-align='center'] {
+    text-align: center;
+  }
+
+  [data-align='end'] {
+    text-align: end;
+  }
+
+  /* ---------- kolom pertama sticky ---------- */
+  .is-sticky .mv-table__corner,
+  .is-sticky .mv-table__rowhead {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 1;
+    /* Garis pemisah supaya batas kolom beku tetap terbaca saat digeser. */
+    box-shadow: inset -1px 0 0 0 var(--color-border-strong);
+  }
+
+  .is-sticky .mv-table__corner {
+    z-index: 2;
+  }
+
+  .mv-table__hint {
+    color: var(--color-text-2);
+    margin-block-start: var(--space-2);
+  }
+
+  .mv-table__hint[hidden] {
+    display: none;
+  }
+
+  .mv-table__catatan {
+    color: var(--color-text-2);
+    margin-block-start: var(--space-3);
+  }
+</style>
+
+<script>
+  /* Petunjuk geser hanya muncul kalau tabel MEMANG meluber.
+     Tanpa JS: petunjuk tersembunyi (atribut `hidden` di markup) sementara
+     tabelnya tetap bisa digeser — degradasi aman. */
+  const wraps = document.querySelectorAll<HTMLElement>('[data-mv-table-scroll]');
+
+  const sync = (wrap: HTMLElement): void => {
+    const hint = wrap.parentElement?.querySelector<HTMLElement>('[data-mv-table-hint]');
+    if (!hint) return;
+    hint.hidden = wrap.scrollWidth <= wrap.clientWidth + 1;
+  };
+
+  wraps.forEach((wrap) => {
+    sync(wrap);
+    if (typeof ResizeObserver === 'function') {
+      new ResizeObserver(() => sync(wrap)).observe(wrap);
+    } else {
+      window.addEventListener('resize', () => sync(wrap), { passive: true });
+    }
+  });
+</script>

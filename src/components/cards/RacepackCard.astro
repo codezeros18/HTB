@@ -1,0 +1,124 @@
+---
+/**
+ * RacepackCard — kartu ukuran besar untuk Tab 2 (Racepack).
+ *
+ * Sama seperti `ProductCard` soal null-hiding, tapi punya baris
+ * `spesifikasi` tambahan (mis. "Tyvek 125 gsm") dan CTA WA konteks
+ * `racepack` — pesan pre-fill-nya membawa slot jumlah peserta & tanggal
+ * acara (`site.ts` mengisi placeholder "(mohon diisi)" bila kosong).
+ *
+ * Props:
+ *   item   RacepackItem apa adanya dari `racepack.ts`.
+ *   class
+ */
+import type { RacepackItem } from '../../content/types';
+import MediaFallback from '../ui/MediaFallback.astro';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+
+interface Props {
+  item: RacepackItem;
+  class?: string;
+}
+
+const { item, class: className }: Props = Astro.props;
+
+const metaRows: string[] = [];
+if (item.moq !== null) metaRows.push(`MOQ ${item.moq.toLocaleString('id-ID')} pcs`);
+if (item.leadTime !== null) metaRows.push(`Lead time ${item.leadTime}`);
+---
+
+<article class:list={['mv-racepack-card', className]}>
+  {
+    item.foto ? (
+      <img
+        class="mv-racepack-card__foto"
+        src={item.foto}
+        alt={item.nama}
+        width="500"
+        height="400"
+        loading="lazy"
+      />
+    ) : (
+      <MediaFallback class="mv-racepack-card__foto" label={item.nama} rasio="4/5" />
+    )
+  }
+
+  <div class="mv-racepack-card__body">
+    <h3 class="mv-racepack-card__nama t-h3">{item.nama}</h3>
+
+    {item.spesifikasi && <p class="mv-racepack-card__spesifikasi t-body-s">{item.spesifikasi}</p>}
+
+    {
+      metaRows.length > 0 && (
+        <ul class="mv-racepack-card__meta">
+          {metaRows.map((m) => (
+            <li class="t-body-s">{m}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      item.hargaMulai !== null && (
+        <p class="mv-racepack-card__harga t-body-m">
+          Mulai Rp {item.hargaMulai.toLocaleString('id-ID')}/pcs
+        </p>
+      )
+    }
+
+    <WhatsAppButton konteks="racepack" class="mv-racepack-card__cta" fullWidth size="md" />
+  </div>
+</article>
+
+<style>
+  .mv-racepack-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mv-racepack-card__foto {
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface);
+  }
+
+  .mv-racepack-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-block-start: var(--space-4);
+  }
+
+  .mv-racepack-card__nama {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-racepack-card__spesifikasi {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+
+  .mv-racepack-card__meta {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--color-text-2);
+  }
+
+  .mv-racepack-card__harga {
+    color: var(--color-accent-hover);
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .mv-racepack-card__cta {
+    margin-block-start: var(--space-2);
+  }
+</style>

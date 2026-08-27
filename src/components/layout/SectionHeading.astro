@@ -1,0 +1,99 @@
+---
+/**
+ * SectionHeading — nomor + garis 56×2px + H2 + subheading opsional.
+ *
+ * Struktur visual dikunci di sini supaya kesepuluh section identik dan
+ * pemanggil tidak perlu mengatur jaraknya sendiri (AC T02.1).
+ *
+ * Props:
+ *   nomor     "01".."10". Dekoratif — disembunyikan dari screen reader
+ *             karena urutan sudah tersirat dari DOM.
+ *   judul     teks H2. Dirender UPPERCASE lewat CSS, bukan lewat data,
+ *             supaya nilai aslinya tetap terbaca screen reader (§6.5).
+ *   subjudul  opsional. `null` → paragrafnya TIDAK dirender sama sekali
+ *             (guardrail 1: nol baris kosong menggantung).
+ *   id        dipasang ke <h2>; pakai untuk aria-labelledby di section.
+ *   as        tingkat heading. Default 'h2'.
+ *   align     'start' (default) atau 'center'.
+ */
+interface Props {
+  nomor?: string | null;
+  judul: string;
+  subjudul?: string | null;
+  id?: string;
+  as?: 'h2' | 'h3';
+  align?: 'start' | 'center';
+  class?: string;
+}
+
+const {
+  nomor = null,
+  judul,
+  subjudul = null,
+  id,
+  as: Heading = 'h2',
+  align = 'start',
+  class: className,
+}: Props = Astro.props;
+---
+
+<header class:list={['mv-heading', `mv-heading--${align}`, className]}>
+  {
+    nomor && (
+      <span class="mv-heading__nomor t-eyebrow" aria-hidden="true">
+        {nomor}
+      </span>
+    )
+  }
+  <span class="mv-heading__rule" aria-hidden="true"></span>
+  <Heading id={id} class="mv-heading__judul t-h2">{judul}</Heading>
+  {subjudul && <p class="mv-heading__sub t-body-l">{subjudul}</p>}
+</header>
+
+<style>
+  .mv-heading {
+    display: flex;
+    flex-direction: column;
+    /* Jarak heading → konten section dikunci di sini. */
+    margin-block-end: var(--space-7); /* 48px */
+  }
+
+  .mv-heading--center {
+    align-items: center;
+    text-align: center;
+  }
+
+  .mv-heading__nomor {
+    color: var(--color-accent);
+    margin-block-end: var(--space-3); /* 12px */
+  }
+
+  .mv-heading__rule {
+    display: block;
+    inline-size: var(--rule-w); /* 56px */
+    block-size: var(--rule-h); /* 2px */
+    background-color: var(--color-accent);
+    margin-block-end: var(--space-4); /* 16px */
+  }
+
+  .mv-heading__judul {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-heading__sub {
+    color: var(--color-text-2);
+    margin-block-start: var(--space-4); /* 16px */
+    max-inline-size: 62ch;
+  }
+
+  .mv-heading--center .mv-heading__sub {
+    margin-inline: auto;
+  }
+
+  @media (max-width: 767.98px) {
+    .mv-heading {
+      margin-block-end: var(--space-6); /* 32px */
+    }
+  }
+</style>

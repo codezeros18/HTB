@@ -1,0 +1,240 @@
+---
+/**
+ * MobileMenu — panel full-screen, item 22px (BLUEPRINT §8 Section 1).
+ *
+ * Memakai <dialog> + showModal() sama seperti `ui/Modal.astro`:
+ * focus trap, Esc, dan inert-nya latar belakang ditangani browser.
+ * Trap tulisan tangan hampir selalu bocor di kasus pinggir.
+ *
+ * Yang tetap ditangani JS di sini:
+ *   1. kunci scroll <body> (+ kompensasi lebar scrollbar → anti-CLS)
+ *   2. sinkronisasi `aria-expanded` pada tombol hamburger
+ *   3. kembalikan fokus ke hamburger saat ditutup
+ *
+ * Dipicu dari Navbar: <button data-mv-menu-open aria-controls="menu-mobile">
+ */
+import { site } from '../../content/site';
+import { navItems } from './nav-items';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+---
+
+<dialog id="menu-mobile" class="mv-menu" aria-label="Menu navigasi" data-mv-menu>
+  <div class="mv-menu__panel">
+    <div class="mv-menu__head">
+      <span class="mv-menu__merek">{site.brand}</span>
+      <button type="button" class="mv-menu__tutup" data-mv-menu-close>
+        <span class="sr-only">Tutup menu</span>
+        <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false">
+          <path
+            d="M4 4l8 8M12 4l-8 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="square"></path>
+        </svg>
+      </button>
+    </div>
+
+    <nav class="mv-menu__nav" aria-label="Navigasi utama (mobile)">
+      <ul class="mv-menu__list">
+        {
+          navItems.map((item) => (
+            <li>
+              <a class="mv-menu__link" href={item.href} data-mv-menu-nav>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="mv-menu__kaki">
+      <WhatsAppButton konteks="navbar" label="Hubungi Kami" fullWidth />
+    </div>
+  </div>
+</dialog>
+
+<style>
+  .mv-menu {
+    /* Full-screen: <dialog> default-nya kotak di tengah. */
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    inline-size: 100%;
+    block-size: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .mv-menu::backdrop {
+    background-color: var(--modal-backdrop);
+  }
+
+  .mv-menu__panel {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    padding: var(--edge-pad);
+    gap: var(--space-7);
+  }
+
+  .mv-menu__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 0 0 auto;
+  }
+
+  .mv-menu__merek {
+    font-family: var(--font-display);
+    font-weight: var(--fw-display);
+    font-size: 22px;
+    letter-spacing: var(--ls-h1);
+  }
+
+  .mv-menu__tutup {
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    background: transparent;
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .mv-menu__tutup:focus-visible,
+  .mv-menu__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-menu__nav {
+    flex: 1 1 auto;
+  }
+
+  .mv-menu__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mv-menu__link {
+    display: flex;
+    align-items: center;
+    /* Item 22px — BLUEPRINT §8 Section 1. */
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: var(--ls-h2);
+    text-transform: uppercase;
+    color: var(--color-text);
+    text-decoration: none;
+    min-block-size: 56px;
+    border-block-end: var(--border-width) solid var(--color-border);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .mv-menu__link:hover {
+    color: var(--color-accent);
+  }
+
+  .mv-menu__kaki {
+    flex: 0 0 auto;
+    padding-block-end: var(--space-4);
+  }
+
+  /* Menu tidak pernah relevan di desktop — link sudah ada di navbar. */
+  @media (min-width: 1024px) {
+    .mv-menu[open] {
+      display: none;
+    }
+  }
+</style>
+
+<script>
+  const dialog = document.querySelector<HTMLDialogElement>('[data-mv-menu]');
+  const pemicu = document.querySelector<HTMLButtonElement>('[data-mv-menu-open]');
+
+  if (dialog && pemicu) {
+    let paddingAsli = '';
+
+    const kunciScroll = (): void => {
+      const gap = window.innerWidth - document.documentElement.clientWidth;
+      paddingAsli = document.body.style.paddingRight;
+      document.body.style.overflow = 'hidden';
+      if (gap > 0) document.body.style.paddingRight = `${gap}px`;
+    };
+
+    const lepasScroll = (): void => {
+      document.body.style.removeProperty('overflow');
+      if (paddingAsli) document.body.style.paddingRight = paddingAsli;
+      else document.body.style.removeProperty('padding-right');
+    };
+
+    pemicu.addEventListener('click', () => {
+      if (dialog.open) return;
+      dialog.showModal();
+      pemicu.setAttribute('aria-expanded', 'true');
+      kunciScroll();
+    });
+
+    dialog.querySelector('[data-mv-menu-close]')?.addEventListener('click', () => dialog.close());
+
+    // Mengklik item navigasi harus menutup menu, kalau tidak panel
+    // full-screen menutupi section tujuannya.
+    dialog.querySelectorAll('[data-mv-menu-nav]').forEach((a) => {
+      a.addEventListener('click', () => dialog.close());
+    });
+
+    // 'close' menangkap SEMUA jalur penutupan, termasuk Esc bawaan browser.
+    dialog.addEventListener('close', () => {
+      lepasScroll();
+      pemicu.setAttribute('aria-expanded', 'false');
+      pemicu.focus();
+    });
+
+    /* Pembungkus siklus Tab.
+       <dialog> modal SUDAH membuat latar belakang inert — pengguna tidak
+       akan pernah mencapai kontrol di belakang panel. Tapi Chrome
+       menyelipkan <body> sekali di antara elemen terakhir dan elemen
+       pertama, sehingga satu tekanan Tab terasa "kosong" dan
+       `document.activeElement` sesaat keluar dari dialog.
+       Di sini siklusnya ditutup secara eksplisit. */
+    dialog.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab') return;
+
+      const fokusable = [
+        ...dialog.querySelectorAll<HTMLElement>('a[href], button:not([disabled])'),
+      ].filter((el) => el.offsetParent !== null);
+
+      const pertama = fokusable[0];
+      const terakhir = fokusable[fokusable.length - 1];
+      if (!pertama || !terakhir) return;
+
+      const aktif = document.activeElement;
+      if (e.shiftKey && aktif === pertama) {
+        e.preventDefault();
+        terakhir.focus();
+      } else if (!e.shiftKey && aktif === terakhir) {
+        e.preventDefault();
+        pertama.focus();
+      }
+    });
+
+    // Kalau viewport melewati 1024px saat menu terbuka, tutup —
+    // link sudah tersedia di navbar dan panel jadi mubazir.
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => {
+      if (e.matches && dialog.open) dialog.close();
+    });
+  }
+</script>

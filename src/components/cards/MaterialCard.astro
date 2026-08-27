@@ -1,0 +1,85 @@
+---
+/**
+ * MaterialCard — satu varian bahan di dalam accordion kelompoknya.
+ *
+ * ⚠️ GUARDRAIL PALING RAWAN DI SPRINT INI: hanya `bahan.namaTampil` yang
+ * boleh dirender. `bahan.namaPasar` ("Nike", "Billabong", "Lacoste CVC")
+ * TIDAK PERNAH disentuh di file ini — bukan cuma disembunyikan CSS,
+ * tapi memang tidak pernah dibaca dari objeknya. Diverifikasi lewat
+ * `grep -riE "nike|billabong|lacoste" dist/` setelah build (T05.4).
+ *
+ * `swatch: null` → `MediaFallback` 1:1, bukan `<img>` kosong (nol
+ * gambar rusak, AC T05.4).
+ *
+ * Props:
+ *   bahan   objek `Bahan` apa adanya dari `bahan.ts`.
+ *   class
+ */
+import type { Bahan } from '../../content/types';
+import MediaFallback from '../ui/MediaFallback.astro';
+
+interface Props {
+  bahan: Bahan;
+  class?: string;
+}
+
+const { bahan: b, class: className }: Props = Astro.props;
+
+const gramaturTeks = b.gramasi ?? (b.gsm.length > 0 ? `${b.gsm.join('/')} gsm` : null);
+---
+
+<article class:list={['mv-material-card', className]}>
+  {
+    b.swatch ? (
+      <img
+        class="mv-material-card__swatch"
+        src={b.swatch}
+        alt={`Tekstur kain ${b.namaTampil}`}
+        width="200"
+        height="200"
+        loading="lazy"
+      />
+    ) : (
+      <MediaFallback class="mv-material-card__swatch" label={b.namaTampil} rasio="1/1" />
+    )
+  }
+
+  <div class="mv-material-card__body">
+    <h4 class="mv-material-card__nama t-h3">{b.namaTampil}</h4>
+    {gramaturTeks && <p class="mv-material-card__gramatur t-body-s">{gramaturTeks}</p>}
+    {b.deskripsi && <p class="mv-material-card__deskripsi t-body-s">{b.deskripsi}</p>}
+  </div>
+</article>
+
+<style>
+  .mv-material-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .mv-material-card__swatch {
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface);
+  }
+
+  .mv-material-card__nama {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-material-card__gramatur {
+    color: var(--color-text-2);
+    font-variant-numeric: tabular-nums;
+    margin: 0;
+  }
+
+  .mv-material-card__deskripsi {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+</style>

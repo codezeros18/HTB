@@ -1,0 +1,242 @@
+---
+/**
+ * Modal — <dialog> NATIVE dibuka dengan showModal().
+ *
+ * Kenapa native: focus trap, Esc menutup, dan inert-nya latar belakang
+ * sudah ditangani browser. Trap buatan sendiri hampir selalu bocor pada
+ * kasus pinggir (iframe, kontrol kustom, shadow DOM).
+ *
+ * Yang masih perlu JS (tidak dijamin native):
+ *   1. Mengunci scroll <body> saat terbuka.
+ *   2. Mengembalikan fokus ke pemicu — Safari belum konsisten.
+ *
+ * Cara membuka dari mana pun di halaman:
+ *   <button data-mv-modal-open="lightbox">Buka</button>
+ *   <Modal id="lightbox" judul="…"> … </Modal>
+ * Menutup: tombol X, Esc, klik backdrop, atau [data-mv-modal-close].
+ *
+ * Props:
+ *   id           WAJIB & unik. Dipakai data-mv-modal-open.
+ *   judul        judul modal. Dirender <h2> dan jadi aria-labelledby.
+ *   judulTampil  tampilkan judul secara visual. Default true.
+ *   lebar        'default' 640px | 'lebar' 1080px (lightbox galeri).
+ *   labelTutup   aria-label tombol tutup. Default 'Tutup'.
+ *   class
+ */
+interface Props {
+  id: string;
+  judul: string;
+  judulTampil?: boolean;
+  lebar?: 'default' | 'lebar';
+  labelTutup?: string;
+  class?: string;
+}
+
+const {
+  id,
+  judul,
+  judulTampil = true,
+  lebar = 'default',
+  labelTutup = 'Tutup',
+  class: className,
+} = Astro.props;
+---
+
+<dialog
+  id={id}
+  class:list={['mv-modal', `mv-modal--${lebar}`, className]}
+  aria-labelledby={`${id}-judul`}
+  data-mv-modal
+>
+  <div class="mv-modal__panel">
+    <div class="mv-modal__head">
+      <h2 id={`${id}-judul`} class:list={['mv-modal__judul', 't-h3', !judulTampil && 'sr-only']}>
+        {judul}
+      </h2>
+      <button type="button" class="mv-modal__tutup" data-mv-modal-close aria-label={labelTutup}>
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false">
+          <path
+            d="M4 4l8 8M12 4l-8 8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="square"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="mv-modal__body">
+      <slot />
+    </div>
+
+    <slot name="footer" />
+  </div>
+</dialog>
+
+<style>
+  .mv-modal {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-inline-size: min(100vw - 2 * var(--edge-pad), var(--modal-max-w));
+    inline-size: 100%;
+    max-block-size: calc(100dvh - 2 * var(--space-6));
+    color: var(--color-text);
+  }
+
+  .mv-modal--lebar {
+    max-inline-size: min(100vw - 2 * var(--edge-pad), 1080px);
+  }
+
+  .mv-modal::backdrop {
+    background-color: var(--modal-backdrop);
+  }
+
+  .mv-modal__panel {
+    background-color: var(--color-bg);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-modal); /* 8px — satu-satunya radius 8 */
+    display: flex;
+    flex-direction: column;
+    max-block-size: calc(100dvh - 2 * var(--space-6));
+  }
+
+  .mv-modal__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .mv-modal__judul {
+    flex: 1 1 auto;
+    margin: 0;
+  }
+
+  .mv-modal__tutup {
+    -webkit-appearance: none;
+    appearance: none;
+    background: transparent;
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-control);
+    color: var(--color-text-2);
+    cursor: pointer;
+    flex: 0 0 auto;
+    /* Target sentuh §7.8 */
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      color var(--dur-fast) var(--ease),
+      background-color var(--dur-fast) var(--ease);
+  }
+
+  .mv-modal__tutup:hover {
+    color: var(--color-text);
+    background-color: var(--color-surface);
+  }
+
+  .mv-modal__tutup:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-modal__body {
+    padding: var(--space-5);
+    overflow-y: auto;
+  }
+
+  /* Masuk: opacity + transform saja (§6.7). */
+  @media (prefers-reduced-motion: no-preference) {
+    .mv-modal[open] .mv-modal__panel {
+      animation: mv-modal-in var(--dur-base) var(--ease) both;
+    }
+  }
+
+  @keyframes mv-modal-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>
+
+<script>
+  /* Satu delegasi untuk seluruh modal di halaman — bukan satu listener
+     per modal. Idempoten: aman meski skrip ini termuat dari beberapa
+     komponen (Astro men-dedupe, tapi penjaga tetap dipasang). */
+  interface ModalState {
+    pemicu: HTMLElement | null;
+    scrollLock: number;
+  }
+
+  const state: ModalState = { pemicu: null, scrollLock: 0 };
+
+  const kunciScroll = (): void => {
+    state.scrollLock += 1;
+    if (state.scrollLock === 1) {
+      // Kompensasi lebar scrollbar supaya konten tidak melompat (CLS).
+      const gap = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = 'hidden';
+      if (gap > 0) document.body.style.paddingRight = `${gap}px`;
+    }
+  };
+
+  const lepasScroll = (): void => {
+    state.scrollLock = Math.max(0, state.scrollLock - 1);
+    if (state.scrollLock === 0) {
+      document.body.style.removeProperty('overflow');
+      document.body.style.removeProperty('padding-right');
+    }
+  };
+
+  const buka = (dialog: HTMLDialogElement, pemicu: HTMLElement | null): void => {
+    if (dialog.open) return;
+    state.pemicu = pemicu;
+    dialog.showModal();
+    kunciScroll();
+  };
+
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement | null;
+    if (!target) return;
+
+    const opener = target.closest<HTMLElement>('[data-mv-modal-open]');
+    if (opener) {
+      const id = opener.dataset.mvModalOpen;
+      const dialog = id ? document.getElementById(id) : null;
+      if (dialog instanceof HTMLDialogElement) {
+        e.preventDefault();
+        buka(dialog, opener);
+      }
+      return;
+    }
+
+    const closer = target.closest<HTMLElement>('[data-mv-modal-close]');
+    if (closer) {
+      closer.closest('dialog')?.close();
+    }
+  });
+
+  document.querySelectorAll<HTMLDialogElement>('dialog[data-mv-modal]').forEach((dialog) => {
+    // Klik backdrop menutup: target klik = elemen <dialog> itu sendiri,
+    // karena isinya dibungkus .mv-modal__panel.
+    dialog.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+
+    // 'close' menangkap SEMUA jalur penutupan, termasuk Esc bawaan browser.
+    dialog.addEventListener('close', () => {
+      lepasScroll();
+      state.pemicu?.focus();
+      state.pemicu = null;
+    });
+  });
+</script>

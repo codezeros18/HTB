@@ -1,0 +1,281 @@
+---
+/**
+ * Hero — dua varian dikendalikan SATU flag: `site.hero.fotoTersedia`.
+ *
+ * ── Kenapa varian tanpa-foto adalah default ─────────────────────
+ * Blocker B2 (asal foto pabrik di sampul PDF) belum dijawab klien.
+ * Sampai dikonfirmasi, foto itu TIDAK DIPAKAI di mana pun — termasuk di
+ * sini. `fotoTersedia: false` di `site.ts` membuat build ini merender
+ * varian tanpa-foto: latar polos + tipografi besar. Ini BUKAN
+ * placeholder yang menunggu foto — BLUEPRINT §8 Section 2 secara
+ * eksplisit menyebutnya lebih baik daripada foto stok: "Hero tipografis
+ * bersih terlihat percaya diri; foto pabrik palsu terlihat menipu."
+ *
+ * ── Guardrail 9: hero TIDAK dianimasikan masuk ──────────────────
+ * Nol `.mv-reveal`, nol opacity/transform awal pada H1/CTA/subheading.
+ * Konten LCP tidak boleh menunggu JavaScript maupun IntersectionObserver.
+ *
+ * ── Kontras teks-di-atas-overlay (varian foto) ──────────────────
+ * `--hero-ink` & overlay `rgba(15,15,15,.55)` (via token `--modal-backdrop`
+ * yang nilainya identik) didefinisikan LOKAL di komponen ini karena
+ * `tokens.css` terkunci di sprint S04. Nilainya konstan di kedua Arah —
+ * overlay gelap §6.8 dipakai independen dari tema. Utang: promosikan ke
+ * token global (`--color-on-overlay`) saat tokens.css dibuka lagi.
+ */
+import { site } from '../../content/site';
+import { klien } from '../../content/klien';
+import Container from '../layout/Container.astro';
+import Button from '../ui/Button.astro';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id }: Props = Astro.props;
+
+const { hero } = site;
+const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
+
+// Tepat 5 entri tampilDiHero — dikontrak S01 (T01.7 AC).
+const stripKlien = klien.filter((k) => k.tampilDiHero);
+---
+
+<section id={id} class="mv-hero" data-varian={varian}>
+  {
+    varian === 'foto' && hero.fotoSrc && (
+      <>
+        {/* rel=preload di body tetap valid resource hint (WHATWG: preload
+            "body-ok"). BaseLayout terkunci sprint ini, jadi hint dipasang
+            di sini alih-alih di <head>. */}
+        <link rel="preload" as="image" href={hero.fotoSrc} fetchpriority="high" />
+        <img
+          class="mv-hero__foto"
+          src={hero.fotoSrc}
+          alt={hero.fotoAlt ?? ''}
+          width="1600"
+          height="900"
+          fetchpriority="high"
+          loading="eager"
+          decoding="async"
+        />
+        <div class="mv-hero__overlay" aria-hidden="true" />
+      </>
+    )
+  }
+
+  <Container as="div" class="mv-hero__inner">
+    <p class="mv-hero__eyebrow t-eyebrow">{hero.eyebrow}</p>
+    <h1 class="mv-hero__h1 t-display">{hero.h1}</h1>
+    <p class="mv-hero__sub t-body-l">{hero.sub}</p>
+
+    <div class="mv-hero__cta">
+      <WhatsAppButton konteks="hero" label={hero.ctaPrimer} size="lg" />
+      <div class="mv-hero__cta-sekunder">
+        <Button href="#produk" variant="secondary" size="lg">
+          {hero.ctaSekunder}
+        </Button>
+      </div>
+    </div>
+
+    <p class="mv-hero__harga t-body-s">{hero.anchorHarga}</p>
+
+    {
+      stripKlien.length > 0 && (
+        <div class="mv-hero__strip">
+          <p class="mv-hero__strip-judul t-body-s">{hero.stripJudul}</p>
+          <ul class="mv-hero__strip-list">
+            {stripKlien.map((k) =>
+              k.izinTayang && k.logo ? (
+                <li class="mv-hero__strip-item">
+                  <img class="mv-hero__strip-logo" src={k.logo} alt={k.nama} loading="lazy" />
+                </li>
+              ) : (
+                <li class="mv-hero__strip-item mv-hero__strip-item--teks">
+                  <span class="mv-hero__strip-nama">{k.nama}</span>
+                </li>
+              )
+            )}
+          </ul>
+        </div>
+      )
+    }
+  </Container>
+</section>
+
+<style>
+  .mv-hero {
+    /* Warna teks-di-atas-overlay & overlay itu sendiri — lihat catatan
+       lisensi di atas file. Konstan lintas Arah A/B. */
+    --hero-ink: rgb(255 255 255);
+    --hero-overlay: var(--modal-backdrop);
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+
+    /* AC T04.1 — bukan 100vh: potongan section berikutnya adalah
+       pemicu scroll (BLUEPRINT §8 Section 2). */
+    min-height: 88vh;
+  }
+
+  @media (max-width: 767.98px) {
+    .mv-hero {
+      /* svh, BUKAN vh — vh rusak oleh address bar iOS (guardrail 2). */
+      min-height: 78svh;
+    }
+  }
+
+  .mv-hero__foto {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    z-index: 0;
+  }
+
+  .mv-hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background-color: var(--hero-overlay);
+  }
+
+  .mv-hero__inner {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    /* Kolom 1–7 di desktop (BLUEPRINT §8 Section 2) — dibatasi lebar
+       daripada memenuhi seluruh container 1280px. */
+    max-inline-size: 46rem;
+    padding-block: var(--space-8);
+    gap: var(--space-4);
+  }
+
+  .mv-hero__eyebrow {
+    color: var(--color-accent);
+  }
+
+  .mv-hero__h1 {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-hero__sub {
+    color: var(--color-text-2);
+    max-inline-size: 42ch;
+  }
+
+  .mv-hero__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-block-start: var(--space-2);
+  }
+
+  .mv-hero__harga {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+
+  /* ---------- varian foto: teks & kontrol di atas overlay gelap ---------- */
+  .mv-hero[data-varian='foto'] .mv-hero__eyebrow,
+  .mv-hero[data-varian='foto'] .mv-hero__h1,
+  .mv-hero[data-varian='foto'] .mv-hero__sub,
+  .mv-hero[data-varian='foto'] .mv-hero__harga,
+  .mv-hero[data-varian='foto'] .mv-hero__strip-judul,
+  .mv-hero[data-varian='foto'] .mv-hero__strip-nama {
+    color: var(--hero-ink);
+  }
+
+  /*
+   * Tombol sekunder dipakai APA ADANYA dari ui/Button (tidak dimodifikasi —
+   * aturan sprint). Button.astro membaca var(--color-text) & var(
+   * --color-border-strong) untuk varian "secondary". Custom property
+   * mengalir ke bawah lewat cascade normal CSS terlepas dari scoping
+   * Astro, jadi meng-override keduanya HANYA di dalam pembungkus ini
+   * membuat tombolnya terbaca di atas overlay gelap tanpa menyentuh
+   * Button.astro maupun tokens.css.
+   */
+  .mv-hero[data-varian='foto'] .mv-hero__cta-sekunder {
+    --color-text: var(--hero-ink);
+    --color-border-strong: var(--hero-ink);
+  }
+
+  /* ---------- strip bukti sosial ---------- */
+  .mv-hero__strip {
+    margin-block-start: var(--space-6);
+    inline-size: 100%;
+  }
+
+  .mv-hero__strip-judul {
+    color: var(--color-text-2);
+    margin: 0 0 var(--space-3);
+  }
+
+  .mv-hero__strip-list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    /* 3 entri terlihat di 360px (AC T04.3) tanpa memotong entri ke-4. */
+    padding-block: var(--space-1);
+  }
+
+  .mv-hero__strip-item {
+    flex: 0 0 auto;
+    /* Kotak seragam: tinggi 28–32px terlepas dari isinya logo atau teks. */
+    block-size: 32px;
+    display: flex;
+    align-items: center;
+  }
+
+  .mv-hero__strip-logo {
+    block-size: 100%;
+    inline-size: auto;
+    object-fit: contain;
+  }
+
+  .mv-hero__strip-item--teks {
+    padding-inline: var(--space-3);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .mv-hero__strip-nama {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-text-2);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 639.98px) {
+    .mv-hero__inner {
+      max-inline-size: none;
+    }
+
+    .mv-hero__cta {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    /* `.mv-hero__cta > *` menjangkau akar WhatsAppButton; `.mv-hero__cta-sekunder`
+       adalah pembungkus (lihat catatan override warna di atas), jadi tombol
+       di dalamnya perlu aturan terpisah supaya ikut melebar penuh. */
+    .mv-hero__cta > *,
+    .mv-hero__cta-sekunder > * {
+      inline-size: 100%;
+    }
+  }
+</style>

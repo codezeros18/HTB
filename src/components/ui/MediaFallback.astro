@@ -1,0 +1,161 @@
+---
+/**
+ * MediaFallback — varian "aset belum ada".
+ *
+ * BUKAN kotak abu, BUKAN "coming soon" (guardrail 7 + AC T02.7).
+ * Ini blok TIPOGRAFIS yang harus terbaca sebagai pilihan desain:
+ * latar bertint aksen (bukan abu netral), garis aksen, nomor besar
+ * ber-font display, dan label eyebrow. Kalau hasilnya terlihat seperti
+ * gambar yang gagal dimuat, desainnya salah.
+ *
+ * Dipakai di mana pun `foto`/`media`/`swatch`/`logo` bernilai null —
+ * yaitu hampir seluruh data S01 saat ini.
+ *
+ * Props:
+ *   label       teks eyebrow di atas. WAJIB — mis. nama produk/tahap.
+ *   nomor       angka/kode besar di tengah (mis. "03"). null → dilewati;
+ *               komponen memakai `label` sebagai elemen utama.
+ *   keterangan  baris kecil di bawah. null → TIDAK dirender (nol baris kosong).
+ *   rasio       '4/5' produk · '16/9' hero/hasil · '3/2' proses · '1/1' swatch.
+ *               Default '4/5'.
+ *   tone        'aksen' (default, latar bertint) · 'kontras' (latar tinta).
+ *   class
+ */
+import type { RasioMedia } from './types';
+
+interface Props {
+  label: string;
+  nomor?: string | null;
+  keterangan?: string | null;
+  rasio?: RasioMedia;
+  tone?: 'aksen' | 'kontras';
+  class?: string;
+}
+
+const {
+  label,
+  nomor = null,
+  keterangan = null,
+  rasio = '4/5',
+  tone = 'aksen',
+  class: className,
+} = Astro.props;
+---
+
+<div
+  class:list={[
+    'mv-fallback',
+    `mv-fallback--${tone}`,
+    !nomor && 'mv-fallback--tanpa-nomor',
+    className,
+  ]}
+  style={`--rasio: ${rasio};`}
+  role="img"
+  aria-label={label}
+>
+  <span class="mv-fallback__rule" aria-hidden="true"></span>
+
+  {
+    /* Tanpa nomor, label naik jadi elemen utama — bukan eyebrow kecil
+      dengan ruang kosong menganga di bawahnya. */
+  }
+  <span
+    class:list={['mv-fallback__label', nomor ? 't-eyebrow' : 'mv-fallback__label--utama']}
+    aria-hidden="true">{label}</span
+  >
+
+  {
+    nomor && (
+      <span class="mv-fallback__nomor" aria-hidden="true">
+        {nomor}
+      </span>
+    )
+  }
+
+  {
+    keterangan && (
+      <span class="mv-fallback__ket t-body-s" aria-hidden="true">
+        {keterangan}
+      </span>
+    )
+  }
+</div>
+
+<style>
+  .mv-fallback {
+    aspect-ratio: var(--rasio);
+    inline-size: 100%;
+    display: flex;
+    flex-direction: column;
+    /* Padding lega — bagian dari kesan "disengaja". */
+    padding: var(--space-5);
+    gap: var(--space-3);
+    border: var(--border-width) solid var(--color-accent);
+    border-radius: var(--radius-control);
+    overflow: hidden;
+  }
+
+  /* Latar bertint aksen — BUKAN abu netral (AC T02.7). */
+  .mv-fallback--aksen {
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent-hover);
+  }
+
+  .mv-fallback--kontras {
+    background-color: var(--color-text);
+    color: var(--color-bg);
+    border-color: var(--color-text);
+  }
+
+  .mv-fallback__rule {
+    flex: 0 0 auto;
+    inline-size: var(--rule-w); /* 56px */
+    block-size: var(--rule-h); /* 2px */
+    background-color: currentColor;
+  }
+
+  .mv-fallback__label {
+    flex: 0 0 auto;
+    /* Nama panjang tetap terbaca, tidak dipotong. */
+    overflow-wrap: anywhere;
+  }
+
+  /* Varian tanpa nomor: label mengambil peran tipografis utama dan
+     didorong ke dasar bingkai, sejajar dengan posisi nomor di varian lain. */
+  .mv-fallback__label--utama {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-end;
+    font-family: var(--font-display);
+    font-weight: var(--fw-h1);
+    font-size: clamp(1.125rem, 11cqi, 2.25rem);
+    line-height: 1.05;
+    letter-spacing: var(--ls-h1);
+    text-transform: uppercase;
+  }
+
+  .mv-fallback__nomor {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-end;
+    font-family: var(--font-display);
+    font-weight: var(--fw-display);
+    /* Skala terhadap lebar bingkai, bukan angka tetap — tetap besar
+       di kartu produk maupun di panel proses 180px. */
+    font-size: clamp(2.5rem, 34cqi, 8rem);
+    line-height: 0.85;
+    letter-spacing: var(--ls-display);
+    font-variant-numeric: tabular-nums;
+    opacity: 0.9;
+  }
+
+  .mv-fallback__ket {
+    flex: 0 0 auto;
+    opacity: 0.75;
+  }
+
+  /* container query unit (cqi) butuh containment. */
+  .mv-fallback {
+    container-type: inline-size;
+  }
+</style>

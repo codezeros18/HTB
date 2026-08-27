@@ -1,0 +1,58 @@
+---
+/**
+ * 404 — halaman tidak ditemukan.
+ *
+ * Bahasa Indonesia, tombol kembali, dan CTA WhatsApp: pengunjung yang
+ * tersesat tetap punya jalan menuju percakapan, bukan jalan buntu.
+ * `noindex` supaya halaman ini tidak pernah terindeks; JSON-LD dimatikan
+ * karena tidak ada entitas yang perlu dideskripsikan di sini.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Container from '../components/layout/Container.astro';
+import Button from '../components/ui/Button.astro';
+import WhatsAppButton from '../components/ui/WhatsAppButton.astro';
+import { site } from '../content/site';
+---
+
+<BaseLayout
+  title={`Halaman tidak ditemukan — ${site.brand}`}
+  description="Halaman yang Anda cari tidak tersedia. Kembali ke beranda atau hubungi kami lewat WhatsApp."
+  noindex
+  jsonLd={false}
+>
+  <Container as="section" width="narrow" spacing="section" last>
+    <p class="t-eyebrow kode" aria-hidden="true">404</p>
+    <h1 class="t-h1 judul">Halaman tidak ditemukan</h1>
+    <p class="t-body-l teks">
+      Alamat yang Anda buka tidak tersedia — mungkin salah ketik, atau tautannya sudah berubah.
+      Semua informasi produk, bahan, dan lokasi kami ada di satu halaman.
+    </p>
+
+    <div class="aksi">
+      <Button href="/" variant="secondary">Kembali ke beranda</Button>
+      <WhatsAppButton konteks="kontak" />
+    </div>
+  </Container>
+</BaseLayout>
+
+<style>
+  .kode {
+    color: var(--color-accent);
+  }
+
+  .judul {
+    margin-block: var(--space-3) 0;
+  }
+
+  .teks {
+    color: var(--color-text-2);
+    margin-block-start: var(--space-4);
+  }
+
+  .aksi {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-block-start: var(--space-6);
+  }
+</style>

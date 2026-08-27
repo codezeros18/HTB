@@ -1,0 +1,105 @@
+---
+/**
+ * Location — 3 lokasi sebagai rantai produksi bernomor (S08).
+ *
+ * BLUEPRINT §8 Section 8: "bukan tiga alamat setara, tapi tiga tahap
+ * rantai produksi bernomor." Urutan array `lokasi.ts` (head-office →
+ * workshop → factory) MEMANG urutan penomoran 01/02/03 — jangan diubah
+ * di sini; kalau urutannya perlu berubah, ubah di lokasi.ts (S01).
+ *
+ * `embedSrc` dibangun di sini dari `alamat`, BUKAN disimpan di
+ * lokasi.ts — string pencarian Maps sudah cukup deterministik dari
+ * alamat (sama seperti `mapsUrl` yang sudah ada), jadi tidak perlu
+ * field baru di file content milik S01.
+ */
+import { site } from '../../content/site';
+import { lokasi } from '../../content/lokasi';
+import Container from '../layout/Container.astro';
+import SectionHeading from '../layout/SectionHeading.astro';
+import LocationCard from '../cards/LocationCard.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id }: Props = Astro.props;
+
+const { lokasiIntro } = site;
+
+const embedSrc = (alamat: string): string =>
+  `https://www.google.com/maps?q=${encodeURIComponent(alamat)}&output=embed`;
+---
+
+<Container as="section" spacing="section" id={id}>
+  <SectionHeading nomor="08" judul={lokasiIntro.judul} subjudul={lokasiIntro.subjudul} />
+
+  <ol class="mv-lokasi__list">
+    {
+      lokasi.map((l, i) => (
+        <li class="mv-lokasi__item">
+          <LocationCard
+            nomor={String(i + 1).padStart(2, '0')}
+            peran={l.peran}
+            alamat={l.alamat}
+            slug={l.slug}
+            deskripsiPeran={l.deskripsiPeran}
+            mapsUrl={l.mapsUrl}
+            telepon={l.telepon}
+            embedSrc={embedSrc(l.alamat)}
+            labelTampilkanPeta={lokasiIntro.labelTampilkanPeta}
+            labelBukaMaps={lokasiIntro.labelBukaMaps}
+          />
+        </li>
+      ))
+    }
+  </ol>
+</Container>
+
+<style>
+  .mv-lokasi__list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mv-lokasi__item {
+    position: relative;
+  }
+
+  /* Panah dekoratif antar-kartu — memperkuat kesan "rantai produksi"
+     bernomor, bukan tiga alamat setara. Disembunyikan dari screen
+     reader: urutannya sudah tersirat dari <ol> + nomor di kartu. */
+  .mv-lokasi__item:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    inset-block-start: var(--space-5);
+    inset-inline-end: calc(var(--space-5) * -1 + 2px);
+    color: var(--color-border-strong);
+    font-family: var(--font-display);
+    font-size: 20px;
+    line-height: 1;
+    z-index: 1;
+  }
+
+  @media (max-width: 1023.98px) {
+    .mv-lokasi__list {
+      grid-template-columns: 1fr;
+    }
+
+    .mv-lokasi__item:not(:last-child)::after {
+      content: '↓';
+      inset-block-start: auto;
+      inset-block-end: calc(var(--space-5) * -1 + 2px);
+      inset-inline-end: auto;
+      inset-inline-start: var(--space-5);
+    }
+  }
+</style>
+
+<script>
+  import { initMapFacade } from '../../scripts/map-facade';
+  initMapFacade();
+</script>

@@ -1,0 +1,74 @@
+---
+/**
+ * Container — pembungkus lebar & jarak vertikal baku (BLUEPRINT §6.6).
+ *
+ * Satu-satunya tempat max-width dan padding tepi ditentukan. Pemanggil
+ * TIDAK BOLEH menambah margin/padding vertikal sendiri (AC T02.1).
+ *
+ * Props:
+ *   as       tag HTML pembungkus. Default 'div'.
+ *   width    'default' 1280px · 'narrow' 720px (teks panjang) ·
+ *            'editorial' 1080px (Gallery skenario B, §8) · 'full' tanpa batas.
+ *   spacing  'flush' tanpa padding vertikal (default) ·
+ *            'section' padding atas 96/56px · 'roomy' 128px (Gallery B).
+ *   last     tandai section terakhir supaya dapat padding bawah juga.
+ */
+import type { HTMLAttributes } from 'astro/types';
+
+type TagPembungkus = 'div' | 'section' | 'article' | 'aside' | 'header' | 'footer' | 'nav' | 'main';
+
+interface Props extends HTMLAttributes<'div'> {
+  as?: TagPembungkus;
+  width?: 'default' | 'narrow' | 'editorial' | 'full';
+  spacing?: 'flush' | 'section' | 'roomy';
+  last?: boolean;
+}
+
+const {
+  as: Tag = 'div',
+  width = 'default',
+  spacing = 'flush',
+  last = false,
+  class: className,
+  ...rest
+} = Astro.props;
+---
+
+<Tag
+  class:list={[
+    'mv-container',
+    `mv-container--${width}`,
+    spacing === 'section' && 'mv-section',
+    spacing === 'roomy' && ['mv-section', 'mv-section--roomy'],
+    className,
+  ]}
+  data-section-last={spacing !== 'flush' && last ? '' : undefined}
+  {...rest}
+>
+  <slot />
+</Tag>
+
+<style>
+  .mv-container {
+    inline-size: 100%;
+    margin-inline: auto;
+    padding-inline: var(--edge-pad);
+  }
+
+  .mv-container--default {
+    max-inline-size: var(--container-max);
+  }
+
+  .mv-container--narrow {
+    max-inline-size: 720px;
+  }
+
+  /* Gallery skenario B — BLUEPRINT §8 (lebar 1080px). */
+  .mv-container--editorial {
+    max-inline-size: 1080px;
+  }
+
+  .mv-container--full {
+    max-inline-size: none;
+  }
+</style>

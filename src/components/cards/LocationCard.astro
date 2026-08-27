@@ -1,0 +1,245 @@
+---
+/**
+ * LocationCard — satu tahap dalam rantai produksi bernomor (S08).
+ *
+ * `deskripsiPeran` [GAP] — BLUEPRINT §8 Section 8 menyatakan field ini
+ * TETAP `null` sampai klien mengonfirmasi. Saat `null`, paragraf itu
+ * TIDAK dirender sama sekali — kartu berhenti di nomor + peran + alamat
+ * + tombol Maps, tanpa ruang kosong menggantung (AC T08.1).
+ *
+ * Peta memakai facade pattern (AC T08.2): SVG statis inline (nol
+ * request) + tombol "Tampilkan peta" yang baru membuat `<iframe>`
+ * setelah diklik (lihat `src/scripts/map-facade.ts`). Tombol
+ * "Buka di Google Maps" terpisah — tautan biasa ke luar, bukan pemicu
+ * iframe, jadi nol jejak sebelum diklik dalam kedua kasus.
+ *
+ * Markup alamat pakai `<address>` + `itemprop` (AC T08.3); `id={slug}`
+ * pada kartu cocok dengan fragmen `@id` blok `LocalBusiness` masing-
+ * masing di StructuredData.astro (S03) — `${origin}/#${slug}`.
+ */
+import Button from '../ui/Button.astro';
+
+interface Props {
+  nomor: string;
+  peran: string;
+  alamat: string;
+  slug: string;
+  deskripsiPeran: string | null;
+  mapsUrl: string | null;
+  telepon: string | null;
+  embedSrc: string;
+  labelTampilkanPeta: string;
+  labelBukaMaps: string;
+  class?: string;
+}
+
+const {
+  nomor,
+  peran,
+  alamat,
+  slug,
+  deskripsiPeran,
+  mapsUrl,
+  telepon,
+  embedSrc,
+  labelTampilkanPeta,
+  labelBukaMaps,
+  class: className,
+}: Props = Astro.props;
+---
+
+<article
+  class:list={['mv-location-card', className]}
+  id={slug}
+  itemscope
+  itemtype="https://schema.org/LocalBusiness"
+>
+  <div class="mv-location-card__head">
+    <span class="mv-location-card__nomor t-tnum" aria-hidden="true">{nomor}</span>
+    <h3 class="mv-location-card__peran t-h3" itemprop="name">{peran}</h3>
+  </div>
+
+  <address
+    class="mv-location-card__alamat t-body-s"
+    itemprop="address"
+    itemscope
+    itemtype="https://schema.org/PostalAddress"
+  >
+    <span itemprop="streetAddress">{alamat}</span>
+  </address>
+
+  {
+    telepon && (
+      <a class="mv-location-card__telepon t-body-s" href={`tel:${telepon}`} itemprop="telephone">
+        {telepon}
+      </a>
+    )
+  }
+
+  {deskripsiPeran && <p class="mv-location-card__deskripsi t-body-s">{deskripsiPeran}</p>}
+
+  <div
+    class="mv-location-card__peta"
+    data-map-facade
+    data-embed-src={embedSrc}
+    data-title={`Peta lokasi ${peran}`}
+  >
+    <svg
+      class="mv-location-card__peta-svg"
+      viewBox="0 0 320 200"
+      role="img"
+      aria-label={`Ilustrasi peta lokasi ${peran}`}
+    >
+      <rect width="320" height="200" class="mv-location-card__peta-bg"></rect>
+      <path d="M0 60H320M0 130H320M80 0V200M230 0V200" class="mv-location-card__peta-garis"></path>
+      <circle cx="160" cy="95" r="7" class="mv-location-card__peta-titik"></circle>
+      <path
+        d="M160 60c-14 0-25 11-25 25 0 18 25 45 25 45s25-27 25-45c0-14-11-25-25-25Z"
+        class="mv-location-card__peta-pin"></path>
+      <circle cx="160" cy="84" r="7" class="mv-location-card__peta-pin-lubang"></circle>
+    </svg>
+
+    <button type="button" class="mv-location-card__peta-tombol t-label" data-map-facade-trigger>
+      {labelTampilkanPeta}
+    </button>
+  </div>
+
+  {
+    mapsUrl && (
+      <Button href={mapsUrl} variant="secondary" newTab class="mv-location-card__maps-link">
+        {labelBukaMaps}
+      </Button>
+    )
+  }
+</article>
+
+<style>
+  .mv-location-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+    background-color: var(--color-bg);
+  }
+
+  .mv-location-card__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+
+  .mv-location-card__nomor {
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: var(--fw-display);
+    line-height: 1;
+    flex: 0 0 auto;
+  }
+
+  .mv-location-card__peran {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-location-card__alamat {
+    color: var(--color-text-2);
+    font-style: normal;
+  }
+
+  .mv-location-card__telepon {
+    color: var(--color-text);
+    font-weight: 500;
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .mv-location-card__telepon:hover {
+    text-decoration: underline;
+  }
+
+  .mv-location-card__telepon:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-location-card__deskripsi {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+
+  .mv-location-card__peta {
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: var(--radius-control);
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  .mv-location-card__peta-svg {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+  }
+
+  .mv-location-card__peta-bg {
+    fill: var(--color-surface);
+  }
+
+  .mv-location-card__peta-garis {
+    fill: none;
+    stroke: var(--color-border-strong);
+    stroke-width: 1;
+    opacity: 0.5;
+  }
+
+  .mv-location-card__peta-titik {
+    fill: var(--color-accent);
+    opacity: 0.18;
+  }
+
+  .mv-location-card__peta-pin {
+    fill: var(--color-accent);
+  }
+
+  .mv-location-card__peta-pin-lubang {
+    fill: var(--color-surface);
+  }
+
+  .mv-location-card__peta-tombol {
+    position: absolute;
+    inset-block-end: var(--space-3);
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    appearance: none;
+    cursor: pointer;
+    padding-block: var(--space-2);
+    padding-inline: var(--space-4);
+    border: var(--border-width) solid var(--color-text);
+    border-radius: var(--radius-control);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .mv-location-card__peta-tombol:hover {
+    background-color: var(--color-surface);
+  }
+
+  .mv-location-card__peta-tombol:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-location-card__peta :global(.mv-location-card__peta-iframe) {
+    inline-size: 100%;
+    block-size: 100%;
+    border: 0;
+    display: block;
+  }
+
+  .mv-location-card__maps-link {
+    align-self: flex-start;
+  }
+</style>

@@ -1,0 +1,364 @@
+---
+/**
+ * Contact — WhatsApp utama + form 5 field sekunder (S08, BLUEPRINT §8
+ * Section 9). Section TERAKHIR sebelum Footer → `Container` memakai `last`.
+ *
+ * ── Hierarki visual: WA > form (AC T08.4) ───────────────────────────
+ * Blok WA muncul LEBIH DULU di DOM, memakai CTA `size="lg" fullWidth`,
+ * dan kartu bertint aksen. Form memakai tombol `size="md"` biasa dan
+ * kartu netral. Ini bukan soal "dibuat rapi" — WA memang kanal
+ * konversi utama untuk audiens B2B Indonesia (§8 Section 9), form
+ * hanya jalur formal sekunder untuk yang butuh jejak tertulis.
+ *
+ * ── Form: TEPAT 5 field terlihat (AC T08.5) ─────────────────────────
+ * Nama · Instansi/Organisasi · WhatsApp-atau-Email · Jenis kebutuhan
+ * (`<select>`) · Perkiraan jumlah pcs. Field ke-6 adalah honeypot
+ * tersembunyi (`kontak.honeypotNama`) — anti-spam, BUKAN CAPTCHA
+ * (guardrail proyek: CAPTCHA menurunkan konversi + skrip pihak ketiga).
+ * Input `access_key` tersembunyi HANYA dirender kalau
+ * `site.kontak.web3formsAccessKey` sudah terisi — [GAP], lihat types.ts.
+ *
+ * ── 4 state (AC T08.6) ───────────────────────────────────────────────
+ * Logikanya di `src/scripts/contact-form.ts`: validasi saat blur,
+ * submitting = tombol disabled + label "MENGIRIM…", sukses = blok ini
+ * menggantikan form, gagal = pesan error + tombol WhatsApp jalan keluar
+ * TANPA menyembunyikan form (data yang sudah diisi tidak hilang).
+ * Pesan error memakai `Badge` (S02) — warna + ikon + teks otomatis,
+ * bukan warna saja (guardrail 10).
+ */
+import { site } from '../../content/site';
+import Container from '../layout/Container.astro';
+import SectionHeading from '../layout/SectionHeading.astro';
+import Badge from '../ui/Badge.astro';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id }: Props = Astro.props;
+
+const { kontak, pic, balasanBiasanya } = site;
+---
+
+<Container as="section" spacing="section" id={id} last>
+  <SectionHeading nomor="09" judul={kontak.judul} subjudul={kontak.subjudul} />
+
+  <div class="mv-kontak__grid">
+    <div class="mv-kontak__wa mv-reveal">
+      <h3 class="mv-kontak__wa-judul t-h3">{kontak.waJudul}</h3>
+      <p class="mv-kontak__wa-deskripsi t-body-l">{kontak.waDeskripsi}</p>
+
+      <div class="mv-kontak__pic">
+        <p class="mv-kontak__pic-nama t-body-m">{pic.nama}</p>
+        <p class="mv-kontak__pic-jabatan t-body-s">{pic.jabatan}</p>
+        {balasanBiasanya && <p class="mv-kontak__balasan t-body-s">{balasanBiasanya}</p>}
+      </div>
+
+      <WhatsAppButton konteks="kontak" size="lg" fullWidth />
+    </div>
+
+    <div class="mv-kontak__form-wrap">
+      <form
+        class="mv-kontak__form mv-reveal"
+        data-contact-form
+        data-pesan-wajib={kontak.pesanWajibDiisi}
+        novalidate
+      >
+        <h3 class="mv-kontak__form-judul t-h3">{kontak.formJudul}</h3>
+
+        {
+          kontak.web3formsAccessKey && (
+            <input type="hidden" name="access_key" value={kontak.web3formsAccessKey} />
+          )
+        }
+
+        {
+          /* Honeypot — CSS memindahkannya keluar layar (bukan display:none,
+           supaya bot yang menyaring display:none tetap terjebak), tidak
+           terjangkau Tab, dan disembunyikan dari pembaca layar. */
+        }
+        <div class="mv-kontak__honeypot" aria-hidden="true">
+          <label for="mv-kontak-website">{kontak.honeypotLabel}</label>
+          <input
+            type="text"
+            id="mv-kontak-website"
+            name={kontak.honeypotNama}
+            tabindex="-1"
+            autocomplete="off"
+            data-honeypot
+          />
+        </div>
+
+        <div class="mv-field">
+          <label class="mv-field__label t-label" for="mv-kontak-nama">{kontak.labelNama}</label>
+          <input
+            class="mv-field__input"
+            id="mv-kontak-nama"
+            name="nama"
+            type="text"
+            autocomplete="name"
+            required
+            data-field
+            aria-describedby="mv-kontak-nama-err"
+          />
+          <p id="mv-kontak-nama-err" class="mv-field__err" hidden></p>
+        </div>
+
+        <div class="mv-field">
+          <label class="mv-field__label t-label" for="mv-kontak-instansi">
+            {kontak.labelInstansi}
+          </label>
+          <input
+            class="mv-field__input"
+            id="mv-kontak-instansi"
+            name="instansi"
+            type="text"
+            autocomplete="organization"
+          />
+        </div>
+
+        <div class="mv-field">
+          <label class="mv-field__label t-label" for="mv-kontak-kontak">{kontak.labelKontak}</label>
+          <input
+            class="mv-field__input"
+            id="mv-kontak-kontak"
+            name="kontak"
+            type="text"
+            autocomplete="tel"
+            placeholder={kontak.placeholderKontak}
+            required
+            data-field
+            aria-describedby="mv-kontak-kontak-err"
+          />
+          <p id="mv-kontak-kontak-err" class="mv-field__err" hidden></p>
+        </div>
+
+        <div class="mv-field">
+          <label class="mv-field__label t-label" for="mv-kontak-jenis">
+            {kontak.labelJenisKebutuhan}
+          </label>
+          <select
+            class="mv-field__input"
+            id="mv-kontak-jenis"
+            name="jenis_kebutuhan"
+            autocomplete="off"
+            required
+            data-field
+            aria-describedby="mv-kontak-jenis-err"
+          >
+            <option value="">{kontak.placeholderJenisKebutuhan}</option>
+            {kontak.opsiJenisKebutuhan.map((opsi) => <option value={opsi}>{opsi}</option>)}
+          </select>
+          <p id="mv-kontak-jenis-err" class="mv-field__err" hidden></p>
+        </div>
+
+        <div class="mv-field">
+          <label class="mv-field__label t-label" for="mv-kontak-jumlah">
+            {kontak.labelJumlahPcs}
+          </label>
+          <input
+            class="mv-field__input"
+            id="mv-kontak-jumlah"
+            name="jumlah_pcs"
+            type="text"
+            inputmode="numeric"
+            autocomplete="off"
+          />
+        </div>
+
+        <button
+          type="submit"
+          class="mv-kontak__submit t-label"
+          data-submit
+          data-label-kirim={kontak.labelSubmit}
+          data-label-mengirim={kontak.labelSubmitting}
+        >
+          {kontak.labelSubmit}
+        </button>
+
+        <div class="mv-kontak__gagal" data-gagal hidden>
+          <Badge variant="error">{kontak.pesanGagalJudul}</Badge>
+          <p class="t-body-s">{kontak.pesanGagalDeskripsi}</p>
+          <WhatsAppButton konteks="kontak" label={kontak.labelWaJalanKeluar} size="md" />
+        </div>
+      </form>
+
+      <div class="mv-kontak__sukses" data-sukses hidden>
+        <Badge variant="sukses">{kontak.pesanSukses}</Badge>
+      </div>
+    </div>
+  </div>
+</Container>
+
+<style>
+  .mv-kontak__grid {
+    display: grid;
+    /* WA lebih lebar & tampil lebih dulu — hierarki visual AC T08.4. */
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .mv-kontak__wa {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    padding: var(--space-7);
+    background-color: var(--color-accent-soft);
+    border: var(--border-width) solid var(--color-accent);
+    border-radius: var(--radius-control);
+  }
+
+  .mv-kontak__wa-judul,
+  .mv-kontak__form-judul {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-kontak__wa-deskripsi {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+
+  .mv-kontak__pic {
+    padding-block-start: var(--space-3);
+    border-block-start: var(--border-width) solid var(--color-border-strong);
+  }
+
+  .mv-kontak__pic-nama {
+    color: var(--color-text);
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .mv-kontak__pic-jabatan,
+  .mv-kontak__balasan {
+    color: var(--color-text-2);
+    margin: var(--space-1) 0 0;
+  }
+
+  .mv-kontak__form-wrap {
+    padding: var(--space-6);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .mv-kontak__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  /* Honeypot: keluar layar, bukan display:none — sebagian bot melewati
+     display:none saat mengisi field. Tetap tidak terjangkau Tab
+     (tabindex="-1" di markup) dan tersembunyi dari pembaca layar
+     (aria-hidden di wrapper). */
+  .mv-kontak__honeypot {
+    position: absolute;
+    inset-inline-start: -9999px;
+    inline-size: 1px;
+    block-size: 1px;
+    overflow: hidden;
+  }
+
+  .mv-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .mv-field__label {
+    color: var(--color-text);
+  }
+
+  .mv-field__input {
+    min-block-size: var(--btn-h);
+    padding-inline: var(--space-4);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: inherit;
+    font-size: var(--fs-body-m);
+  }
+
+  .mv-field__input:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-field__input[aria-invalid='true'] {
+    border-color: var(--color-error);
+  }
+
+  .mv-field__err {
+    margin: 0;
+  }
+
+  .mv-kontak__submit {
+    appearance: none;
+    cursor: pointer;
+    min-block-size: var(--btn-h);
+    padding-inline: var(--btn-pad-x);
+    border: var(--border-width) solid var(--color-text);
+    border-radius: var(--radius-control);
+    background-color: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  .mv-kontak__submit:hover:not(:disabled) {
+    background-color: var(--color-text-2);
+    border-color: var(--color-text-2);
+  }
+
+  .mv-kontak__submit:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-kontak__submit:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .mv-kontak__gagal {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-4);
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-error);
+    border-radius: var(--radius-control);
+  }
+
+  .mv-kontak__gagal p {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+
+  .mv-kontak__sukses {
+    padding: var(--space-6);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  @media (max-width: 1023.98px) {
+    .mv-kontak__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 639.98px) {
+    .mv-kontak__wa,
+    .mv-kontak__form-wrap {
+      padding: var(--space-5);
+    }
+  }
+</style>
+
+<script>
+  import { initContactForm } from '../../scripts/contact-form';
+  initContactForm();
+</script>

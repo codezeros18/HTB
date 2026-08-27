@@ -1,0 +1,249 @@
+---
+/**
+ * Halaman uji primitif S02 — BUKAN bagian dari situs final.
+ * Merender setiap komponen di semua variannya supaya build memverifikasinya
+ * dan regresi visual terlihat cepat. Boleh dihapus setelah S03 memindahkan
+ * 2 preload font ke BaseLayout (utang T00.3).
+ * index.astro final adalah milik S03 — file ini tidak menggantikannya.
+ */
+import '../styles/global.css';
+import Container from '../components/layout/Container.astro';
+import SectionHeading from '../components/layout/SectionHeading.astro';
+import Button from '../components/ui/Button.astro';
+import WhatsAppButton from '../components/ui/WhatsAppButton.astro';
+import Table from '../components/ui/Table.astro';
+import Tab from '../components/ui/Tab.astro';
+import Accordion from '../components/ui/Accordion.astro';
+import Modal from '../components/ui/Modal.astro';
+import Badge from '../components/ui/Badge.astro';
+import MediaFallback from '../components/ui/MediaFallback.astro';
+import { sizeCharts } from '../content/size-charts';
+import { harga } from '../content/harga';
+import { bahan } from '../content/bahan';
+import type { TableRow } from '../components/ui/types';
+
+// Tabel 8 kolom terlebar dari data nyata — inilah kasus uji AC T02.4 di 360px.
+const regular = sizeCharts.find((s) => s.id === 'regular');
+const barisSize: TableRow[] = (regular?.baris ?? []).map((b) => ({
+  header: b.label,
+  sel: b.nilai,
+}));
+
+const barisDTF: TableRow[] = harga.sablonDTF.map((d) => ({
+  header: d.nama,
+  sel: [`Rp ${d.nominal.toLocaleString('id-ID')}`],
+}));
+
+const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Probe primitif — MOTIVE</title>
+    {/* TEPAT 2 preload — S03 (T03.1) wajib memindahkan dua baris ini ke BaseLayout <head> */}
+    <link
+      rel="preload"
+      href="/fonts/archivo-var-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
+      href="/fonts/inter-var-latin.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+  </head>
+  <body>
+    <main>
+      <!-- ===== Skala tipe ===== -->
+      <Container as="section" spacing="section">
+        <SectionHeading
+          nomor="01"
+          judul="Skala tipe"
+          subjudul="Nilai berasal dari tokens.css dan berubah sendiri di bawah 768px."
+        />
+        <p class="t-display">Display 56/34</p>
+        <p class="t-h1">H1 section</p>
+        <p class="t-h2">H2 section</p>
+        <p class="t-h3">H3 sentence case</p>
+        <p class="t-eyebrow">Eyebrow</p>
+        <p class="t-body-l">Body L — paragraf utama.</p>
+        <p class="t-body-m">Body M — paragraf standar.</p>
+        <p class="t-body-s">Body S — catatan kecil.</p>
+        <p class="t-tnum">1234567890 · tabular-nums</p>
+      </Container>
+
+      <!-- ===== Button ===== -->
+      <Container as="section" spacing="section">
+        <SectionHeading nomor="02" judul="Button" subjudul="3 varian × 2 ukuran × state." />
+        <div class="row">
+          <Button variant="primary">Primary</Button>
+          <Button variant="secondary">Secondary</Button>
+          <Button variant="ghost">Ghost</Button>
+          <Button variant="primary" size="lg">Primary LG</Button>
+          <Button variant="primary" disabled>Disabled</Button>
+          <Button variant="secondary" href="https://example.com" external>Tautan luar</Button>
+          <Button variant="secondary" href="https://example.com" disabled>Tautan disabled</Button>
+        </div>
+        <div class="row">
+          <WhatsAppButton konteks="hero" />
+          <WhatsAppButton konteks="produk" produk="Regular T-shirt" variant="secondary" />
+          <WhatsAppButton konteks="racepack" peserta="500" tanggal="12 Oktober" variant="ghost" />
+        </div>
+      </Container>
+
+      <!-- ===== Table ===== -->
+      <Container as="section" spacing="section">
+        <SectionHeading
+          nomor="03"
+          judul="Table"
+          subjudul="Tabel 8 kolom. Di 360px digeser sendiri, halaman tidak ikut meluber."
+        />
+        <Table
+          caption={`Panduan ukuran ${regular?.nama ?? ''} (satuan cm)`}
+          captionVisible
+          kolom={['UKURAN', ...(regular?.sizes ?? [])]}
+          baris={barisSize}
+          catatan="Angka belum diverifikasi — hanya untuk uji tampilan primitif."
+        />
+        <div class="spacer"></div>
+        <Table
+          caption="Harga sablon DTF"
+          kolom={['Jenis', 'Harga']}
+          baris={barisDTF}
+          align="end"
+          sticky={false}
+        />
+      </Container>
+
+      <!-- ===== Tab ===== -->
+      <Container as="section" spacing="section">
+        <SectionHeading
+          nomor="04"
+          judul="Tab"
+          subjudul="Panah kiri/kanan, Home/End, deep link #bahan."
+        />
+        <Tab
+          label="Kategori uji"
+          tabs={[
+            { id: 'apparel', label: 'Apparel' },
+            { id: 'racepack', label: 'Racepack' },
+            { id: 'bahan', label: 'Bahan & Ukuran' },
+          ]}
+        >
+          <p slot="panel-apparel" class="t-body-m">Panel Apparel.</p>
+          <p slot="panel-racepack" class="t-body-m">Panel Racepack.</p>
+          <div slot="panel-bahan">
+            {
+              kelompokBahan.map((k) => (
+                <Accordion
+                  judul={k}
+                  meta={`${bahan.filter((b) => b.kelompok === k).length} varian`}
+                >
+                  <ul class="t-body-m">
+                    {bahan
+                      .filter((b) => b.kelompok === k)
+                      .map((b) => (
+                        <li>
+                          {b.namaTampil}
+                          {b.gramasi ? ` — ${b.gramasi}` : ''}
+                        </li>
+                      ))}
+                  </ul>
+                </Accordion>
+              ))
+            }
+          </div>
+        </Tab>
+      </Container>
+
+      <!-- ===== Modal ===== -->
+      <Container as="section" spacing="section">
+        <SectionHeading
+          nomor="05"
+          judul="Modal"
+          subjudul="dialog native — Esc menutup, Tab terkunci, fokus kembali ke pemicu."
+        />
+        <Accordion id="acc-mandiri" judul="Accordion mandiri (uji tanpa JS)" meta="native">
+          <p class="t-body-m">
+            Dibuka mesin render, bukan JavaScript. Dipakai skrip verifikasi untuk menguji AC
+            &ldquo;berfungsi penuh dengan JavaScript dimatikan&rdquo;.
+          </p>
+        </Accordion>
+        <div class="spacer"></div>
+        <Button variant="secondary" data-mv-modal-open="probe-modal">Buka modal</Button>
+        <Modal id="probe-modal" judul="Modal uji">
+          <p class="t-body-m">
+            Tab tidak boleh keluar dari sini. Esc menutup. Fokus kembali ke tombol pemicu.
+          </p>
+          <div class="row">
+            <Button variant="primary">Aksi</Button>
+            <Button variant="ghost" data-mv-modal-close>Batal</Button>
+          </div>
+        </Modal>
+      </Container>
+
+      <!-- ===== Badge + MediaFallback ===== -->
+      <Container as="section" spacing="section" last>
+        <SectionHeading
+          nomor="06"
+          judul="Badge & MediaFallback"
+          subjudul="MediaFallback bukan kotak abu — blok tipografis bertint aksen."
+        />
+        <div class="row">
+          <Badge>Netral</Badge>
+          <Badge variant="aksen">Aksen</Badge>
+          <Badge variant="sukses">Terkirim</Badge>
+          <Badge variant="error">Gagal</Badge>
+          <Badge variant="garis">Garis</Badge>
+        </div>
+        <div class="grid mv-reveal-group">
+          <MediaFallback class="mv-reveal" label="Regular T-shirt" nomor="01" rasio="4/5" />
+          <MediaFallback
+            class="mv-reveal"
+            label="Cutting Bahan"
+            nomor="03"
+            rasio="4/5"
+            keterangan="Babak I"
+          />
+          <MediaFallback class="mv-reveal" label="Katun Combed" rasio="4/5" tone="kontras" />
+          <MediaFallback class="mv-reveal" label="Sewing" nomor="06" rasio="4/5" />
+        </div>
+      </Container>
+    </main>
+
+    <style>
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-4);
+        align-items: center;
+        margin-block-start: var(--space-5);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: var(--space-5);
+        margin-block-start: var(--space-5);
+      }
+      .spacer {
+        block-size: var(--space-6);
+      }
+      ul {
+        padding-inline-start: var(--space-5);
+      }
+    </style>
+
+    <script>
+      import { revealOnScroll } from '../scripts/observer';
+      revealOnScroll();
+    </script>
+  </body>
+</html>

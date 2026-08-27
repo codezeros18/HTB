@@ -1,0 +1,206 @@
+---
+/**
+ * Button — 3 varian × state default/hover/focus/active/disabled.
+ *
+ * Merender <button> secara default, atau <a> bila `href` diberikan.
+ * Target sentuh dikunci ≥44×44px di SEMUA viewport (§7.8), bukan hanya
+ * mobile — lebih murah daripada mengecek ulang tiap kali dipakai.
+ *
+ * Props:
+ *   variant   'primary' (aksen solid) · 'secondary' (garis) · 'ghost' (teks)
+ *   size      'md' (default) · 'lg'
+ *   href      ada → merender <a>; kosong → <button>
+ *   type      hanya untuk <button>. Default 'button' (bukan 'submit').
+ *   disabled  <button> mendapat `disabled` + `aria-disabled`;
+ *             <a> kehilangan href sehingga tidak bisa diklik/di-Tab.
+ *   fullWidth lebar penuh induknya
+ *   newTab    target="_blank" + rel="noopener noreferrer", TANPA ikon
+ *   external  newTab + ikon panah keluar
+ *   Sisa atribut diteruskan apa adanya (aria-*, data-*, id, form, dst).
+ */
+import type { HTMLAttributes } from 'astro/types';
+import type { ButtonSize, ButtonVariant } from './types';
+
+interface Props extends Omit<HTMLAttributes<'button'>, 'type' | 'size'> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  href?: string;
+  type?: 'button' | 'submit' | 'reset';
+  disabled?: boolean;
+  fullWidth?: boolean;
+  newTab?: boolean;
+  external?: boolean;
+}
+
+const {
+  variant = 'primary',
+  size = 'md',
+  href,
+  type = 'button',
+  disabled = false,
+  fullWidth = false,
+  newTab = false,
+  external = false,
+  class: className,
+  ...rest
+} = Astro.props;
+
+const bukaTabBaru = newTab || external;
+
+const Tag = href ? 'a' : 'button';
+
+const classes = [
+  'mv-btn',
+  `mv-btn--${variant}`,
+  `mv-btn--${size}`,
+  fullWidth && 'mv-btn--full',
+  className,
+];
+
+// <a> tanpa href tidak fokusabel & tidak bisa diklik — itulah perilaku
+// "disabled" yang benar untuk tautan. aria-disabled tetap diumumkan.
+const tagProps = href
+  ? {
+      href: disabled ? undefined : href,
+      target: bukaTabBaru ? '_blank' : undefined,
+      rel: bukaTabBaru ? 'noopener noreferrer' : undefined,
+    }
+  : { type, disabled };
+---
+
+<Tag
+  class:list={classes}
+  aria-disabled={disabled ? 'true' : undefined}
+  data-disabled={disabled ? '' : undefined}
+  {...tagProps}
+  {...rest}
+>
+  <span class="mv-btn__label t-label"><slot /></span>
+  {
+    external && !disabled && (
+      <svg
+        class="mv-btn__ikon"
+        viewBox="0 0 16 16"
+        width="12"
+        height="12"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M6 3h7v7M13 3 3.5 12.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="square"
+        />
+      </svg>
+    )
+  }
+</Tag>
+
+<style>
+  .mv-btn {
+    /* Reset lintas <button>/<a> */
+    -webkit-appearance: none;
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    cursor: pointer;
+
+    /* Target sentuh WCAG 2.1 AA — §7.8 */
+    min-block-size: var(--btn-h); /* 44px */
+    min-inline-size: var(--tap-min); /* 44px */
+
+    padding-block: 0;
+    padding-inline: var(--btn-pad-x); /* 24px */
+
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-control); /* 4px */
+    background-color: transparent;
+    color: inherit;
+
+    /* §6.7: hanya properti murah. transform dipakai untuk state :active. */
+    transition:
+      background-color var(--dur-fast) var(--ease),
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
+  }
+
+  .mv-btn--lg {
+    padding-inline: var(--btn-pad-x-lg); /* 32px */
+    min-block-size: 52px;
+  }
+
+  .mv-btn--full {
+    inline-size: 100%;
+  }
+
+  .mv-btn__label {
+    /* Label tombol: 13px / 700 / +0.08em / UPPERCASE — §6.5 */
+    display: inline-block;
+  }
+
+  .mv-btn__ikon {
+    flex: 0 0 auto;
+  }
+
+  /* ---------- primary ---------- */
+  .mv-btn--primary {
+    background-color: var(--color-accent);
+    color: var(--color-accent-ink);
+    border-color: var(--color-accent);
+  }
+
+  .mv-btn--primary:hover:not([data-disabled]) {
+    background-color: var(--color-accent-hover);
+    border-color: var(--color-accent-hover);
+  }
+
+  /* ---------- secondary ---------- */
+  .mv-btn--secondary {
+    background-color: transparent;
+    color: var(--color-text);
+    /* border-strong, bukan border dekoratif — §6.3 melarang --color-border
+       untuk border kontrol (kontras 1.37:1). */
+    border-color: var(--color-border-strong);
+  }
+
+  .mv-btn--secondary:hover:not([data-disabled]) {
+    background-color: var(--color-surface);
+    border-color: var(--color-text);
+  }
+
+  /* ---------- ghost ---------- */
+  .mv-btn--ghost {
+    background-color: transparent;
+    color: var(--color-text);
+    border-color: transparent;
+    padding-inline: var(--space-3);
+  }
+
+  .mv-btn--ghost:hover:not([data-disabled]) {
+    background-color: var(--color-surface);
+  }
+
+  /* ---------- state bersama ---------- */
+  .mv-btn:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-btn:active:not([data-disabled]) {
+    transform: translateY(1px);
+  }
+
+  .mv-btn[data-disabled] {
+    cursor: not-allowed;
+    opacity: 0.45;
+    /* Jaring pengaman: <a> yang di-disable tetap tidak menerima klik
+       walau href sudah dilepas. */
+    pointer-events: none;
+  }
+</style>

@@ -1,0 +1,124 @@
+---
+/**
+ * StructuredData — JSON-LD (BLUEPRINT §7.7).
+ *
+ * Struktur: satu `@graph` berisi
+ *   1× Organization  — CV. Huimora Talenta Berkarya, brand MOTIVE
+ *   3× LocalBusiness — @id unik per lokasi; Head Office lokasi utama
+ *                      (Organization.location), Workshop & Factory
+ *                      memakai `branchOf`. TIDAK digabung jadi satu.
+ *   1× OfferCatalog  — 12 produk sebagai Offer.
+ *
+ * ── Yang SENGAJA tidak dikeluarkan ─────────────────────────────
+ * `openingHours`  — `jamOperasional === null` di ketiga lokasi.
+ * `geo`           — `koordinat === null`; koordinat tidak boleh ditebak
+ *                   (guardrail 1). Muncul otomatis begitu datanya ada.
+ * `sameAs`        — `site.sosmed === null`.
+ * `logo`          — berkas logo belum ada (dibuat di S10/T10.1).
+ * Tipe `Product`  — dilarang oleh AC T03.2: menyatakan Product tanpa
+ *                   harga/stok/review valid mengundang peringatan
+ *                   Search Console dan tidak menghasilkan rich result.
+ *                   `itemOffered` memakai `Service`.
+ * `priceSpecification` hanya untuk 2 anchor terverifikasi (38k & 40k).
+ */
+import { site } from '../../content/site';
+import { lokasi } from '../../content/lokasi';
+import { katalog } from '../../content/katalog';
+
+interface Props {
+  /** URL kanonik halaman ini. */
+  canonical: string;
+}
+
+const { canonical }: Props = Astro.props;
+
+const origin = new URL(canonical).origin;
+const ID_ORG = `${origin}/#organization`;
+const ID_KATALOG = `${origin}/#katalog`;
+const idLokasi = (slug: string): string => `${origin}/#${slug}`;
+
+type Node = Record<string, unknown>;
+
+const headOffice = lokasi.find((l) => l.slug === 'head-office');
+
+const organization: Node = {
+  '@type': 'Organization',
+  '@id': ID_ORG,
+  name: site.namaCV,
+  alternateName: site.brand,
+  brand: { '@type': 'Brand', name: site.brand },
+  description: site.meta.description,
+  url: origin,
+  email: site.email,
+  telephone: `+${site.whatsapp}`,
+  founder: { '@type': 'Person', name: site.pic.nama, jobTitle: site.pic.jabatan },
+  hasOfferCatalog: { '@id': ID_KATALOG },
+  ...(headOffice ? { location: { '@id': idLokasi(headOffice.slug) } } : {}),
+  // sameAs hanya kalau sosmed sudah diberikan klien.
+  ...(site.sosmed && site.sosmed.length > 0 ? { sameAs: site.sosmed.map((s) => s.url) } : {}),
+};
+
+const bisnisLokal: Node[] = lokasi.map((l) => {
+  const utama = l.slug === 'head-office';
+  return {
+    '@type': 'LocalBusiness',
+    '@id': idLokasi(l.slug),
+    name: `${site.brand} — ${l.peran}`,
+    parentOrganization: { '@id': ID_ORG },
+    // Head Office = lokasi utama. Dua lainnya cabang.
+    ...(utama ? {} : { branchOf: { '@id': ID_ORG } }),
+    address: {
+      '@type': 'PostalAddress',
+      // lokasi.ts menyimpan alamat sebagai satu string apa adanya dari PDF.
+      // Memecahnya jadi locality/region berarti menebak — tidak dilakukan.
+      streetAddress: l.alamat,
+      addressCountry: 'ID',
+    },
+    telephone: l.telepon ?? `+${site.whatsapp}`,
+    url: origin,
+    ...(l.mapsUrl ? { hasMap: l.mapsUrl } : {}),
+    // geo & openingHours menunggu data klien — lihat catatan di atas.
+    ...(l.koordinat
+      ? {
+          geo: { '@type': 'GeoCoordinates', latitude: l.koordinat.lat, longitude: l.koordinat.lng },
+        }
+      : {}),
+    ...(l.jamOperasional ? { openingHours: l.jamOperasional } : {}),
+  };
+});
+
+const offerCatalog: Node = {
+  '@type': 'OfferCatalog',
+  '@id': ID_KATALOG,
+  name: `Katalog produk ${site.brand}`,
+  itemListElement: katalog.map((p) => ({
+    '@type': 'Offer',
+    itemOffered: {
+      '@type': 'Service',
+      name: p.nama,
+      serviceType: 'Konveksi custom apparel',
+      provider: { '@id': ID_ORG },
+    },
+    ...(p.hargaMulai !== null
+      ? {
+          priceSpecification: {
+            '@type': 'PriceSpecification',
+            priceCurrency: 'IDR',
+            minPrice: p.hargaMulai,
+          },
+        }
+      : {}),
+  })),
+};
+
+const graph = {
+  '@context': 'https://schema.org',
+  '@graph': [organization, ...bisnisLokal, offerCatalog],
+};
+
+// `<` di-escape supaya string data tidak bisa menutup <script> lebih awal.
+const json = JSON.stringify(graph).replace(/</g, '\\u003c');
+---
+
+{/* is:inline — ini data, bukan skrip. Jangan diproses/di-bundle Astro. */}
+<script type="application/ld+json" is:inline set:html={json} />

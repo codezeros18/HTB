@@ -1,0 +1,120 @@
+---
+/**
+ * About — 2 paragraf + 4 ValueCard bernomor + baris fakta perusahaan.
+ *
+ * Guardrail 6 (baris fakta): `site.about.baris` adalah `(string|null)[]`.
+ * Elemen `null` disembunyikan SENDIRI-SENDIRI; kalau setelah difilter
+ * hasilnya kosong, seluruh blok baris fakta tidak dirender — nol label
+ * kosong, nol pemisah menggantung, nol tanda hubung "—" (AC T04.6).
+ *
+ * Fade-in (T04.7): kelas `.mv-reveal`/`.mv-reveal-group` dari S02.
+ * `revealOnScroll()` SUDAH dipanggil sekali di BaseLayout untuk seluruh
+ * halaman — section ini tidak memanggilnya lagi (satu observer bersama).
+ */
+import { site } from '../../content/site';
+import Container from '../layout/Container.astro';
+import SectionHeading from '../layout/SectionHeading.astro';
+import ValueCard from '../cards/ValueCard.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id }: Props = Astro.props;
+
+const { about } = site;
+const barisTerisi = about.baris.filter((b): b is string => b !== null);
+---
+
+<Container as="section" spacing="section" id={id}>
+  <SectionHeading nomor="03" judul={about.judul} />
+
+  <div class="mv-about__grid">
+    <div class="mv-about__teks mv-reveal">
+      {about.paragraf.map((p) => <p class="t-body-l">{p}</p>)}
+
+      {
+        barisTerisi.length > 0 && (
+          <ul class="mv-about__fakta">
+            {barisTerisi.map((f) => (
+              <li class="mv-about__fakta-item t-body-s">{f}</li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+
+    <div class="mv-about__kartu mv-reveal-group">
+      {
+        about.janjiNilai.map((n, i) => (
+          <ValueCard
+            class="mv-reveal"
+            nomor={String(i + 1).padStart(2, '0')}
+            judul={n.judul}
+            deskripsi={n.deskripsi}
+          />
+        ))
+      }
+    </div>
+  </div>
+</Container>
+
+<style>
+  .mv-about__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .mv-about__teks p + p {
+    margin-block-start: var(--space-4);
+  }
+
+  .mv-about__teks p {
+    color: var(--color-text-2);
+    margin-block-start: 0;
+  }
+
+  /* Baris fakta: dipisah titik tengah, TANPA pemisah menggantung setelah
+     elemen terakhir (::after hanya pada :not(:last-child)). */
+  .mv-about__fakta {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    margin: var(--space-6) 0 0;
+    padding: 0;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .mv-about__fakta-item {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  /* Pemisah HANYA di antara item (:not(:last-child)) — nol titik
+     menggantung setelah item terakhir. */
+  .mv-about__fakta-item:not(:last-child)::after {
+    content: '·';
+    color: var(--color-border-strong);
+    margin-inline-start: var(--space-3);
+  }
+
+  .mv-about__kartu {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  @media (max-width: 1023.98px) {
+    .mv-about__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 639.98px) {
+    .mv-about__kartu {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

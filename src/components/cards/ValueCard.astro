@@ -1,0 +1,62 @@
+---
+/**
+ * ValueCard — kartu janji nilai bernomor, dipakai section About (T04.5).
+ *
+ * TIDAK clickable, TIDAK punya `cursor: pointer`, dan tidak menyimulasikan
+ * afordansi interaktif (hover elevation/shadow) — ini kartu informasi
+ * statis, bukan tautan (AC T04.5).
+ *
+ * Props:
+ *   nomor      label bernomor, mis. "01". Dekoratif (dipisah dari urutan
+ *              dokumen lewat aria-hidden) karena urutan sudah tersirat DOM.
+ *   judul      teks H3.
+ *   deskripsi  teks Body S di bawah judul.
+ *   class
+ */
+interface Props {
+  nomor: string;
+  judul: string;
+  deskripsi: string;
+  class?: string;
+}
+
+const { nomor, judul, deskripsi, class: className }: Props = Astro.props;
+---
+
+<div class:list={['mv-value-card', className]}>
+  <span class="mv-value-card__nomor t-tnum" aria-hidden="true">{nomor}</span>
+  <h3 class="mv-value-card__judul t-h3">{judul}</h3>
+  <p class="mv-value-card__deskripsi t-body-s">{deskripsi}</p>
+</div>
+
+<style>
+  .mv-value-card {
+    /* Statis dengan sengaja — nol cursor:pointer, nol transform/shadow
+       saat hover. Kartu informasi, bukan kartu tautan. */
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+    background-color: var(--color-bg);
+  }
+
+  .mv-value-card__nomor {
+    color: var(--color-accent);
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: var(--fw-display);
+    line-height: 1;
+  }
+
+  .mv-value-card__judul {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-value-card__deskripsi {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+</style>

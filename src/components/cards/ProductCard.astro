@@ -1,0 +1,135 @@
+---
+/**
+ * ProductCard — satu produk apparel/racepack di grid Tab 1.
+ *
+ * Baris MOQ/lead time HILANG SELURUHNYA (bukan dirender kosong) saat
+ * `null` — guardrail 1. Harga anchor (`hargaMulai`), saat ada, TIDAK
+ * pernah disembunyikan di balik accordion (BLUEPRINT §8 Section 4).
+ * Foto `null` → `MediaFallback`, bukan `<img>` dengan `src` kosong
+ * (guardrail 7 / AC T02.7 — nol kotak abu, nol gambar rusak).
+ *
+ * Props:
+ *   produk   Produk — objek APA ADANYA dari `katalog.ts`. Komponen ini
+ *            tidak menerima string konten lepas (guardrail 5/7).
+ *   class
+ */
+import type { Produk } from '../../content/types';
+import { bahan } from '../../content/bahan';
+import MediaFallback from '../ui/MediaFallback.astro';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+
+interface Props {
+  produk: Produk;
+  class?: string;
+}
+
+const { produk, class: className }: Props = Astro.props;
+
+// Alt text §7.8: "[Nama produk], bahan [X]" — hanya kalau pemetaan
+// produk↔bahan sudah ada (bahanRef masih [] di seluruh katalog per S01).
+const namaBahan = produk.bahanRef
+  .map((id) => bahan.find((b) => b.id === id)?.namaTampil)
+  .filter((n): n is string => Boolean(n));
+const altFoto =
+  namaBahan.length > 0 ? `${produk.nama}, bahan ${namaBahan.join(' / ')}` : produk.nama;
+
+const metaRows: string[] = [];
+if (produk.moq !== null) metaRows.push(`MOQ ${produk.moq.toLocaleString('id-ID')} pcs`);
+if (produk.leadTime !== null) metaRows.push(`Lead time ${produk.leadTime}`);
+---
+
+<article class:list={['mv-product-card', className]}>
+  {
+    produk.foto ? (
+      <img
+        class="mv-product-card__foto"
+        src={produk.foto}
+        alt={altFoto}
+        width="400"
+        height="500"
+        loading="lazy"
+      />
+    ) : (
+      <MediaFallback class="mv-product-card__foto" label={produk.nama} rasio="4/5" />
+    )
+  }
+
+  <div class="mv-product-card__body">
+    <h3 class="mv-product-card__nama t-h3">{produk.nama}</h3>
+
+    {
+      metaRows.length > 0 && (
+        <ul class="mv-product-card__meta">
+          {metaRows.map((m) => (
+            <li class="t-body-s">{m}</li>
+          ))}
+        </ul>
+      )
+    }
+
+    {
+      produk.hargaMulai !== null && (
+        <p class="mv-product-card__harga t-body-m">
+          Mulai Rp {produk.hargaMulai.toLocaleString('id-ID')}/pcs
+        </p>
+      )
+    }
+
+    <WhatsAppButton
+      konteks="produk"
+      produk={produk.nama}
+      class="mv-product-card__cta"
+      fullWidth
+      size="md"
+    />
+  </div>
+</article>
+
+<style>
+  .mv-product-card {
+    display: flex;
+    flex-direction: column;
+    /* Kartu informasi, bukan kartu tautan — nol cursor:pointer di sini. */
+  }
+
+  .mv-product-card__foto {
+    display: block;
+    inline-size: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: var(--radius-control);
+    background-color: var(--color-surface);
+  }
+
+  .mv-product-card__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding-block-start: var(--space-3);
+  }
+
+  .mv-product-card__nama {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-product-card__meta {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    color: var(--color-text-2);
+  }
+
+  .mv-product-card__harga {
+    color: var(--color-accent-hover);
+    font-weight: 700;
+    margin: 0;
+  }
+
+  .mv-product-card__cta {
+    margin-block-start: var(--space-2);
+  }
+</style>

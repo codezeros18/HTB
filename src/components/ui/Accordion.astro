@@ -1,0 +1,133 @@
+---
+/**
+ * Accordion — <details>/<summary> NATIVE.
+ *
+ * Kenapa native (aturan sprint 1): sudah aksesibel bawaan (peran group +
+ * state expanded diumumkan screen reader), berfungsi PENUH tanpa
+ * JavaScript, dan nol byte JS terkirim. Versi div+state buatan sendiri
+ * selalu lebih berat dan lebih mudah salah.
+ *
+ * Animasi hanya `opacity` + `transform` pada isi (§6.7). Tinggi TIDAK
+ * dianimasikan — itu properti layout yang memicu reflow tiap frame.
+ *
+ * Props:
+ *   judul     teks <summary>. WAJIB.
+ *   meta      teks kecil di kanan judul (mis. "4 varian"). null → tidak dirender.
+ *   open      terbuka saat pertama dirender. Default false.
+ *   name      grup akordion eksklusif (atribut `name` native). Beri nilai
+ *             sama pada beberapa Accordion agar hanya satu terbuka.
+ *             Browser lama mengabaikannya — semua tetap bisa dibuka.
+ *   id, class
+ */
+interface Props {
+  judul: string;
+  meta?: string | null;
+  open?: boolean;
+  name?: string;
+  id?: string;
+  class?: string;
+}
+
+const { judul, meta = null, open = false, name, id, class: className } = Astro.props;
+---
+
+<details class:list={['mv-acc', className]} open={open} name={name} id={id}>
+  <summary class="mv-acc__summary">
+    <span class="mv-acc__judul t-h3">{judul}</span>
+    {meta && <span class="mv-acc__meta t-body-s">{meta}</span>}
+    <span class="mv-acc__ikon" aria-hidden="true">
+      <svg viewBox="0 0 16 16" width="14" height="14" focusable="false">
+        <path
+          d="M3 6l5 5 5-5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="square"></path>
+      </svg>
+    </span>
+  </summary>
+  <div class="mv-acc__body">
+    <slot />
+  </div>
+</details>
+
+<style>
+  .mv-acc {
+    border-block-end: var(--border-width) solid var(--color-border);
+  }
+
+  .mv-acc__summary {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    cursor: pointer;
+    list-style: none;
+    /* Target sentuh §7.8 */
+    min-block-size: var(--tap-min);
+    padding-block: var(--space-4);
+    color: var(--color-text);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  /* Buang segitiga bawaan di kedua mesin render. */
+  .mv-acc__summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .mv-acc__summary::marker {
+    content: '';
+  }
+
+  .mv-acc__summary:hover {
+    color: var(--color-accent);
+  }
+
+  .mv-acc__summary:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-acc__judul {
+    flex: 1 1 auto;
+  }
+
+  .mv-acc__meta {
+    flex: 0 0 auto;
+    color: var(--color-text-2);
+  }
+
+  .mv-acc__ikon {
+    flex: 0 0 auto;
+    display: inline-flex;
+    color: var(--color-text-2);
+    /* Hanya transform — §6.7 */
+    transition: transform var(--dur-base) var(--ease);
+  }
+
+  .mv-acc[open] .mv-acc__ikon {
+    transform: rotate(180deg);
+  }
+
+  .mv-acc__body {
+    padding-block-end: var(--space-5);
+    color: var(--color-text-2);
+  }
+
+  /* Fade-in isi saat dibuka. Tinggi tidak ikut dianimasikan. */
+  @media (prefers-reduced-motion: no-preference) {
+    .mv-acc[open] .mv-acc__body {
+      animation: mv-acc-in var(--dur-base) var(--ease) both;
+    }
+  }
+
+  @keyframes mv-acc-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+</style>

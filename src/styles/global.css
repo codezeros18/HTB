@@ -1,0 +1,322 @@
+/* =============================================================
+   global.css — entry stylesheet MOTIVE
+   Urutan: token → tailwind → @font-face → @theme → base
+   ============================================================= */
+
+@import './tokens.css';
+@import 'tailwindcss';
+
+/* ===== SELF-HOST FONT (BLUEPRINT.md §6.5 / §7.6) =====
+   Sumber: Archivo (Omnibus-Type) & Inter (Rasmus Andersson), SIL OFL 1.1.
+   Diunduh sebagai woff2 variabel, di-instance ke sumbu wght 400–800,
+   di-subset ke latin + latin-ext. NOL request ke fonts.googleapis.com
+   atau fonts.gstatic.com. Total 4 file ≈ 77 KB.
+   Hanya archivo-var-latin (800) & inter-var-latin (400) yang di-preload
+   di <head> layout (S03). */
+
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/archivo-var-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Archivo';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/archivo-var-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-024F, U+0192, U+1E00-1EFF, U+2018-201E, U+2020-2022, U+2026, U+20A0-20BF, U+2122;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/inter-var-latin.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074,
+    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: url('/fonts/inter-var-latin-ext.woff2') format('woff2');
+  unicode-range:
+    U+0100-024F, U+0192, U+1E00-1EFF, U+2018-201E, U+2020-2022, U+2026, U+20A0-20BF, U+2122;
+}
+
+/* Fallback face dengan metric override — menahan CLS saat swap.
+   Angka size-adjust/ascent/descent dihitung dari xHeight & hhea font
+   relatif terhadap Arial (upm 2048, xHeight 1062). */
+@font-face {
+  font-family: 'Archivo Fallback';
+  src: local('Segoe UI'), local('Arial');
+  size-adjust: 98.58%;
+  ascent-override: 89.06%;
+  descent-override: 21.3%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Inter Fallback';
+  src: local('Segoe UI'), local('Arial');
+  size-adjust: 94.99%;
+  ascent-override: 101.98%;
+  descent-override: 25.39%;
+  line-gap-override: 0%;
+}
+
+/* ===== PEMETAAN TOKEN → TAILWIND (BLUEPRINT.md §6.3–§6.6) =====
+   `inline` = utilitas memancarkan var(--token) langsung, jadi menukar
+   Arah A/B di tokens.css ikut mengubah seluruh kelas Tailwind. */
+@theme inline {
+  --color-bg: var(--color-bg);
+  --color-surface: var(--color-surface);
+  --color-surface-alt: var(--color-surface-alt);
+  --color-text: var(--color-text);
+  --color-text-2: var(--color-text-2);
+  --color-border: var(--color-border);
+  --color-border-strong: var(--color-border-strong);
+  --color-accent: var(--color-accent);
+  --color-accent-hover: var(--color-accent-hover);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-accent-ink: var(--color-accent-ink);
+  --color-focus: var(--color-focus);
+  --color-success: var(--color-success);
+  --color-error: var(--color-error);
+
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+
+  --radius-chip: var(--radius-chip);
+  --radius-control: var(--radius-control);
+  --radius-modal: var(--radius-modal);
+
+  --shadow-card: var(--shadow-card);
+
+  --container-container: var(--container-max);
+
+  --breakpoint-xs: 360px;
+  --breakpoint-sm: 640px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
+  --breakpoint-xl: 1280px;
+  --breakpoint-2xl: 1536px;
+}
+
+/* ===== BASE ===== */
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-size: var(--fs-body-m);
+    line-height: var(--lh-body-m);
+    font-weight: var(--fw-body);
+    -webkit-font-smoothing: var(--font-smoothing);
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* Scroll ke anchor tidak tertutup navbar sticky (tinggi final dikunci di S03). */
+  :where([id]) {
+    scroll-margin-block-start: var(--space-8);
+  }
+}
+
+/* ===== SKALA TIPE (BLUEPRINT §6.5) =====
+   Nilai fs/lh/ls/fw ada di tokens.css dan sudah responsif lewat media query
+   di sana — kelas di bawah hanya memasangnya. Dipakai lintas sprint;
+   JANGAN menulis ulang ukuran font di komponen. */
+@layer components {
+  .t-display,
+  .t-h1,
+  .t-h2,
+  .t-h3 {
+    font-family: var(--font-display);
+  }
+
+  .t-display {
+    font-size: var(--fs-display);
+    line-height: var(--lh-display);
+    letter-spacing: var(--ls-display);
+    font-weight: var(--fw-display);
+    text-transform: uppercase;
+  }
+
+  .t-h1 {
+    font-size: var(--fs-h1);
+    line-height: var(--lh-h1);
+    letter-spacing: var(--ls-h1);
+    font-weight: var(--fw-h1);
+    text-transform: uppercase;
+  }
+
+  .t-h2 {
+    font-size: var(--fs-h2);
+    line-height: var(--lh-h2);
+    letter-spacing: var(--ls-h2);
+    font-weight: var(--fw-h2);
+    text-transform: uppercase;
+  }
+
+  /* H3 = Sentence case. §6.5: JANGAN uppercase di sini. */
+  .t-h3 {
+    font-size: var(--fs-h3);
+    line-height: var(--lh-h3);
+    letter-spacing: var(--ls-h3);
+    font-weight: var(--fw-h3);
+  }
+
+  .t-eyebrow {
+    font-family: var(--font-display);
+    font-size: var(--fs-eyebrow);
+    line-height: var(--lh-eyebrow);
+    letter-spacing: var(--ls-eyebrow);
+    font-weight: var(--fw-eyebrow);
+    text-transform: uppercase;
+  }
+
+  .t-body-l {
+    font-size: var(--fs-body-l);
+    line-height: var(--lh-body-l);
+    letter-spacing: var(--ls-body-l);
+    font-weight: var(--fw-body);
+  }
+
+  .t-body-m {
+    font-size: var(--fs-body-m);
+    line-height: var(--lh-body-m);
+    letter-spacing: var(--ls-body-m);
+    font-weight: var(--fw-body);
+  }
+
+  .t-body-s {
+    font-size: var(--fs-body-s);
+    line-height: var(--lh-body-s);
+    letter-spacing: var(--ls-body-s);
+    font-weight: var(--fw-body);
+  }
+
+  .t-label {
+    font-family: var(--font-display);
+    font-size: var(--fs-btn);
+    line-height: var(--lh-btn);
+    letter-spacing: var(--ls-btn);
+    font-weight: var(--fw-btn);
+    text-transform: uppercase;
+  }
+
+  /* Angka tabel — tabular-nums wajib supaya kolom tidak bergoyang (§6.5). */
+  .t-tnum {
+    font-size: var(--fs-tnum);
+    line-height: var(--lh-tnum);
+    letter-spacing: var(--ls-tnum);
+    font-weight: var(--fw-tnum);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum' 1;
+  }
+
+  /* Teks hanya untuk screen reader (SkipLink, caption tabel, dst). */
+  .sr-only {
+    position: absolute;
+    inline-size: 1px;
+    block-size: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+
+/* ===== JARAK VERTIKAL SECTION (BLUEPRINT §6.6) =====
+   Padding HANYA di sisi atas. Dua section berurutan menghasilkan jarak
+   tepat var(--section-pad-y) (96px desktop / 56px mobile) — bukan 192px
+   seperti kalau padding dipasang di kedua sisi. Section terakhir di dalam
+   <main> mendapat padding bawah supaya tidak menempel ke footer.
+   Konsekuensi: pemanggil TIDAK BOLEH menambah margin sendiri. */
+@layer components {
+  .mv-section {
+    padding-block-start: var(--section-pad-y);
+  }
+
+  main > .mv-section:last-child,
+  .mv-section[data-section-last] {
+    padding-block-end: var(--section-pad-y);
+  }
+
+  /* Gallery skenario B — §6.6: 128px. Dipakai S07. */
+  .mv-section--roomy {
+    padding-block-start: var(--section-pad-y-gallery-b);
+  }
+
+  main > .mv-section--roomy:last-child,
+  .mv-section--roomy[data-section-last] {
+    padding-block-end: var(--section-pad-y-gallery-b);
+  }
+}
+
+/* ===== MASUK-LAYAR (BLUEPRINT §6.7) =====
+   Hanya transform + opacity. Kelas `is-visible` dipasang sekali oleh
+   src/scripts/observer.ts, lalu elemen di-unobserve.
+
+   Keadaan awal (tersembunyi) hanya berlaku saat pengguna TIDAK meminta
+   reduced motion DAN JavaScript aktif (`.js` dipasang oleh observer.ts).
+   Tanpa JS atau dengan reduced motion, konten tampil penuh sejak awal. */
+@layer components {
+  @media (prefers-reduced-motion: no-preference) {
+    .js .mv-reveal {
+      opacity: 0;
+      transform: translateY(var(--reveal-shift));
+      transition:
+        opacity var(--dur-slow) var(--ease) var(--reveal-delay),
+        transform var(--dur-slow) var(--ease) var(--reveal-delay);
+    }
+
+    .js .mv-reveal.is-visible {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Stagger deklaratif: <div class="mv-reveal" style="--reveal-delay: 60ms"> */
+  .mv-reveal-group > * {
+    --reveal-delay: calc(var(--reveal-index, 0) * var(--reveal-stagger));
+  }
+}
+
+/* Reduced motion: matikan total (BLUEPRINT §6.7 + §7.8). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+}

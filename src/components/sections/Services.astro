@@ -1,0 +1,348 @@
+---
+/**
+ * Services — 3 tab + progressive disclosure (BLUEPRINT §8 Section 4).
+ *
+ * Kenapa tab, bukan accordion di level atas: Apparel, Racepack, dan
+ * Bahan & Ukuran SALING MENGGANTIKAN (Rina hanya butuh Apparel, Dewa
+ * hanya butuh Racepack) — tab menyatakan "pilih jalurmu".
+ *
+ * Kepadatan (T05.7): dengan tab default "Apparel" + 5 accordion bahan
+ * tertutup + hanya 8 dari 12 kartu Apparel tampil, section ini harus
+ * tetap ≤3.5 layar di 360px. Diukur & dilampirkan di PROGRESS.md.
+ *
+ * `#racepack` / `#bahan` adalah anchor STATIS (selalu ada di DOM, tidak
+ * pernah `hidden`) — perlu tetap terlihat oleh browser supaya
+ * `location.hash` bisa menggulir ke sini SEBELUM `ui/Tab.astro` (S02)
+ * sempat mengaktifkan tab yang cocok lewat `applyHash()`-nya sendiri.
+ * Anchor id di dalam tabpanel yang di-render `hidden` di SSR tidak bisa
+ * jadi target scroll browser.
+ */
+import { site } from '../../content/site';
+import { katalog } from '../../content/katalog';
+import { racepack } from '../../content/racepack';
+import { bahan } from '../../content/bahan';
+import { sizeCharts } from '../../content/size-charts';
+import { harga } from '../../content/harga';
+import type { TableRow } from '../ui/types';
+import Container from '../layout/Container.astro';
+import SectionHeading from '../layout/SectionHeading.astro';
+import Tab from '../ui/Tab.astro';
+import Accordion from '../ui/Accordion.astro';
+import Table from '../ui/Table.astro';
+import Button from '../ui/Button.astro';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+import ProductCard from '../cards/ProductCard.astro';
+import RacepackCard from '../cards/RacepackCard.astro';
+import MaterialCard from '../cards/MaterialCard.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id }: Props = Astro.props;
+
+// AC T05.2 — 8 kartu tampil, 4 sisanya di balik "Lihat 4 produk lainnya".
+const kartuTampil = katalog.slice(0, 8);
+const kartuSisa = katalog.slice(8);
+
+// Urutan kelompok = urutan kemunculan pertama di bahan.ts (PDF hlm. 8–12).
+const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
+
+// Add-on: 4 baris DTF + 1 baris paket lanyard = 5 baris nyata di harga.ts.
+// Catatan A11/A17 (ambiguitas paket vs per-item) SENGAJA tidak ikut —
+// itu catatan internal tim, bukan untuk publik (AC T05.6).
+const barisAddOn: TableRow[] = [
+  ...harga.sablonDTF.map((d) => ({
+    header: d.nama,
+    sel: [`Rp ${d.nominal.toLocaleString('id-ID')}`],
+  })),
+  {
+    header: harga.paketLanyard.nama,
+    sel: [`Rp ${harga.paketLanyard.nominal.toLocaleString('id-ID')}`],
+  },
+];
+---
+
+<Container as="section" spacing="section" id={id}>
+  <SectionHeading nomor="04" judul={site.services.judul} />
+
+  {/* Anchor statis untuk deep link #racepack / #bahan — lihat catatan di atas. */}
+  <span id="racepack" class="sr-only"></span>
+  <span id="bahan" class="sr-only"></span>
+
+  <Tab
+    label="Kategori layanan"
+    defaultId="apparel"
+    tabs={[
+      { id: 'apparel', label: site.services.tabApparel },
+      { id: 'racepack', label: site.services.tabRacepack },
+      { id: 'bahan', label: site.services.tabBahan },
+    ]}
+  >
+    <div slot="panel-apparel">
+      <div class="mv-services__grid-apparel">
+        {kartuTampil.map((p) => <ProductCard produk={p} />)}
+      </div>
+
+      {
+        kartuSisa.length > 0 && (
+          <>
+            <div
+              class="mv-services__grid-apparel mv-services__grid-apparel--extra"
+              id="apparel-extra"
+              hidden
+            >
+              {kartuSisa.map((p) => (
+                <ProductCard produk={p} />
+              ))}
+            </div>
+
+            <div class="mv-services__lihat-lainnya-wrap">
+              <Button
+                type="button"
+                variant="secondary"
+                data-show-more
+                data-label-buka={site.services.labelLihatLainnya}
+                data-label-tutup={site.services.labelSembunyikanLainnya}
+                aria-expanded="false"
+                aria-controls="apparel-extra"
+              >
+                <span data-show-more-label>{site.services.labelLihatLainnya}</span>
+              </Button>
+            </div>
+          </>
+        )
+      }
+    </div>
+
+    <div slot="panel-racepack">
+      <p class="mv-services__intro t-body-l">{site.services.racepackIntro}</p>
+      <div class="mv-services__grid-racepack">
+        {racepack.map((r) => <RacepackCard item={r} />)}
+      </div>
+    </div>
+
+    <div slot="panel-bahan">
+      <div class="mv-services__bahan">
+        {
+          kelompokBahan.map((k) => {
+            const varian = bahan.filter((b) => b.kelompok === k);
+            return (
+              <Accordion judul={k} meta={`${varian.length} varian`} name="bahan-kelompok">
+                <div class="mv-services__material-grid">
+                  {varian.map((v) => (
+                    <MaterialCard bahan={v} />
+                  ))}
+                </div>
+              </Accordion>
+            );
+          })
+        }
+      </div>
+
+      <div class="mv-services__panduan">
+        <h3 class="t-h3">{site.services.panduanUkuranJudul}</h3>
+
+        <label class="mv-services__panduan-label t-body-s" for="pilih-ukuran">
+          {site.services.panduanUkuranPilihLabel}
+        </label>
+        <select id="pilih-ukuran" class="mv-services__select" data-chart-select>
+          {sizeCharts.map((c) => <option value={c.id}>{c.nama}</option>)}
+        </select>
+
+        {
+          sizeCharts.map((c, i) => (
+            <div
+              class="mv-services__chart-panel"
+              data-chart-panel
+              data-chart-id={c.id}
+              hidden={i !== 0}
+            >
+              {c.statusVerifikasi === 'terverifikasi' ? (
+                <Table
+                  caption={`Panduan ukuran ${c.nama} (${c.unit})`}
+                  captionVisible
+                  kolom={['Ukuran', ...c.sizes]}
+                  baris={c.baris.map((b) => ({ header: b.label, sel: b.nilai }))}
+                  catatan={c.toleransi}
+                />
+              ) : (
+                <div class="mv-services__chart-kosong">
+                  <p class="t-body-m">{site.services.panduanUkuranBelumVerifikasi}</p>
+                  <WhatsAppButton konteks="kontak" label="Tanya via WhatsApp" />
+                </div>
+              )}
+            </div>
+          ))
+        }
+      </div>
+
+      <div class="mv-services__addon">
+        <h3 class="t-h3">{site.services.addOnJudul}</h3>
+        <Table
+          caption="Harga sablon DTF dan paket lanyard"
+          kolom={['Item', 'Harga']}
+          baris={barisAddOn}
+          align="end"
+          sticky={false}
+        />
+      </div>
+    </div>
+  </Tab>
+</Container>
+
+{
+  /*
+  Tambalan bug lintas-sprint — TIDAK mengubah ui/Tab.astro (S02, di luar
+  cakupan file S05). Tab.astro punya <noscript> sendiri yang seharusnya
+  menumpuk semua tabpanel terbuka saat JS mati, TAPI overridenya ditulis
+  TANPA cascade layer sehingga KALAH melawan preflight Tailwind 4:
+    [hidden]:where(:not([hidden=until-found])) { display:none!important }
+  yang hidup di `@layer base`. Untuk !important, layer LEBIH AWAL menang
+  (kebalikan dari deklarasi normal) — unlayered diperlakukan sebagai
+  layer PALING AKHIR, jadi selalu kalah. Dibuktikan empiris (lihat
+  PROGRESS.md S05.4): membungkus override di `@layer base` yang SAMA
+  membuatnya menang lewat spesifisitas (.mv-tabs__panel[hidden] 0,2,0
+  > [hidden]:where() Tailwind 0,1,0 — :where() nol spesifisitas).
+  Tanpa ini, accordion Bahan (bertumpu di tabpanel non-default) TIDAK
+  bisa dibuka tanpa JavaScript — AC T05.4. Perbaikan permanen semestinya
+  masuk ke ui/Tab.astro sendiri; dicatat sebagai utang di PROGRESS.md.
+*/
+}
+<noscript>
+  <style>
+    @layer base {
+      .mv-tabs__panel[hidden] {
+        display: block !important;
+      }
+    }
+  </style>
+</noscript>
+
+<style>
+  /* ---------- grid Apparel: 2 / 3 / 4 kolom ---------- */
+  .mv-services__grid-apparel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-5) var(--space-4);
+  }
+
+  .mv-services__grid-apparel--extra {
+    margin-block-start: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .mv-services__grid-apparel {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1280px) {
+    .mv-services__grid-apparel {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .mv-services__lihat-lainnya-wrap {
+    display: flex;
+    justify-content: center;
+    margin-block-start: var(--space-6);
+  }
+
+  /* ---------- grid Racepack: 1 / 2 kolom, kartu lebih besar ---------- */
+  .mv-services__intro {
+    color: var(--color-text-2);
+    max-inline-size: 60ch;
+    margin: 0 0 var(--space-5);
+  }
+
+  .mv-services__grid-racepack {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-5);
+  }
+
+  @media (min-width: 768px) {
+    .mv-services__grid-racepack {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* ---------- Bahan & Ukuran ---------- */
+  .mv-services__bahan {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mv-services__material-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+
+  @media (min-width: 640px) {
+    .mv-services__material-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .mv-services__panduan,
+  .mv-services__addon {
+    margin-block-start: var(--space-7);
+  }
+
+  .mv-services__panduan h3,
+  .mv-services__addon h3 {
+    margin: 0 0 var(--space-4);
+    color: var(--color-text);
+  }
+
+  .mv-services__panduan-label {
+    display: block;
+    color: var(--color-text-2);
+    margin-block-end: var(--space-2);
+  }
+
+  /* <select> NATIVE — nol dropdown kustom (aturan sprint 2). */
+  .mv-services__select {
+    display: block;
+    inline-size: 100%;
+    max-inline-size: 24rem;
+    min-block-size: var(--tap-min);
+    padding-inline: var(--space-4);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    font-size: var(--fs-body-m);
+    margin-block-end: var(--space-5);
+  }
+
+  .mv-services__select:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-services__chart-kosong {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    padding: var(--space-5);
+    background-color: var(--color-surface);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .mv-services__chart-kosong p {
+    color: var(--color-text-2);
+    margin: 0;
+    max-inline-size: 48ch;
+  }
+</style>
+
+<script>
+  import { initShowMore, initSizeChartSelector } from '../../scripts/tabs';
+  initShowMore();
+  initSizeChartSelector();
+</script>

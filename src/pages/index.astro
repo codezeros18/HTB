@@ -1,0 +1,49 @@
+---
+/**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║  index.astro — FINAL. JANGAN DISENTUH SETELAH SPRINT S03.     ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ *
+ * File ini hanya berisi URUTAN 10 SECTION dan kontrak anchor id.
+ * Urutannya DIKUNCI KLIEN (BLUEPRINT §8) — jangan disusun ulang,
+ * jangan ditambah, jangan dikurangi.
+ *
+ *    1  NAVBAR                  → BaseLayout
+ *    2  HERO                    → sections/Hero.astro       (S04)
+ *    3  ABOUT US        #tentang → sections/About.astro      (S04)
+ *    4  OUR SERVICES    #produk  → sections/Services.astro   (S05)
+ *    5  PRODUCTION      #proses  → sections/Process.astro    (S06)
+ *    6  OUR CLIENTS     #klien   → sections/Clients.astro    (S07)
+ *    7  GALLERY         #galeri  → sections/Gallery.astro    (S07)
+ *    8  LOCATION        #lokasi  → sections/Location.astro   (S08)
+ *    9  CONTACT         #kontak  → sections/Contact.astro    (S08)
+ *   10  FOOTER                   → BaseLayout
+ *
+ * Sprint pemilik HANYA mengubah isi file section-nya sendiri.
+ * Anchor id diteruskan sebagai prop dari sini supaya kontraknya
+ * terbaca di satu tempat; komponen section wajib memasangnya pada
+ * elemen terluarnya.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SECTION_IDS } from '../components/layout/nav-items';
+
+import Hero from '../components/sections/Hero.astro';
+import About from '../components/sections/About.astro';
+import Services from '../components/sections/Services.astro';
+import Process from '../components/sections/Process.astro';
+import Clients from '../components/sections/Clients.astro';
+import Gallery from '../components/sections/Gallery.astro';
+import Location from '../components/sections/Location.astro';
+import Contact from '../components/sections/Contact.astro';
+---
+
+<BaseLayout>
+  <Hero />
+  <About id={SECTION_IDS.tentang} />
+  <Services id={SECTION_IDS.produk} />
+  <Process id={SECTION_IDS.proses} />
+  <Clients id={SECTION_IDS.klien} />
+  <Gallery id={SECTION_IDS.galeri} />
+  <Location id={SECTION_IDS.lokasi} />
+  <Contact id={SECTION_IDS.kontak} />
+</BaseLayout>

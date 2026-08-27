@@ -1,0 +1,127 @@
+---
+/**
+ * Badge — chip/tag kecil. Radius 2px (§6.6), tanpa pill.
+ *
+ * Varian `sukses` dan `error` OTOMATIS membawa ikon: §7.8 melarang warna
+ * menjadi satu-satunya pembawa informasi. Matikan hanya bila teks di
+ * sekitarnya sudah menyatakan statusnya secara eksplisit.
+ *
+ * Props:
+ *   variant  'netral' (default) · 'aksen' · 'sukses' · 'error' · 'garis'
+ *   ikon     tampilkan ikon status. Default: true untuk sukses/error,
+ *            false untuk sisanya.
+ *   as       'span' (default) atau 'li'.
+ *   class
+ */
+import type { BadgeVariant } from './types';
+
+interface Props {
+  variant?: BadgeVariant;
+  ikon?: boolean;
+  as?: 'span' | 'li';
+  class?: string;
+}
+
+const { variant = 'netral', ikon, as: Tag = 'span', class: className }: Props = Astro.props;
+
+const statusVariant = variant === 'sukses' || variant === 'error';
+const tampilIkon = ikon ?? statusVariant;
+---
+
+<Tag class:list={['mv-badge', `mv-badge--${variant}`, className]}>
+  {
+    tampilIkon && variant === 'sukses' && (
+      <svg
+        class="mv-badge__ikon"
+        viewBox="0 0 16 16"
+        width="12"
+        height="12"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M3 8.5l3.5 3.5L13 5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="square"
+        />
+      </svg>
+    )
+  }
+  {
+    tampilIkon && variant === 'error' && (
+      <svg
+        class="mv-badge__ikon"
+        viewBox="0 0 16 16"
+        width="12"
+        height="12"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <path
+          d="M8 3v6M8 12v1"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="square"
+        />
+      </svg>
+    )
+  }
+  {tampilIkon && !statusVariant && <slot name="ikon" />}
+  <span class="mv-badge__teks"><slot /></span>
+</Tag>
+
+<style>
+  .mv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding-block: var(--space-1);
+    padding-inline: var(--space-2);
+    border: var(--border-width) solid transparent;
+    border-radius: var(--radius-chip); /* 2px */
+    font-family: var(--font-display);
+    font-size: var(--fs-eyebrow);
+    line-height: var(--lh-eyebrow);
+    letter-spacing: var(--ls-eyebrow);
+    font-weight: var(--fw-eyebrow);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .mv-badge__ikon {
+    flex: 0 0 auto;
+  }
+
+  .mv-badge--netral {
+    background-color: var(--color-surface);
+    color: var(--color-text-2);
+    border-color: var(--color-border);
+  }
+
+  .mv-badge--aksen {
+    background-color: var(--color-accent-soft);
+    color: var(--color-accent-hover);
+    border-color: var(--color-accent);
+  }
+
+  .mv-badge--sukses {
+    background-color: transparent;
+    color: var(--color-success);
+    border-color: var(--color-success);
+  }
+
+  .mv-badge--error {
+    background-color: transparent;
+    color: var(--color-error);
+    border-color: var(--color-error);
+  }
+
+  .mv-badge--garis {
+    background-color: transparent;
+    color: var(--color-text);
+    border-color: var(--color-border-strong);
+  }
+</style>

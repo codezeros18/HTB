@@ -1,0 +1,369 @@
+---
+/**
+ * Gallery — 3 skenario dari SATU flag data (`site.galeri.foto.length`).
+ * BLUEPRINT §8 Section 7.
+ *
+ *   ≥12 foto → A: grid 3 kolom, klik → lightbox (Modal S02). Caption
+ *              `[produk] · [bahan] · [sablon]`.
+ *   5–11    → B: editorial 2 kolom asimetris, lebar 1080px, padding
+ *              vertikal 128px (`spacing="roomy"`). TANPA lightbox.
+ *   <5      → C: section TIDAK dirender sama sekali. Anchor `#galeri`
+ *              dialihkan ke `#produk` (skrip is:inline kecil di bawah).
+ *
+ * KONDISI SEKARANG: `foto: []` → skenario C aktif (blocker B2, nol foto
+ * hasil produksi nyata). A & B ditulis lengkap agar siap; keduanya
+ * tidak merender apa pun sekarang, jadi nol markup/nol JS ikut terkirim.
+ *
+ * AC T07.6: lightbox (Modal + skrip panah) HANYA ada di cabang skenario
+ * A. Skrip navigasi panah ditulis `is:inline` supaya benar-benar absen
+ * dari output di skenario B & C — bukan sekadar tak dieksekusi.
+ */
+import { site } from '../../content/site';
+import Container from '../layout/Container.astro';
+import SectionHeading from '../layout/SectionHeading.astro';
+import Modal from '../ui/Modal.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id }: Props = Astro.props;
+
+const { galeri } = site;
+const n = galeri.foto.length;
+const skenario: 'A' | 'B' | 'C' = n >= 12 ? 'A' : n >= 5 ? 'B' : 'C';
+
+const caption = (f: (typeof galeri.foto)[number]): string => {
+  const inti = [f.produk, f.bahan, f.sablon].filter(Boolean).join(' · ');
+  // Nama klien HANYA kalau data menyertakannya (diisi hanya untuk klien
+  // izinTayang: true — AC T07.7). Selain itu caption tanpa nama klien.
+  return f.klienNama ? `${inti} · ${f.klienNama}` : inti;
+};
+
+const LIGHTBOX_ID = 'galeri-lightbox';
+
+/* Skrip navigasi lightbox skenario A — is:inline via set:html supaya
+   BENAR-BENAR absen dari output skenario B & C (AC T07.6). Modal S02
+   sudah menangani buka/tutup/Esc/focus-trap/kembalikan-fokus; skrip ini
+   hanya: pilih slide yang tampil + tombol/panah prev-next. */
+const LIGHTBOX_JS = `(function(){
+  var box=document.querySelector('[data-galeri-lightbox]');
+  if(!box)return;
+  var slides=box.querySelectorAll('[data-galeri-slide]');
+  var dialog=box.closest('dialog');
+  var cur=0;
+  function show(i){
+    if(i<0)i=slides.length-1;
+    if(i>=slides.length)i=0;
+    cur=i;
+    for(var k=0;k<slides.length;k++)slides[k].hidden=(k!==i);
+  }
+  document.addEventListener('click',function(e){
+    var t=e.target.closest&&e.target.closest('[data-galeri-index]');
+    if(t)show(parseInt(t.getAttribute('data-galeri-index'),10)||0);
+  });
+  box.querySelector('[data-galeri-prev]').addEventListener('click',function(){show(cur-1);});
+  box.querySelector('[data-galeri-next]').addEventListener('click',function(){show(cur+1);});
+  if(dialog)dialog.addEventListener('keydown',function(e){
+    if(e.key==='ArrowLeft')show(cur-1);
+    else if(e.key==='ArrowRight')show(cur+1);
+  });
+})();`;
+---
+
+{
+  /* Skenario C: section tidak dirender. Skrip is:inline mini mengalihkan
+     anchor `#galeri` mana pun ke `#produk` — nol link mati, dan karena
+     is:inline + di dalam cabang ini, ia ABSEN total dari output skenario
+     A & B (bukan sekadar tak jalan). */
+  skenario === 'C' && (
+    <script
+      is:inline
+      set:html={
+        "(function(){document.querySelectorAll('a[href=\"#galeri\"]').forEach(function(a){a.setAttribute('href','#produk');});})();"
+      }
+    />
+  )
+}
+
+{
+  skenario === 'A' && (
+    <Container as="section" spacing="section" id={id}>
+      <SectionHeading nomor="07" judul={galeri.judul} subjudul={galeri.subjudul} />
+
+      <ul class="mv-galeri__grid" role="list">
+        {galeri.foto.map((f, i) => (
+          <li class="mv-galeri__item">
+            <button
+              type="button"
+              class="mv-galeri__trigger"
+              data-mv-modal-open={LIGHTBOX_ID}
+              data-galeri-index={i}
+              aria-label={`${galeri.labelPerbesar}: ${caption(f)}`}
+            >
+              <picture>
+                <source srcset={`${f.src}.avif`} type="image/avif" />
+                <source srcset={`${f.src}.webp`} type="image/webp" />
+                <img
+                  src={`${f.src}.webp`}
+                  alt={f.alt}
+                  width={f.width}
+                  height={f.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <span class="mv-galeri__caption t-body-s">{caption(f)}</span>
+            </button>
+          </li>
+        ))}
+      </ul>
+
+      <Modal id={LIGHTBOX_ID} judul={galeri.judul} judulTampil={false} lebar="lebar">
+        <div class="mv-galeri__lightbox" data-galeri-lightbox>
+          <div class="mv-galeri__stage">
+            {galeri.foto.map((f, i) => (
+              <figure class="mv-galeri__slide" data-galeri-slide={i} hidden={i !== 0}>
+                <picture>
+                  <source srcset={`${f.src}.avif`} type="image/avif" />
+                  <source srcset={`${f.src}.webp`} type="image/webp" />
+                  <img
+                    src={`${f.src}.webp`}
+                    alt={f.alt}
+                    width={f.width}
+                    height={f.height}
+                    decoding="async"
+                  />
+                </picture>
+                <figcaption class="t-body-s">{caption(f)}</figcaption>
+              </figure>
+            ))}
+          </div>
+
+          <div class="mv-galeri__nav">
+            <button type="button" class="mv-galeri__prev t-label" data-galeri-prev>
+              {galeri.labelSebelumnya}
+            </button>
+            <button type="button" class="mv-galeri__next t-label" data-galeri-next>
+              {galeri.labelBerikutnya}
+            </button>
+          </div>
+        </div>
+      </Modal>
+
+      <script is:inline set:html={LIGHTBOX_JS} />
+    </Container>
+  )
+}
+
+{
+  skenario === 'B' && (
+    <Container as="section" spacing="roomy" width="editorial" id={id}>
+      <SectionHeading nomor="07" judul={galeri.judul} subjudul={galeri.subjudul} />
+
+      <div class="mv-galeri__editorial">
+        <figure class="mv-galeri__besar">
+          <picture>
+            <source srcset={`${galeri.foto[0]?.src}.avif`} type="image/avif" />
+            <source srcset={`${galeri.foto[0]?.src}.webp`} type="image/webp" />
+            <img
+              src={`${galeri.foto[0]?.src}.webp`}
+              alt={galeri.foto[0]?.alt}
+              width={galeri.foto[0]?.width}
+              height={galeri.foto[0]?.height}
+              loading="lazy"
+              decoding="async"
+            />
+          </picture>
+          <figcaption class="t-body-s">{galeri.foto[0] && caption(galeri.foto[0])}</figcaption>
+        </figure>
+
+        <div class="mv-galeri__kanan">
+          {galeri.foto.slice(1, 3).map((f) => (
+            <figure class="mv-galeri__kecil">
+              <picture>
+                <source srcset={`${f.src}.avif`} type="image/avif" />
+                <source srcset={`${f.src}.webp`} type="image/webp" />
+                <img
+                  src={`${f.src}.webp`}
+                  alt={f.alt}
+                  width={f.width}
+                  height={f.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
+              <figcaption class="t-body-s">{caption(f)}</figcaption>
+            </figure>
+          ))}
+
+          {galeri.blokTeksB && <p class="mv-galeri__teks t-body-l">{galeri.blokTeksB}</p>}
+        </div>
+      </div>
+    </Container>
+  )
+}
+
+<style>
+  /* ---------- Skenario A ---------- */
+  .mv-galeri__grid {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+  }
+
+  .mv-galeri__item {
+    display: flex;
+  }
+
+  .mv-galeri__trigger {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-text-2);
+    cursor: pointer;
+    text-align: start;
+    inline-size: 100%;
+  }
+
+  .mv-galeri__trigger:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-galeri__trigger img {
+    inline-size: 100%;
+    block-size: auto;
+    display: block;
+    border-radius: var(--radius-control);
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  .mv-galeri__caption {
+    color: var(--color-text-2);
+  }
+
+  /* ---------- Lightbox ---------- */
+  .mv-galeri__lightbox {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .mv-galeri__slide {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .mv-galeri__slide[hidden] {
+    display: none;
+  }
+
+  .mv-galeri__slide img {
+    inline-size: 100%;
+    block-size: auto;
+    display: block;
+    border-radius: var(--radius-control);
+  }
+
+  .mv-galeri__slide figcaption {
+    color: var(--color-text-2);
+  }
+
+  .mv-galeri__nav {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .mv-galeri__prev,
+  .mv-galeri__next {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    min-block-size: var(--btn-h);
+    padding-inline: var(--btn-pad-x);
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    background-color: var(--color-bg);
+    color: var(--color-text);
+  }
+
+  .mv-galeri__prev:hover,
+  .mv-galeri__next:hover {
+    background-color: var(--color-surface);
+  }
+
+  .mv-galeri__prev:focus-visible,
+  .mv-galeri__next:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* ---------- Skenario B ---------- */
+  .mv-galeri__editorial {
+    display: grid;
+    grid-template-columns: 4fr 3fr;
+    gap: var(--space-6);
+    align-items: start;
+  }
+
+  .mv-galeri__besar,
+  .mv-galeri__kecil {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .mv-galeri__besar img,
+  .mv-galeri__kecil img {
+    inline-size: 100%;
+    block-size: auto;
+    display: block;
+    border-radius: var(--radius-control);
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  .mv-galeri__besar figcaption,
+  .mv-galeri__kecil figcaption {
+    color: var(--color-text-2);
+  }
+
+  .mv-galeri__kanan {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  .mv-galeri__teks {
+    color: var(--color-text-2);
+    margin: 0;
+  }
+
+  @media (max-width: 767.98px) {
+    .mv-galeri__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .mv-galeri__editorial {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 479.98px) {
+    .mv-galeri__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

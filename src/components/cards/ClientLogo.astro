@@ -1,0 +1,100 @@
+---
+/**
+ * ClientLogo — satu sel portofolio dalam grid "PERNAH DIPERCAYA OLEH" (S07).
+ *
+ * DUA mode dalam wadah berukuran IDENTIK (BLUEPRINT §5.3 / §8 Section 6):
+ *   - `izinTayang: true`  + `logo` → <img> dinormalisasi (contain, max-h 44px)
+ *   - selain itu (kondisi SEKARANG: semua entri false) → NAMA TEKS Archivo 600
+ *
+ * AC T07.3: selama semua `izinTayang: false`, komponen ini merender NOL
+ * `<img>`. Kotak tetap sama besar untuk kedua mode → grid seragam.
+ *
+ * AC T07.2: tinggi sel dikunci `--logo-box-h` (80px) untuk SEMUA sel di
+ * SEMUA viewport — keseragaman ±0px secara konstruksi. Lebar mengecil
+ * proporsional di mobile (grid `1fr`), tinggi tidak.
+ *
+ * Interaksi: TIDAK ADA. Bukan tautan, nol hover, nol filter grayscale
+ * (BLUEPRINT §8 Section 6 — grayscale menghapus identitas warna & mati
+ * di mobile). `alt` = nama organisasi, bukan "logo klien N" (AC T07.4).
+ */
+interface Props {
+  nama: string;
+  logo: string | null;
+  izinTayang: boolean;
+  /** 5 logo hero dimuat eager; sisanya lazy (BLUEPRINT §8 Section 6). */
+  hero?: boolean;
+  class?: string;
+}
+
+const { nama, logo, izinTayang, hero = false, class: className }: Props = Astro.props;
+
+const tampilLogo = izinTayang && logo !== null;
+---
+
+<li class:list={['mv-client', className]}>
+  <div class="mv-client__box">
+    {
+      tampilLogo ? (
+        <img
+          class="mv-client__img"
+          src={logo}
+          alt={nama}
+          width="128"
+          height="44"
+          loading={hero ? 'eager' : 'lazy'}
+          decoding="async"
+        />
+      ) : (
+        <span class="mv-client__nama">{nama}</span>
+      )
+    }
+  </div>
+</li>
+
+<style>
+  .mv-client {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+  }
+
+  .mv-client__box {
+    inline-size: 100%;
+    max-inline-size: var(--logo-box-w); /* 160px */
+    block-size: var(--logo-box-h); /* 80px — dikunci di semua viewport */
+    padding: var(--space-4); /* 16px */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Latar netral untuk SEMUA sel (mode teks & mode logo identik).
+       Guardrail 4 → token, bukan hex. Arah A: `--color-bg` = putih, sesuai
+       BLUEPRINT §8 Section 6 "kotak tetap putih". Bila Arah B (gelap)
+       diaktifkan, logo berlatar putih memang wajib dipotong dulu
+       (BLUEPRINT §6.4) — ditangani di titik itu, bukan di sini. */
+    background-color: var(--color-bg);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-control);
+  }
+
+  .mv-client__img {
+    max-inline-size: 100%;
+    max-block-size: 44px; /* BLUEPRINT §8 Section 6 */
+    inline-size: auto;
+    block-size: auto;
+    object-fit: contain;
+    /* Nol filter — grayscale dilarang (menghapus identitas warna). */
+  }
+
+  .mv-client__nama {
+    font-family: var(--font-display);
+    font-weight: 600; /* Archivo 600 (BLUEPRINT §5.3) */
+    font-size: 12px;
+    line-height: 1.2;
+    text-align: center;
+    color: var(--color-text);
+    /* Nama panjang ("Politeknik Penerbangan Indonesia (PPI) Curug") tetap
+       terbaca penuh — dipotong baris, bukan ellipsis. */
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+</style>

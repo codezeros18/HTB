@@ -1,0 +1,380 @@
+---
+/**
+ * Navbar — 5 item + CTA, sticky, 76px → 60px setelah scroll 120px.
+ *
+ * ── KENAPA CLS = 0 ─────────────────────────────────────────────
+ * Perubahan tinggi navbar adalah sumber CLS paling umum. Di sini
+ * TIDAK ADA satu pun properti layout yang berubah:
+ *
+ *   .mv-nav          fixed, block-size 76px — KONSTAN selamanya
+ *   .mv-nav__surface absolute 76px — hanya `transform: translateY(-16px)`
+ *   .mv-nav__inner   absolute 100% — hanya `transform: translateY(8px)`
+ *   .mv-nav-spacer   76px di alur — KONSTAN, tidak pernah dianimasikan
+ *
+ * Efek visual "menyusut": permukaan bergeser naik 16px sehingga tepi
+ * bawahnya (beserta border) mendarat di y=60. Isi digeser turun 8px
+ * agar tetap di tengah pita 60px. Keduanya murni `transform`, yang
+ * dikecualikan dari perhitungan layout shift — dan sekaligus mematuhi
+ * §6.7 "hanya transform dan opacity".
+ *
+ * Pita 60–76px dibiarkan transparan dan `pointer-events: none`,
+ * sehingga konten yang lewat di bawahnya terlihat & tetap bisa diklik.
+ *
+ * ── NOL scroll listener ────────────────────────────────────────
+ * State "sudah discroll" dideteksi lewat sentinel 120px + Intersection-
+ * Observer bersama dari S02, bukan `addEventListener('scroll')`.
+ * Section aktif memakai observer yang sama dengan threshold 0.35.
+ *
+ * Props: —  (isi navigasi berasal dari `nav-items.ts`)
+ */
+import { site } from '../../content/site';
+import { navItems } from './nav-items';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+---
+
+<header class="mv-nav" data-mv-nav>
+  <div class="mv-nav__surface">
+    <div class="mv-nav__inner">
+      <a class="mv-nav__logo" href="#top" aria-label={`${site.brand} — kembali ke atas`}>
+        {site.brand}
+      </a>
+
+      <nav class="mv-nav__links" aria-label="Navigasi utama">
+        <ul class="mv-nav__list">
+          {
+            navItems.map((item) => (
+              <li>
+                <a class="mv-nav__link" href={item.href} data-nav-link={item.sectionId}>
+                  <span class="mv-nav__linklabel">{item.label}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <div class="mv-nav__aksi">
+        {
+          /* Urutan DOM = urutan Tab: logo → 5 link → CTA → hamburger.
+            Di mobile, CTA tetap terlihat; yang disembunyikan adalah
+            daftar link (BLUEPRINT §8: korbankan menu, bukan CTA). */
+        }
+        <WhatsAppButton konteks="navbar" label="Hubungi Kami" class="mv-nav__cta" ikon={false} />
+
+        <button
+          type="button"
+          class="mv-nav__hamburger"
+          data-mv-menu-open
+          aria-expanded="false"
+          aria-controls="menu-mobile"
+        >
+          <span class="sr-only">Buka menu navigasi</span>
+          <span class="mv-nav__bars" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+
+{
+  /* Penahan tinggi di alur dokumen. Nilainya tidak pernah berubah,
+    jadi konten di bawahnya tidak pernah bergeser. Sentinel 120px
+    menumpang di sini untuk mendeteksi "sudah discroll" tanpa
+    scroll listener. */
+}
+<div class="mv-nav-spacer" aria-hidden="true">
+  <span class="mv-nav__sentinel" data-mv-nav-sentinel></span>
+</div>
+
+<style>
+  .mv-nav,
+  .mv-nav-spacer {
+    --nav-h: 76px;
+    --nav-shrink: 16px;
+  }
+
+  /* ---------- kerangka ---------- */
+  .mv-nav {
+    position: fixed;
+    inset-block-start: 0;
+    inset-inline: 0;
+    z-index: 50;
+    block-size: var(--nav-h); /* KONSTAN — jangan pernah dianimasikan */
+    /* Pita bawah yang tidak tertutup permukaan tetap bisa diklik tembus. */
+    pointer-events: none;
+  }
+
+  .mv-nav-spacer {
+    position: relative;
+    block-size: var(--nav-h); /* KONSTAN */
+  }
+
+  /* Sentinel setinggi 120px: selama sebagian masih terlihat, halaman
+     dianggap "belum discroll". Menggantikan scroll listener. */
+  .mv-nav__sentinel {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: 1px;
+    block-size: 120px;
+    pointer-events: none;
+  }
+
+  /* ---------- permukaan (latar + border) ---------- */
+  .mv-nav__surface {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: var(--nav-h);
+    overflow: hidden;
+    pointer-events: auto;
+
+    background-color: var(--color-bg);
+    border-block-end: var(--border-width) solid var(--color-border);
+
+    transition: transform var(--dur-base) var(--ease);
+  }
+
+  .mv-nav[data-scrolled] .mv-nav__surface {
+    /* Tepi bawah + border mendarat di y=60. Murni transform. */
+    transform: translateY(calc(-1 * var(--nav-shrink)));
+  }
+
+  /* ---------- isi ---------- */
+  .mv-nav__inner {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: var(--nav-h);
+
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+
+    max-inline-size: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--edge-pad);
+
+    transition: transform var(--dur-base) var(--ease);
+  }
+
+  .mv-nav[data-scrolled] .mv-nav__inner {
+    /* Setengah dari penyusutan — mengembalikan isi ke tengah pita 60px. */
+    transform: translateY(calc(var(--nav-shrink) / 2));
+  }
+
+  /* ---------- logo ---------- */
+  .mv-nav__logo {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+    font-family: var(--font-display);
+    font-weight: var(--fw-display);
+    font-size: 22px;
+    letter-spacing: var(--ls-h1);
+    color: var(--color-text);
+    text-decoration: none;
+  }
+
+  .mv-nav__logo:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* ---------- link ---------- */
+  .mv-nav__links {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+  }
+
+  .mv-nav__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .mv-nav__link {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+    color: var(--color-text-2);
+    text-decoration: none;
+    font-size: var(--fs-body-m);
+    font-weight: var(--fw-body-medium);
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .mv-nav__linklabel {
+    position: relative;
+    display: inline-block;
+    padding-block: var(--space-1);
+  }
+
+  /* Underline 2px aksen — dianimasikan dengan scaleX (transform saja). */
+  .mv-nav__linklabel::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 2px;
+    background-color: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  .mv-nav__link:hover {
+    color: var(--color-text);
+  }
+
+  .mv-nav__link:hover .mv-nav__linklabel::after,
+  .mv-nav__link[aria-current='true'] .mv-nav__linklabel::after {
+    transform: scaleX(1);
+  }
+
+  /* Section aktif: warna + weight + underline — bukan warna saja (§7.8). */
+  .mv-nav__link[aria-current='true'] {
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .mv-nav__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* ---------- aksi kanan ---------- */
+  .mv-nav__aksi {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-inline-start: auto;
+  }
+
+  .mv-nav__hamburger {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none; /* hanya tampil di bawah 1024px */
+    align-items: center;
+    justify-content: center;
+    inline-size: var(--tap-min);
+    block-size: var(--tap-min);
+    background: transparent;
+    border: var(--border-width) solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .mv-nav__hamburger:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* Tiga garis dari satu elemen + dua pseudo — nol <svg>, nol request. */
+  .mv-nav__bars,
+  .mv-nav__bars::before,
+  .mv-nav__bars::after {
+    display: block;
+    inline-size: 18px;
+    block-size: 2px;
+    background-color: currentColor;
+  }
+
+  .mv-nav__bars {
+    position: relative;
+  }
+
+  .mv-nav__bars::before,
+  .mv-nav__bars::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+  }
+
+  .mv-nav__bars::before {
+    inset-block-start: -6px;
+  }
+
+  .mv-nav__bars::after {
+    inset-block-start: 6px;
+  }
+
+  /* ---------- di bawah 1024px ---------- */
+  @media (max-width: 1023.98px) {
+    .mv-nav__links {
+      display: none;
+    }
+
+    .mv-nav__hamburger {
+      display: inline-flex;
+    }
+  }
+
+  /* Di 360px label CTA dipendekkan lewat CSS agar tetap muat
+     bersama logo + hamburger tanpa membuang tombolnya. */
+  @media (max-width: 400px) {
+    .mv-nav__inner {
+      gap: var(--space-3);
+    }
+  }
+</style>
+
+<script>
+  import { observeElement } from '../../scripts/observer';
+  import { navItems } from './nav-items';
+
+  const nav = document.querySelector<HTMLElement>('[data-mv-nav]');
+  const sentinel = document.querySelector<HTMLElement>('[data-mv-nav-sentinel]');
+
+  /* --- state "sudah discroll": sentinel 120px, bukan scroll listener --- */
+  if (nav && sentinel) {
+    observeElement(
+      sentinel,
+      (entry) => {
+        if (entry.isIntersecting) nav.removeAttribute('data-scrolled');
+        else nav.setAttribute('data-scrolled', '');
+      },
+      { threshold: 0, rootMargin: '0px', once: false }
+    );
+  }
+
+  /* --- underline section aktif (threshold 0.35, observer bersama S02) --- */
+  const links = new Map<string, HTMLAnchorElement>();
+  document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
+    const id = a.dataset.navLink;
+    if (id) links.set(id, a);
+  });
+
+  const terlihat = new Set<string>();
+  const urutan = navItems.map((i) => i.sectionId);
+
+  const perbarui = (): void => {
+    // Bila beberapa section terlihat sekaligus, yang teratas di dokumen menang.
+    const aktif = urutan.find((id) => terlihat.has(id)) ?? null;
+    for (const [id, a] of links) {
+      if (id === aktif) a.setAttribute('aria-current', 'true');
+      else a.removeAttribute('aria-current');
+    }
+  };
+
+  for (const id of urutan) {
+    const section = document.getElementById(id);
+    if (!section) continue; // section belum dibangun (stub S04–S08)
+    observeElement(
+      section,
+      (entry) => {
+        if (entry.isIntersecting) terlihat.add(id);
+        else terlihat.delete(id);
+        perbarui();
+      },
+      { threshold: 0.35, rootMargin: '0px', once: false }
+    );
+  }
+</script>
