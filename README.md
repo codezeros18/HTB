@@ -21,14 +21,16 @@ Dibangun dengan **Astro 7**, **TypeScript**, dan **Tailwind CSS 4**. Situs ini d
 │   ├── content/             ← SEMUA ISI WEBSITE ADA DI SINI (lihat bagian "Mengubah Konten")
 │   ├── layouts/             BaseLayout.astro
 │   ├── pages/               index.astro, 404.astro
-│   ├── scripts/             observer.ts, tabs.ts, process-stepper.ts
+│   ├── scripts/             observer.ts, tabs.ts, process-stepper.ts, map-facade.ts, contact-form.ts
 │   └── styles/              tokens.css (warna & ukuran), global.css
 ├── public/
 │   ├── images/              produk, bahan, proses, lokasi, klien, hero
 │   ├── fonts/               Archivo & Inter (WOFF2)
 │   ├── docs/                company-profile-motive.pdf
 │   └── favicon/, og-image.jpg, robots.txt
-├── scripts/check-budget.mjs Pemeriksa berat halaman
+├── scripts/
+│   ├── check-budget.mjs     Pemeriksa berat halaman (dipakai `npm run check:budget`)
+│   └── verify-s*.mjs        Uji acceptance per sprint di peramban nyata (butuh Chrome)
 ├── astro.config.mjs
 └── package.json
 ```
@@ -71,6 +73,75 @@ Buka `http://localhost:4321` di peramban. Setiap perubahan file akan langsung te
 **4. Menghentikan server**
 
 Tekan `Ctrl + C` di terminal.
+
+---
+
+## Kerja Paralel dari Dua Mesin (Komputer & Laptop)
+
+Repo ini bisa dikerjakan bergantian dari beberapa mesin. Yang wajib dipahami lebih dulu: **tidak semua file ikut Git.**
+
+### 1. Yang tersinkron lewat Git — cukup `git pull` / `git push`
+
+Seluruh `src/` (komponen + konten di `src/content/` + style + script), `public/` (font, gambar hasil optimasi, dokumen publik), `scripts/` (`check-budget.mjs`, `verify-s*.mjs`), dan seluruh konfigurasi (`astro.config.mjs`, `package.json`, `package-lock.json`, `eslint.config.js`, `.prettierrc.json`, `tsconfig.json`) plus `README.md`.
+
+### 2. Yang TIDAK ikut Git — harus disalin manual antar mesin
+
+Dokumen kerja internal ada di `.gitignore` (berisi strategi, daftar data yang belum dijawab klien, catatan anomali — bukan untuk konsumsi klien):
+
+| File | Isi | Kalau hilang |
+|---|---|---|
+| `PROGRESS.md` | Log tiap task: yang dikerjakan, keputusan teknis, error & fix | **Seluruh memori teknis proyek hilang — tidak ada salinan lain** |
+| `TASKS.md` | Rencana sprint + status centang | Kehilangan jejak apa yang sudah/belum selesai |
+| `BLUEPRINT.md` | Spesifikasi penuh + token desain | Kehilangan alasan di balik tiap keputusan |
+| `PROMPTS.md` | Prompt siap-pakai per sprint | — |
+| `CLAUDE.md` | Aturan proyek (dibaca otomatis tiap sesi Claude Code) | Sesi berikutnya kehilangan guardrail |
+
+**Cara menyinkronkannya — pilih salah satu:**
+
+- **Folder bersama (paling praktis):** taruh kelima file di Google Drive / OneDrive / Dropbox yang ter-sync di kedua mesin, lalu salin ke root repo sebelum mulai kerja dan salin balik setelah selesai.
+- **Repo privat terpisah:** simpan kelima file di repo Git privat kedua, di-`pull`/`push` terpisah dari repo utama.
+- **Salin manual (rawan lupa, hanya darurat):** kirim `PROGRESS.md` + `TASKS.md` terbaru ke diri sendiri sebelum pindah mesin.
+
+Aturan mainnya: **selesai kerja → perbarui `PROGRESS.md` → sinkronkan kelima file → baru pindah mesin.**
+
+### 3. Yang harus dipasang / dibuat ulang di TIAP mesin (tidak ikut Git, tapi bisa dibuat ulang)
+
+| Item | Cara | Catatan |
+|---|---|---|
+| Node.js | pasang manual di OS | **Samakan versi mayor di kedua mesin** — Node 20 LTS atau 22 LTS. Beda versi bisa membuat `package-lock.json` berubah bolak-balik |
+| Git | pasang manual di OS | versi terbaru apa pun |
+| `node_modules/` | `npm install` | Jalankan ulang **setiap habis `git pull` yang mengubah `package-lock.json`** |
+| `dist/`, `.astro/` | otomatis saat `npm run dev` / `npm run build` | Jangan di-commit; aman dihapus kapan saja |
+| Google Chrome | pasang manual | **Hanya** dibutuhkan oleh `scripts/verify-s*.mjs` (uji di peramban nyata). `dev` / `build` / `lint` / `typecheck` / `check:budget` tidak butuh Chrome. Skrip verify mencari Chrome di `C:/Program Files/Google/Chrome/Application/chrome.exe` — sesuaikan konstanta `CHROME` di dalam skrip bila lokasinya beda |
+
+**Tidak ada `.env` atau kunci rahasia saat ini** — `npm install` lalu `npm run dev` sudah cukup untuk menjalankan situs sepenuhnya. (Bila nanti kunci Web3Forms disimpan sebagai variabel lingkungan, file `.env` dibuat manual di tiap mesin dan tidak ikut Git.)
+
+### 4. Checklist mesin baru (pertama kali)
+
+1. Pasang **Node.js 20+** dan **Git** (plus **Google Chrome** bila akan menjalankan `verify-s*.mjs`)
+2. `git clone <url-repo>` lalu `cd` ke folder repo
+3. `npm install`
+4. Salin `PROGRESS.md`, `TASKS.md`, `BLUEPRINT.md`, `PROMPTS.md`, `CLAUDE.md` dari folder bersama ke root repo
+5. `npm run dev` → buka `http://localhost:4321`. Kalau halaman muncul, setup beres
+6. (opsional) `npm run build && npm run check:budget` untuk memastikan toolchain lengkap
+
+### 5. Rutinitas tiap kali berpindah mesin
+
+**Mulai sesi:**
+
+```bash
+git pull                 # tarik perubahan kode dari mesin sebelumnya
+npm install              # hanya bila package-lock.json ikut berubah
+# salin PROGRESS.md + TASKS.md (+ file internal lain) dari folder bersama
+```
+
+**Selesai sesi:**
+
+```bash
+npm run lint && npm run typecheck && npm run build && npm run check:budget
+git add -A && git commit -m "<ringkas perubahan>" && git push
+# perbarui PROGRESS.md, lalu salin kelima file internal balik ke folder bersama
+```
 
 ---
 
