@@ -21,7 +21,13 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
 <dialog id="menu-mobile" class="mv-menu" aria-label="Menu navigasi" data-mv-menu>
   <div class="mv-menu__panel">
     <div class="mv-menu__head">
-      <span class="mv-menu__merek">{site.brand}</span>
+      <img
+        class="mv-menu__merek"
+        src="/images/logo/LOGO%20MOTIVE%20NEW%20PUTIH.png"
+        alt={site.brand}
+        width="1721"
+        height="223"
+      />
       <button type="button" class="mv-menu__tutup" data-mv-menu-close>
         <span class="sr-only">Tutup menu</span>
         <svg viewBox="0 0 16 16" width="18" height="18" aria-hidden="true" focusable="false">
@@ -89,10 +95,12 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
   }
 
   .mv-menu__merek {
-    font-family: var(--font-display);
-    font-weight: var(--fw-display);
-    font-size: 22px;
-    letter-spacing: var(--ls-h1);
+    display: block;
+    inline-size: auto;
+    block-size: auto;
+    max-block-size: 28px;
+    max-inline-size: 200px;
+    object-fit: contain;
   }
 
   .mv-menu__tutup {

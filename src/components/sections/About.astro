@@ -1,20 +1,18 @@
 ---
 /**
- * About — 2 paragraf + 4 ValueCard bernomor + baris fakta perusahaan.
+ * About — REDESIGN 2026-08-30: section SETENGAH LAYAR (± min-height 60vh),
+ * konten dipadatkan. Tujuan: menjelaskan "apa itu MOTIVE" dalam sekali lihat.
  *
- * Guardrail 6 (baris fakta): `site.about.baris` adalah `(string|null)[]`.
- * Elemen `null` disembunyikan SENDIRI-SENDIRI; kalau setelah difilter
- * hasilnya kosong, seluruh blok baris fakta tidak dirender — nol label
- * kosong, nol pemisah menggantung, nol tanda hubung "—" (AC T04.6).
+ * Layout: 2 kolom desktop —
+ *   kiri  : eyebrow + H2 besar
+ *   kanan : 2 paragraf ringkas + 4 janji nilai sebagai baris chip + baris fakta
  *
- * Fade-in (T04.7): kelas `.mv-reveal`/`.mv-reveal-group` dari S02.
- * `revealOnScroll()` SUDAH dipanggil sekali di BaseLayout untuk seluruh
- * halaman — section ini tidak memanggilnya lagi (satu observer bersama).
+ * Semua konten dari `site.about` (guardrail 5). Elemen `null` di `baris`
+ * disembunyikan sendiri-sendiri; kalau semua null, blok fakta tidak dirender.
+ * Fade-in: `.mv-reveal` (S02).
  */
 import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
-import SectionHeading from '../layout/SectionHeading.astro';
-import ValueCard from '../cards/ValueCard.astro';
 
 interface Props {
   id?: string;
@@ -26,12 +24,26 @@ const { about } = site;
 const barisTerisi = about.baris.filter((b): b is string => b !== null);
 ---
 
-<Container as="section" spacing="section" id={id}>
-  <SectionHeading nomor="03" judul={about.judul} />
-
+<Container as="section" spacing="section" id={id} class="mv-about">
   <div class="mv-about__grid">
-    <div class="mv-about__teks mv-reveal">
-      {about.paragraf.map((p) => <p class="t-body-l">{p}</p>)}
+    <div class="mv-about__head mv-reveal">
+      <p class="t-eyebrow mv-about__eyebrow">Tentang Kami</p>
+      <h2 class="t-h1 mv-about__judul">{about.judul}</h2>
+    </div>
+
+    <div class="mv-about__body mv-reveal">
+      {about.paragraf.map((p) => <p class="t-body-l mv-about__p">{p}</p>)}
+
+      <ul class="mv-about__nilai">
+        {
+          about.janjiNilai.map((n) => (
+            <li class="mv-about__nilai-item">
+              <span class="mv-about__nilai-judul t-label">{n.judul}</span>
+              <span class="mv-about__nilai-desc t-body-s">{n.deskripsi}</span>
+            </li>
+          ))
+        }
+      </ul>
 
       {
         barisTerisi.length > 0 && (
@@ -43,77 +55,103 @@ const barisTerisi = about.baris.filter((b): b is string => b !== null);
         )
       }
     </div>
-
-    <div class="mv-about__kartu mv-reveal-group">
-      {
-        about.janjiNilai.map((n, i) => (
-          <ValueCard
-            class="mv-reveal"
-            nomor={String(i + 1).padStart(2, '0')}
-            judul={n.judul}
-            deskripsi={n.deskripsi}
-          />
-        ))
-      }
-    </div>
   </div>
 </Container>
 
 <style>
+  .mv-about {
+    /* SETENGAH LAYAR — konten dikunci pendek, dipusatkan vertikal. */
+    min-block-size: 60vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
   .mv-about__grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
     gap: var(--space-8);
     align-items: start;
   }
 
-  .mv-about__teks p + p {
-    margin-block-start: var(--space-4);
+  .mv-about__eyebrow {
+    color: var(--color-accent);
+    margin: 0 0 var(--space-3);
   }
 
-  .mv-about__teks p {
+  .mv-about__judul {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .mv-about__p {
     color: var(--color-text-2);
-    margin-block-start: 0;
+    margin: 0;
   }
 
-  /* Baris fakta: dipisah titik tengah, TANPA pemisah menggantung setelah
-     elemen terakhir (::after hanya pada :not(:last-child)). */
+  .mv-about__p + .mv-about__p {
+    margin-block-start: var(--space-3);
+  }
+
+  /* 4 janji nilai sebagai baris chip padat — bukan kartu besar. */
+  .mv-about__nilai {
+    list-style: none;
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .mv-about__nilai-item {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: var(--space-3) var(--space-4);
+    border-inline-start: 2px solid var(--color-accent);
+    background-color: var(--color-surface);
+  }
+
+  .mv-about__nilai-judul {
+    color: var(--color-text);
+  }
+
+  .mv-about__nilai-desc {
+    color: var(--color-text-2);
+  }
+
   .mv-about__fakta {
     display: flex;
     flex-wrap: wrap;
     list-style: none;
-    margin: var(--space-6) 0 0;
+    margin: var(--space-5) 0 0;
     padding: 0;
     gap: var(--space-2) var(--space-3);
   }
 
   .mv-about__fakta-item {
-    color: var(--color-text);
-    font-weight: 500;
+    color: var(--color-text-2);
   }
 
-  /* Pemisah HANYA di antara item (:not(:last-child)) — nol titik
-     menggantung setelah item terakhir. */
   .mv-about__fakta-item:not(:last-child)::after {
     content: '·';
     color: var(--color-border-strong);
     margin-inline-start: var(--space-3);
   }
 
-  .mv-about__kartu {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-  }
-
   @media (max-width: 1023.98px) {
     .mv-about__grid {
       grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+
+    .mv-about {
+      min-block-size: 0;
     }
   }
 
-  @media (max-width: 639.98px) {
-    .mv-about__kartu {
+  @media (max-width: 559.98px) {
+    .mv-about__nilai {
       grid-template-columns: 1fr;
     }
   }

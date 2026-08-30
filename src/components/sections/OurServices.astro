@@ -1,0 +1,475 @@
+---
+/**
+ * OurServices — REDESIGN 2026-08-30 (permintaan klien).
+ *
+ * Kartu layanan berjajar. Klik kartu → drill-down bertingkat di DALAM
+ * section ini (tanpa pindah halaman):
+ *   kartu layanan → kelompok → daftar item → detail
+ *   (foto kiri, deskripsi kanan, CTA WhatsApp). Tombol "Kembali" bertingkat.
+ *
+ * Layanan dengan HANYA SATU kelompok melompati tingkat kelompok — kartunya
+ * membuka daftar item langsung (`bukaKey`).
+ *
+ * Semua panel dirender di server dalam keadaan `hidden`; `services-nav.ts`
+ * yang menukar tampilan + mengelola tumpukan "back". Tanpa JS: seluruh
+ * panel ditumpuk terbuka (semua informasi & CTA tetap terjangkau).
+ *
+ * Data & foto: `src/content/layanan.ts` (memetakan folder OUR SERVICE).
+ */
+import { layanan } from '../../content/layanan';
+import Container from '../layout/Container.astro';
+import WhatsAppButton from '../ui/WhatsAppButton.astro';
+
+interface Props {
+  id?: string;
+}
+
+const { id }: Props = Astro.props;
+
+/** Layanan 1-kelompok dibuka langsung ke daftar itemnya. */
+const bukaKey = (l: (typeof layanan)[number]): string =>
+  l.sub.length === 1 && l.sub[0] ? `${l.slug}/${l.sub[0].slug}` : l.slug;
+
+/** Jumlah item total sebuah layanan — untuk label kartu. */
+const jumlahItem = (l: (typeof layanan)[number]): number =>
+  l.sub.reduce((n, s) => n + s.items.length, 0);
+---
+
+<Container as="section" spacing="section" id={id}>
+  <header class="svc__head">
+    <p class="t-eyebrow svc__eyebrow">Layanan Kami</p>
+    <h2 class="svc__title">Our Services</h2>
+  </header>
+
+  <div class="svc" data-svc>
+    {/* ---------- Tingkat 0: kartu layanan ---------- */}
+    <div class="svc__cards" data-svc-level="0">
+      {
+        layanan.map((l) => (
+          <button type="button" class="svc__card" data-svc-open={bukaKey(l)}>
+            <span class="svc__card-media">
+              <img
+                src={l.foto}
+                alt={l.nama}
+                width="1054"
+                height="1492"
+                loading="lazy"
+                decoding="async"
+              />
+            </span>
+            <span class="svc__card-body">
+              <span class="svc__card-nama t-h3">{l.nama}</span>
+              <span class="svc__card-ringkas t-body-s">{l.ringkas}</span>
+              <span class="svc__card-cue t-label" aria-hidden="true">
+                {jumlahItem(l)} produk &rarr;
+              </span>
+            </span>
+          </button>
+        ))
+      }
+    </div>
+
+    {/* ---------- Tingkat 1: kelompok (hanya untuk layanan >1 kelompok) ---------- */}
+    {
+      layanan
+        .filter((l) => l.sub.length > 1)
+        .map((l) => (
+          <div class="svc__panel" data-svc-panel={l.slug} hidden>
+            <div class="svc__crumbs">
+              <button type="button" class="svc__back t-label" data-svc-back>
+                &larr; Kembali
+              </button>
+              <span class="svc__crumb t-body-s">{l.nama}</span>
+            </div>
+            <div class="svc__grid">
+              {l.sub.map((s) => (
+                <button
+                  type="button"
+                  class="svc__tile svc__tile--item"
+                  data-svc-open={`${l.slug}/${s.slug}`}
+                >
+                  <span class="svc__tile-media">
+                    <img
+                      src={s.foto}
+                      alt={s.nama}
+                      width="1054"
+                      height="1492"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <span class="svc__tile-teks">
+                    <span class="svc__tile-nama t-h3">{s.nama}</span>
+                    <span class="svc__tile-meta t-body-s">{s.items.length} produk</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))
+    }
+
+    {/* ---------- Tingkat 2: daftar item per kelompok ---------- */}
+    {
+      layanan.flatMap((l) =>
+        l.sub.map((s) => (
+          <div class="svc__panel" data-svc-panel={`${l.slug}/${s.slug}`} hidden>
+            <div class="svc__crumbs">
+              <button type="button" class="svc__back t-label" data-svc-back>
+                &larr; Kembali
+              </button>
+              <span class="svc__crumb t-body-s">
+                {l.sub.length > 1 ? `${l.nama} · ${s.nama}` : l.nama}
+              </span>
+            </div>
+            <div class="svc__grid">
+              {s.items.map((it) => (
+                <button
+                  type="button"
+                  class="svc__tile svc__tile--item"
+                  data-svc-open={`${l.slug}/${s.slug}/${it.slug}`}
+                >
+                  <span class="svc__tile-media">
+                    <img
+                      src={it.foto}
+                      alt={it.nama}
+                      width={it.width}
+                      height={it.height}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </span>
+                  <span class="svc__tile-teks">
+                    <span class="svc__tile-nama t-h3">{it.nama}</span>
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))
+      )
+    }
+
+    {/* ---------- Tingkat 3: detail item (foto kiri, deskripsi kanan) ---------- */}
+    {
+      layanan.flatMap((l) =>
+        l.sub.flatMap((s) =>
+          s.items.map((it) => (
+            <div
+              class="svc__panel svc__panel--detail"
+              data-svc-panel={`${l.slug}/${s.slug}/${it.slug}`}
+              hidden
+            >
+              <div class="svc__crumbs">
+                <button type="button" class="svc__back t-label" data-svc-back>
+                  &larr; Kembali
+                </button>
+                <span class="svc__crumb t-body-s">
+                  {l.sub.length > 1
+                    ? `${l.nama} · ${s.nama} · ${it.nama}`
+                    : `${l.nama} · ${it.nama}`}
+                </span>
+              </div>
+              <div class="svc__detail">
+                <div class="svc__detail-media">
+                  <img
+                    src={it.foto}
+                    alt={it.nama}
+                    width={it.width}
+                    height={it.height}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div class="svc__detail-body">
+                  <p class="svc__detail-eyebrow t-eyebrow">{l.nama}</p>
+                  <h3 class="svc__detail-nama t-h1">{it.nama}</h3>
+                  <p class="svc__detail-desc t-body-l">{it.deskripsi}</p>
+                  <WhatsAppButton
+                    konteks="produk"
+                    produk={it.nama}
+                    label="Konsultasi via WhatsApp"
+                    size="lg"
+                  />
+                </div>
+              </div>
+            </div>
+          ))
+        )
+      )
+    }
+  </div>
+</Container>
+
+{
+  /* Tanpa JS: tumpuk semua panel terbuka (di `@layer base` supaya menang atas
+     preflight Tailwind `[hidden]{display:none!important}`). */
+}
+<noscript>
+  <style>
+    @layer base {
+      .svc__panel[hidden] {
+        display: block !important;
+        margin-block-start: var(--space-6);
+        border-block-start: var(--border-width) solid var(--color-border);
+        padding-block-start: var(--space-6);
+      }
+      .svc__back {
+        display: none !important;
+      }
+    }
+  </style>
+</noscript>
+
+<style>
+  .svc__head {
+    margin-block-end: var(--space-7);
+  }
+
+  .svc__eyebrow {
+    color: var(--color-accent);
+    margin: 0 0 var(--space-3);
+  }
+
+  .svc__title {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    font-size: clamp(2.75rem, 12vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  /* ---------- Tingkat 0: kartu layanan ---------- */
+  .svc__cards {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .svc__card {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    text-align: start;
+    padding: 0;
+    border: var(--border-width) solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      border-color var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
+  }
+
+  .svc__card:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+
+  .svc__card:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .svc__card-media {
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  .svc__card-media img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .svc__card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
+
+  .svc__card-nama {
+    color: var(--color-text);
+  }
+
+  .svc__card-ringkas {
+    color: var(--color-text-2);
+  }
+
+  .svc__card-cue {
+    color: var(--color-accent);
+    margin-block-start: var(--space-1);
+  }
+
+  /* ---------- panel tingkat 1–3 ---------- */
+  .svc__crumbs {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-block-end: var(--space-6);
+  }
+
+  .svc__back {
+    -webkit-appearance: none;
+    appearance: none;
+    cursor: pointer;
+    min-block-size: var(--tap-min);
+    padding-inline: var(--space-4);
+    border: var(--border-width) solid var(--color-border-strong);
+    background-color: transparent;
+    color: var(--color-text);
+    border-radius: var(--radius-control);
+  }
+
+  .svc__back:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+
+  .svc__back:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .svc__crumb {
+    color: var(--color-text-2);
+  }
+
+  .svc__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .svc__tile {
+    -webkit-appearance: none;
+    appearance: none;
+    display: flex;
+    flex-direction: column;
+    text-align: start;
+    padding: 0;
+    border: var(--border-width) solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--color-text);
+    cursor: pointer;
+    overflow: hidden;
+    transition:
+      border-color var(--dur-fast) var(--ease),
+      transform var(--dur-fast) var(--ease);
+  }
+
+  .svc__tile:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-2px);
+  }
+
+  .svc__tile:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .svc__tile-media {
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  .svc__tile-media img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .svc__tile-teks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    padding: var(--space-4);
+  }
+
+  .svc__tile-nama {
+    color: var(--color-text);
+  }
+
+  .svc__tile-meta {
+    color: var(--color-text-2);
+  }
+
+  /* ---------- tingkat 3: detail ---------- */
+  .svc__detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-7);
+    align-items: center;
+  }
+
+  .svc__detail-media {
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  .svc__detail-media img {
+    inline-size: 100%;
+    block-size: auto;
+    display: block;
+  }
+
+  .svc__detail-body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .svc__detail-eyebrow {
+    color: var(--color-accent);
+    margin: 0;
+  }
+
+  .svc__detail-nama {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .svc__detail-desc {
+    color: var(--color-text-2);
+    margin: 0;
+    max-inline-size: 52ch;
+  }
+
+  /* ---------- responsif ---------- */
+  @media (max-width: 1023.98px) {
+    .svc__cards,
+    .svc__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .svc__detail {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .svc__cards,
+    .svc__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
+
+<script>
+  import { initServicesNav } from '../../scripts/services-nav';
+  initServicesNav();
+</script>

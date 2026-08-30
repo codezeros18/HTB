@@ -346,7 +346,11 @@ const { kontak, pic, balasanBiasanya } = site;
 
   @media (max-width: 1023.98px) {
     .mv-kontak__grid {
-      grid-template-columns: 1fr;
+      /* minmax(0, 1fr), BUKAN 1fr: `1fr` = `minmax(auto, 1fr)`, dan batas
+         bawah `auto` = min-content. Isi kartu (tombol WA lg + alamat) punya
+         min-content ±345px sehingga track melar melewati lebar container
+         328px di 360px → halaman meluber 1px. `0` melepas batas itu. */
+      grid-template-columns: minmax(0, 1fr);
     }
   }
 

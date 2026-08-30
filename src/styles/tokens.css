@@ -17,27 +17,29 @@
    BLUEPRINT.md §6.3. Semua rasio kontras sudah dihitung.
    Jangan mengembalikan #FF0000 — gagal WCAG AA (4.00:1). */
 :root {
-  --color-bg: #ffffff;
-  --color-surface: #f4f4f4;
-  --color-surface-alt: #ebebeb;
-  --color-text: #0f0f0f;
-  --color-text-2: #595959;
-  --color-border: #dcdcdc;
-  --color-border-strong: #767676;
-  --color-accent: #d6001c;
-  --color-accent-hover: #a80016;
-  --color-accent-soft: #fff1f2;
-  /* Jembatan: teks di atas tombol aksen. Arah A = putih (tak ada di
-     tabel §6.3 karena trivial); Arah B mendefinisikan #14191A. */
-  --color-accent-ink: #ffffff;
-  --color-focus: #0057d9;
-  --color-success: #0f7b3e;
-  --color-error: #b3261e;
+  /* REDESIGN (2026-08-30) — HITAM (hangat) + EMAS. Kontras dimaksimalkan
+     tanpa jatuh ke #000/#fff yang "harsh": near-black hangat #0a0908 terbaca
+     sebagai hitam, undertone-nya menyatu dengan emas. Semua rasio dihitung ulang.
+     Kedalaman lewat perbedaan surface + border, BUKAN shadow (§6.4). */
+  --color-bg: #0a0908; /* near-black hangat */
+  --color-surface: #141210; /* kartu / panel — lift halus dari hitam */
+  --color-surface-alt: #1e1b17; /* baris tabel selang-seling */
+  --color-text: #f6f4ef; /* warm white — 18.1:1 di atas bg — AAA */
+  --color-text-2: #b0a99c; /* warm grey — 8.5:1 bg · 8.0:1 surface — AAA */
+  --color-border: #2a2620; /* hairline dekoratif — JANGAN untuk border kontrol */
+  --color-border-strong: #6c665c; /* border kontrol — 3.5:1 di atas bg — lolos 3:1 UI */
+  --color-accent: #e6b43e; /* emas — 10.4:1 di atas bg — AAA */
+  --color-accent-hover: #f4cd64;
+  --color-accent-soft: color-mix(in srgb, var(--color-accent) 14%, var(--color-bg));
+  --color-accent-ink: #0a0908; /* teks DI ATAS tombol emas — 10.4:1 */
+  --color-focus: #8ab4f8;
+  --color-success: #4ade80;
+  --color-error: #ff6b6b;
 
   /* Penyesuaian arah (dipakai di global.css) */
-  --fw-h3: 700; /* Arah B: 600 */
-  --font-smoothing: auto; /* Arah B: antialiased */
-  --shadow-card: 0 6px 20px rgba(0, 0, 0, 0.1); /* Arah B: none */
+  --fw-h3: 600;
+  --font-smoothing: antialiased;
+  --shadow-card: none;
 }
 
 /* ===== 2. ARAH B — MOTIVE DARK — tukar seluruh blok ini dengan blok di atas =====
@@ -77,43 +79,44 @@
 
 /* ===== 3. TIPOGRAFI — identik di kedua arah (BLUEPRINT.md §6.5) ===== */
 :root {
-  /* Font stack — self-host, lihat @font-face di global.css.
-     Fallback face "* Fallback" memakai size-adjust agar swap tidak menggeser layout. */
-  --font-display: 'Archivo', 'Archivo Fallback', 'Segoe UI', Arial, sans-serif;
-  --font-body: 'Inter', 'Inter Fallback', 'Segoe UI', Arial, sans-serif;
+  /* REDESIGN (2026-08-30) — SATU keluarga huruf: Poppins (dimuat via
+     Google Fonts di BaseLayout). Fallback face Archivo/Inter dilepas. */
+  --font-display: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Poppins', 'Segoe UI', Arial, sans-serif;
 
-  /* Type scale — DESKTOP (≥768px). fs / lh / tracking / weight */
-  --fs-display: 56px;
-  --lh-display: 1;
-  --ls-display: -0.02em;
-  --fw-display: 800;
+  /* Type scale — DESKTOP (≥768px). fs / lh / tracking / weight
+     REDESIGN — gaya creative-agency: display sangat besar & berat (Poppins 900). */
+  --fs-display: 64px; /* dulu 56 */
+  --lh-display: 0.96;
+  --ls-display: -0.03em;
+  --fw-display: 900;
 
-  --fs-h1: 40px;
-  --lh-h1: 1.05;
-  --ls-h1: -0.015em;
+  --fs-h1: 44px; /* dulu 40 */
+  --lh-h1: 1.02;
+  --ls-h1: -0.025em;
   --fw-h1: 800;
 
-  --fs-h2: 28px;
-  --lh-h2: 1.15;
-  --ls-h2: -0.01em;
-  --fw-h2: 700;
+  --fs-h2: 30px;
+  --lh-h2: 1.12;
+  --ls-h2: -0.02em;
+  --fw-h2: 800;
 
   --fs-h3: 20px;
-  --lh-h3: 1.25;
+  --lh-h3: 1.3; /* dulu 1.25 */
   --ls-h3: 0em;
   /* --fw-h3 didefinisikan di blok palet (berbeda antar arah) */
 
   --fs-eyebrow: 12px;
   --lh-eyebrow: 1.2;
-  --ls-eyebrow: 0.16em;
-  --fw-eyebrow: 700;
+  --ls-eyebrow: 0.22em; /* REDESIGN — eyebrow di-track lebih lebar (agency) */
+  --fw-eyebrow: 600;
 
   --fs-body-l: 17px;
-  --lh-body-l: 1.65;
+  --lh-body-l: 1.6; /* REDESIGN 1.65→1.6 — blok paragraf lebih padat/editorial */
   --ls-body-l: 0em;
 
   --fs-body-m: 15px;
-  --lh-body-m: 1.6;
+  --lh-body-m: 1.55; /* REDESIGN 1.6→1.55 */
   --ls-body-m: 0em;
 
   --fs-body-s: 13px;
@@ -125,7 +128,7 @@
 
   --fs-btn: 13px;
   --lh-btn: 1;
-  --ls-btn: 0.08em;
+  --ls-btn: 0.09em; /* REDESIGN 0.08→0.09 — label tombol lebih tegas */
   --fw-btn: 700;
 
   --fs-tnum: 15px;
@@ -137,11 +140,11 @@
 /* Type scale — MOBILE (<768px). Hanya fs/lh/tracking yang berubah. */
 @media (max-width: 767.98px) {
   :root {
-    --fs-display: 34px;
+    --fs-display: 36px; /* REDESIGN 34→36 */
     --lh-display: 1.05;
-    --ls-display: -0.015em;
+    --ls-display: -0.02em; /* REDESIGN -0.015→-0.02em */
 
-    --fs-h1: 27px;
+    --fs-h1: 28px; /* REDESIGN 27→28 */
     --lh-h1: 1.1;
     --ls-h1: -0.01em;
 
@@ -155,10 +158,10 @@
 
     --fs-eyebrow: 11px;
     --lh-eyebrow: 1.2;
-    --ls-eyebrow: 0.14em;
+    --ls-eyebrow: 0.16em; /* REDESIGN 0.14→0.16em */
 
     --fs-body-l: 16px;
-    --lh-body-l: 1.6;
+    --lh-body-l: 1.58; /* REDESIGN 1.6→1.58 */
 
     --fs-body-m: 15px;
     --lh-body-m: 1.6;
@@ -182,9 +185,11 @@
   --space-8: 64px;
   --space-9: 96px;
 
-  /* Padding vertikal section */
-  --section-pad-y: 96px;
-  --section-pad-y-gallery-b: 128px;
+  /* Padding vertikal section
+     REDESIGN — irama vertikal dilonggarkan (96→104 · 128→144) untuk kesan
+     tenang/lapang; masih basis-8, nol dampak berat halaman. §6.6 semula 96/128. */
+  --section-pad-y: 104px;
+  --section-pad-y-gallery-b: 144px;
 
   /* Radius — tidak ada pill, tidak ada radius >8px */
   --radius-chip: 2px;
@@ -211,7 +216,7 @@
 
 @media (max-width: 767.98px) {
   :root {
-    --section-pad-y: 56px;
+    --section-pad-y: 60px; /* REDESIGN 56→60 */
     --edge-pad: 16px;
   }
 }
@@ -224,7 +229,7 @@
   --ease: cubic-bezier(0.2, 0, 0, 1);
 
   /* Masuk-layar (dipakai .mv-reveal di global.css) */
-  --reveal-shift: 12px;
+  --reveal-shift: 10px; /* REDESIGN 12→10 — masuk-layar lebih ringkas */
   --reveal-delay: 0ms;
   --reveal-stagger: 60ms;
 }
@@ -266,5 +271,7 @@
 
   /* Modal */
   --modal-max-w: 640px;
-  --modal-backdrop: rgba(15, 15, 15, 0.55);
+  /* REDESIGN — scrim lebih dalam & hangat: dipakai backdrop modal DAN overlay
+     hero, supaya headline emas + teks putih tetap tajam di atas foto. */
+  --modal-backdrop: rgba(6, 5, 4, 0.64);
 }

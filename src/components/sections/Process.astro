@@ -57,6 +57,20 @@ const nomorDua = (n: number): string => String(n).padStart(2, '0');
 <Container as="section" spacing="section" id={id}>
   <SectionHeading nomor="05" judul="Proses Produksi 11 Tahap" />
 
+  {/* REDESIGN — ikhtisar 4 babak: dari bahan datang sampai barang dikirim. */}
+  <ol class="mv-proses__ringkas" aria-label="Empat babak produksi">
+    {
+      babakProses.map((b) => (
+        <li class="mv-proses__ringkas-item">
+          <span class="mv-proses__ringkas-nomor" aria-hidden="true">
+            {b.babak}
+          </span>
+          <span class="mv-proses__ringkas-judul t-label">{b.judul}</span>
+        </li>
+      ))
+    }
+  </ol>
+
   <div class="mv-proses" data-process data-varian={rencanaB ? 'stepper' : 'media'}>
     {
       /*
@@ -149,6 +163,44 @@ const nomorDua = (n: number): string => String(n).padStart(2, '0');
 </Container>
 
 <style>
+  /* ---------- ikhtisar 4 babak (REDESIGN) ---------- */
+  .mv-proses__ringkas {
+    list-style: none;
+    margin: 0 0 var(--space-8);
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+    counter-reset: babak;
+  }
+
+  .mv-proses__ringkas-item {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border-block-start: 2px solid var(--color-accent);
+    background-color: var(--color-surface);
+  }
+
+  .mv-proses__ringkas-nomor {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: clamp(1.75rem, 4vw, 2.75rem);
+    line-height: 1;
+    color: var(--color-accent);
+  }
+
+  .mv-proses__ringkas-judul {
+    color: var(--color-text);
+  }
+
+  @media (max-width: 767.98px) {
+    .mv-proses__ringkas {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
   .mv-proses {
     /* Navbar fixed setinggi 76px (Navbar.astro, S03). tokens.css DAN
        Navbar.astro sama-sama terkunci di sprint ini, jadi angkanya

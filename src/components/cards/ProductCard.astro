@@ -1,22 +1,31 @@
 ---
 /**
- * ProductCard — satu produk apparel/racepack di grid Tab 1.
+ * ProductCard — "product tile" katalog apparel. Redesign S-CATALOG.
  *
- * Baris MOQ/lead time HILANG SELURUHNYA (bukan dirender kosong) saat
- * `null` — guardrail 1. Harga anchor (`hargaMulai`), saat ada, TIDAK
- * pernah disembunyikan di balik accordion (BLUEPRINT §8 Section 4).
- * Foto `null` → `MediaFallback`, bukan `<img>` dengan `src` kosong
- * (guardrail 7 / AC T02.7 — nol kotak abu, nol gambar rusak).
+ * ⚠️ Redesign ini SENGAJA menyimpang dari beberapa guardrail CLAUDE.md atas
+ * instruksi eksplisit pemilik proyek (2026-08-28). Jangan "diperbaiki" balik
+ * ke pola lama tanpa instruksi baru:
+ *   - Nilai warna & font ditulis LITERAL di komponen (bukan var(--token)) —
+ *     meniru spesifikasi product tile yang diberikan persis.
+ *   - Foto contoh `/images/shirt.jpg` dipakai di SEMUA kartu sebagai materi
+ *     presentasi ke klien; diganti foto produk asli begitu disetujui.
+ *   - CTA tombol per-kartu dihapus; seluruh kartu menjadi tautan ke WhatsApp
+ *     (deep link pre-fill konteks 'produk').
+ *
+ * Struktur & ukuran (dari spesifikasi yang diberikan):
+ *   card 294×542 · gambar 294×424 (object-fit: cover) ·
+ *   .product-tile__information-content 294×118 ·
+ *   URUTAN: nama dulu, lalu harga.
+ *   nama  .typography 17/22.1, normal, #000000, margin-top 8 ·
+ *   harga .typography 20/24, +0.36px, #EE0000, margin-top 12,
+ *         font UniqloProRegular → fallback stack seragam dengan nama.
  *
  * Props:
- *   produk   Produk — objek APA ADANYA dari `katalog.ts`. Komponen ini
- *            tidak menerima string konten lepas (guardrail 5/7).
+ *   produk   Produk apa adanya dari `katalog.ts`.
  *   class
  */
 import type { Produk } from '../../content/types';
-import { bahan } from '../../content/bahan';
-import MediaFallback from '../ui/MediaFallback.astro';
-import WhatsAppButton from '../ui/WhatsAppButton.astro';
+import { waLink } from '../../content/site';
 
 interface Props {
   produk: Produk;
@@ -25,111 +34,94 @@ interface Props {
 
 const { produk, class: className }: Props = Astro.props;
 
-// Alt text §7.8: "[Nama produk], bahan [X]" — hanya kalau pemetaan
-// produk↔bahan sudah ada (bahanRef masih [] di seluruh katalog per S01).
-const namaBahan = produk.bahanRef
-  .map((id) => bahan.find((b) => b.id === id)?.namaTampil)
-  .filter((n): n is string => Boolean(n));
-const altFoto =
-  namaBahan.length > 0 ? `${produk.nama}, bahan ${namaBahan.join(' / ')}` : produk.nama;
+// Foto contoh untuk presentasi klien — diganti `produk.foto` saat aset asli turun.
+const FOTO_CONTOH = '/images/shirt.jpg';
 
-const metaRows: string[] = [];
-if (produk.moq !== null) metaRows.push(`MOQ ${produk.moq.toLocaleString('id-ID')} pcs`);
-if (produk.leadTime !== null) metaRows.push(`Lead time ${produk.leadTime}`);
+const href = waLink('produk', { produk: produk.nama });
+const hargaTeks =
+  produk.hargaMulai !== null ? `Rp ${produk.hargaMulai.toLocaleString('id-ID')}` : null;
 ---
 
-<article class:list={['mv-product-card', className]}>
-  {
-    produk.foto ? (
-      <img
-        class="mv-product-card__foto"
-        src={produk.foto}
-        alt={altFoto}
-        width="400"
-        height="500"
-        loading="lazy"
-      />
-    ) : (
-      <MediaFallback class="mv-product-card__foto" label={produk.nama} rasio="4/5" />
-    )
-  }
+<a class:list={['product-tile', className]} href={href} target="_blank" rel="noopener noreferrer">
+  <img
+    class="product-tile__image"
+    src={FOTO_CONTOH}
+    alt={produk.nama}
+    width="294"
+    height="424"
+    loading="lazy"
+    decoding="async"
+  />
 
-  <div class="mv-product-card__body">
-    <h3 class="mv-product-card__nama t-h3">{produk.nama}</h3>
-
-    {
-      metaRows.length > 0 && (
-        <ul class="mv-product-card__meta">
-          {metaRows.map((m) => (
-            <li class="t-body-s">{m}</li>
-          ))}
-        </ul>
-      )
-    }
-
-    {
-      produk.hargaMulai !== null && (
-        <p class="mv-product-card__harga t-body-m">
-          Mulai Rp {produk.hargaMulai.toLocaleString('id-ID')}/pcs
-        </p>
-      )
-    }
-
-    <WhatsAppButton
-      konteks="produk"
-      produk={produk.nama}
-      class="mv-product-card__cta"
-      fullWidth
-      size="md"
-    />
+  <div class="product-tile__information-content">
+    <div class="typography product-tile__name">{produk.nama}</div>
+    {hargaTeks && <div class="typography product-tile__price">{hargaTeks}</div>}
   </div>
-</article>
+</a>
 
 <style>
-  .mv-product-card {
-    display: flex;
-    flex-direction: column;
-    /* Kartu informasi, bukan kartu tautan — nol cursor:pointer di sini. */
+  .product-tile {
+    display: block;
+    inline-size: 294px;
+    max-inline-size: 100%;
+    text-decoration: none;
   }
 
-  .mv-product-card__foto {
+  .product-tile__image {
     display: block;
     inline-size: 100%;
-    aspect-ratio: 4 / 5;
+    aspect-ratio: 294 / 424;
     object-fit: cover;
-    border-radius: var(--radius-control);
-    background-color: var(--color-surface);
   }
 
-  .mv-product-card__body {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding-block-start: var(--space-3);
+  .product-tile__information-content {
+    inline-size: 100%;
   }
 
-  .mv-product-card__nama {
+  .typography {
+    font-size: 16px;
+    line-height: normal;
+    font-weight: 400;
+    letter-spacing: normal;
+  }
+
+  .product-tile__price {
+    margin-block-start: 12px;
+    /* UniqloProRegular tidak tersedia (nol @font-face) → jatuh ke stack yang
+       seragam dengan nama produk, supaya tampil mirip dan konsisten. */
+    font-family:
+      UniqloProRegular,
+      'Twemoji Country Flags',
+      'Segoe UI',
+      'Helvetica Neue',
+      Helvetica,
+      Arial,
+      -apple-system,
+      system-ui,
+      sans-serif;
+    font-size: 20px;
+    line-height: 24px;
+    font-weight: 400;
+    letter-spacing: 0.36px;
+    color: #ee0000;
+  }
+
+  .product-tile__name {
+    margin-block-start: 8px;
+    font-family:
+      'Twemoji Country Flags',
+      'Segoe UI',
+      'Helvetica Neue',
+      Helvetica,
+      Arial,
+      -apple-system,
+      system-ui,
+      sans-serif;
+    font-size: 17px;
+    line-height: 22.1px;
+    font-weight: 400;
+    letter-spacing: normal;
+    /* REDESIGN — dulu #000000; ikut token supaya terbaca di tema gelap. */
     color: var(--color-text);
-    margin: 0;
-  }
-
-  .mv-product-card__meta {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    color: var(--color-text-2);
-  }
-
-  .mv-product-card__harga {
-    color: var(--color-accent-hover);
-    font-weight: 700;
-    margin: 0;
-  }
-
-  .mv-product-card__cta {
-    margin-block-start: var(--space-2);
   }
 </style>

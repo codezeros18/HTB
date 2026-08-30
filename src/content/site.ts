@@ -50,21 +50,13 @@ export const site: SiteConfig = {
     // BLUEPRINT §1.2/§8 [FAKTA-PDF] — anchor 38k, baris kecil, BUKAN headline.
     anchorHarga: 'Mulai Rp 38.000/pcs untuk kaos PE Soft 20s, sudah termasuk 1 logo depan.',
     stripJudul: 'Pernah dipercaya oleh',
-    // Blocker B2 — asal foto pabrik di sampul PDF belum dikonfirmasi.
-    // `false` = default aktif: varian tanpa-foto. JANGAN diubah ke `true`
-    // tanpa foto asli yang sudah dikonfirmasi kliennya (guardrail proyek 2).
-    //
-    // Sudah diuji-coba sekali dengan placeholder di
-    // public/images/hero/placeholder-sementara-JANGAN-DIPAKAI-LIVE.jpg
-    // (foto katalog H&M, tag merek terlihat — BUKAN aset MOTIVE, hanya
-    // untuk cek visual mekanisme atas otorisasi eksplisit pemilik proyek).
-    // Hasil uji itu: mekanisme & kontras OK (12.89:1 desktop, 6.54:1
-    // mobile — diukur dari piksel nyata), TAPI file 992 KB tak terkompresi
-    // meledakkan LCP ke 6.9 s (batas 2.0 s). Dikembalikan ke `false` atas
-    // instruksi eksplisit supaya LCP tetap lolos. Lihat PROGRESS.md S04.2.
-    fotoTersedia: false,
-    fotoSrc: null,
-    fotoAlt: null,
+    // REDESIGN (2026-08-30) — foto hero dari klien: lantai produksi nyata,
+    // `public/images/HERO SECTION/Hero Section.png` (1536×1024).
+    // ⚠️ Masih PNG ~3,0 MB belum dioptimasi. WAJIB dikompres (AVIF/WebP,
+    // target ≤180 KB) + `srcset` sebelum produksi — kalau tidak LCP jebol.
+    fotoTersedia: true,
+    fotoSrc: '/images/HERO%20SECTION/Hero%20Section.png',
+    fotoAlt: 'Lantai produksi MOTIVE — deretan penjahit mengerjakan pesanan apparel',
     statusApproval: 'draft',
   },
 

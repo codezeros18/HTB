@@ -29,6 +29,7 @@ import { SECTION_IDS } from '../components/layout/nav-items';
 
 import Hero from '../components/sections/Hero.astro';
 import About from '../components/sections/About.astro';
+import OurServices from '../components/sections/OurServices.astro';
 import Services from '../components/sections/Services.astro';
 import Process from '../components/sections/Process.astro';
 import Clients from '../components/sections/Clients.astro';
@@ -40,7 +41,12 @@ import Contact from '../components/sections/Contact.astro';
 <BaseLayout>
   <Hero />
   <About id={SECTION_IDS.tentang} />
-  <Services id={SECTION_IDS.produk} />
+  {
+    /* REDESIGN 2026-08-30 — "Our Services" jadi section visual tersendiri,
+      memegang anchor #produk. Katalog detail tetap di <Services> di bawahnya. */
+  }
+  <OurServices id={SECTION_IDS.produk} />
+  <Services />
   <Process id={SECTION_IDS.proses} />
   <Clients id={SECTION_IDS.klien} />
   <Gallery id={SECTION_IDS.galeri} />
