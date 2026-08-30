@@ -1,0 +1,96 @@
+---
+/**
+ * LayananCrumb — breadcrumb untuk halaman `/layanan/**` (REDESIGN 2026-08-30).
+ *
+ * Dipakai di 3 tingkat halaman (kelompok / daftar item / detail) supaya
+ * pengunjung selalu tahu posisinya dan bisa lompat balik ke tingkat mana pun
+ * lewat URL asli — bukan tombol "kembali" JavaScript.
+ *
+ * Props:
+ *   trail  Crumb[] — elemen terakhir TANPA href = halaman sekarang.
+ */
+export interface Crumb {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  trail: Crumb[];
+}
+
+const { trail } = Astro.props;
+---
+
+<nav class="crumb" aria-label="Navigasi lokasi halaman">
+  <ol class="crumb__list">
+    {
+      trail.map((c, i) => (
+        <li class="crumb__item">
+          {c.href ? (
+            <a class="crumb__link" href={c.href}>
+              {c.label}
+            </a>
+          ) : (
+            <span class="crumb__current" aria-current="page">
+              {c.label}
+            </span>
+          )}
+          {i < trail.length - 1 && (
+            <span class="crumb__sep" aria-hidden="true">
+              /
+            </span>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .crumb {
+    margin-block-end: var(--space-6);
+  }
+
+  .crumb__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .crumb__item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .crumb__link {
+    color: var(--color-text-2);
+    text-decoration: none;
+    font-size: var(--fs-body-s);
+  }
+
+  .crumb__link:hover {
+    color: var(--color-accent);
+    text-decoration: underline;
+  }
+
+  .crumb__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .crumb__current {
+    color: var(--color-text);
+    font-size: var(--fs-body-s);
+    font-weight: 500;
+  }
+
+  .crumb__sep {
+    color: var(--color-border-strong);
+    font-size: var(--fs-body-s);
+  }
+</style>

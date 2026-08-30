@@ -1,0 +1,203 @@
+---
+/**
+ * /layanan/[layanan]/[sub]/[item]/ — detail satu produk.
+ * REDESIGN 2026-08-30 — foto kiri, deskripsi kanan, CTA WhatsApp
+ * ter-prefill nama produk. Lihat catatan di `/layanan/[layanan]/index.astro`.
+ */
+import type { Layanan, LayananDetail, LayananSub } from '../../../../../content/layanan';
+import { layanan } from '../../../../../content/layanan';
+import { site } from '../../../../../content/site';
+import BaseLayout from '../../../../../layouts/BaseLayout.astro';
+import Container from '../../../../../components/layout/Container.astro';
+import LayananCrumb from '../../../../../components/layanan/LayananCrumb.astro';
+import type { Crumb } from '../../../../../components/layanan/LayananCrumb.astro';
+import WhatsAppButton from '../../../../../components/ui/WhatsAppButton.astro';
+
+interface StaticProps {
+  l: Layanan;
+  s: LayananSub;
+  it: LayananDetail;
+}
+
+export function getStaticPaths(): {
+  params: { layanan: string; sub: string; item: string };
+  props: StaticProps;
+}[] {
+  return layanan.flatMap((l) =>
+    l.sub.flatMap((s) =>
+      s.items.map((it) => ({
+        params: { layanan: l.slug, sub: s.slug, item: it.slug },
+        props: { l, s, it },
+      }))
+    )
+  );
+}
+
+const { l, s, it } = Astro.props as StaticProps;
+
+const trail: Crumb[] = [
+  { label: 'Beranda', href: '/#produk' },
+  { label: 'Our Services', href: '/#produk' },
+  ...(l.sub.length > 1
+    ? [
+        { label: l.nama, href: `/layanan/${l.slug}` },
+        { label: s.nama, href: `/layanan/${l.slug}/${s.slug}` },
+      ]
+    : [{ label: l.nama, href: `/layanan/${l.slug}/${s.slug}` }]),
+  { label: it.nama },
+];
+
+// Produk lain di kelompok yang sama — navigasi lanjut tanpa balik ke daftar.
+const lainnya = s.items.filter((x) => x.slug !== it.slug);
+---
+
+<BaseLayout title={`${it.nama} — ${l.nama} — ${site.brand}`} description={it.deskripsi}>
+  <Container as="section" spacing="section">
+    <LayananCrumb trail={trail} />
+
+    <div class="lyd__detail">
+      <div class="lyd__media">
+        <img src={it.foto} alt={it.nama} width={it.width} height={it.height} decoding="async" />
+      </div>
+      <div class="lyd__body">
+        <p class="t-eyebrow lyd__eyebrow">{l.nama}</p>
+        <h1 class="t-h1 lyd__judul">{it.nama}</h1>
+        <p class="t-body-l lyd__desc">{it.deskripsi}</p>
+        <WhatsAppButton
+          konteks="produk"
+          produk={it.nama}
+          label="Konsultasi via WhatsApp"
+          size="lg"
+        />
+      </div>
+    </div>
+  </Container>
+
+  {
+    lainnya.length > 0 && (
+      <Container as="section" spacing="section" last>
+        <h2 class="t-h2 lyd__lainnya-judul">Produk lain di {s.nama}</h2>
+        <div class="lyd__lainnya-grid">
+          {lainnya.map((x) => (
+            <a class="lyd__lainnya-tile" href={`/layanan/${l.slug}/${s.slug}/${x.slug}`}>
+              <span class="lyd__lainnya-media">
+                <img
+                  src={x.foto}
+                  alt={x.nama}
+                  width={x.width}
+                  height={x.height}
+                  loading="lazy"
+                  decoding="async"
+                />
+              </span>
+              <span class="t-h3 lyd__lainnya-nama">{x.nama}</span>
+            </a>
+          ))}
+        </div>
+      </Container>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .lyd__detail {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-8);
+    align-items: center;
+  }
+
+  .lyd__media {
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
+  }
+
+  .lyd__media img {
+    inline-size: 100%;
+    block-size: auto;
+    display: block;
+  }
+
+  .lyd__body {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .lyd__eyebrow {
+    color: var(--color-accent);
+    margin: 0;
+  }
+
+  .lyd__judul {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .lyd__desc {
+    color: var(--color-text-2);
+    margin: 0;
+    max-inline-size: 52ch;
+  }
+
+  .lyd__lainnya-judul {
+    color: var(--color-text);
+    margin: 0 0 var(--space-6);
+  }
+
+  .lyd__lainnya-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .lyd__lainnya-tile {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    text-decoration: none;
+    color: var(--color-text);
+  }
+
+  .lyd__lainnya-media {
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
+    transition: border-color var(--dur-fast) var(--ease);
+  }
+
+  .lyd__lainnya-tile:hover .lyd__lainnya-media {
+    border-color: var(--color-accent);
+  }
+
+  .lyd__lainnya-tile:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .lyd__lainnya-media img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 1023.98px) {
+    .lyd__detail {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+
+    .lyd__lainnya-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 767.98px) {
+    .lyd__lainnya-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+</style>
