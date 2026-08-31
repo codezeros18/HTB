@@ -19,18 +19,29 @@
 
 export interface NavItem {
   label: string;
-  /** Anchor href. Selalu `#<sectionId>` — nol `href="#"`. */
+  /**
+   * Anchor href. ABSOLUT (`/#<sectionId>`), BUKAN relatif (`#<sectionId>`).
+   * REDESIGN (2026-08-30) — bug ditemukan: sejak halaman `/layanan/**`
+   * ditambahkan (S-SERVICES), href relatif membuat navbar diam-diam mati
+   * di sana. Fragment tanpa `/` di depan di-resolve TERHADAP HALAMAN
+   * SAAT INI — di homepage kebetulan cocok (section-nya memang di situ),
+   * tapi di `/layanan/produk-x` browser mencari id itu di halaman yang
+   * SAMA, tidak ketemu, dan diam-diam tidak melakukan apa pun (bukan
+   * error, jadi terlihat seperti "navbar tidak bisa dipencet"). Dengan
+   * `/#id`, browser SELALU menuju homepage lalu ke section-nya — dari
+   * halaman mana pun.
+   */
   href: string;
   /** id elemen section yang diamati IntersectionObserver navbar. */
   sectionId: string;
 }
 
 export const navItems: NavItem[] = [
-  { label: 'Tentang', href: '#tentang', sectionId: 'tentang' },
-  { label: 'Produk', href: '#produk', sectionId: 'produk' },
-  { label: 'Proses', href: '#proses', sectionId: 'proses' },
-  { label: 'Klien', href: '#klien', sectionId: 'klien' },
-  { label: 'Lokasi', href: '#lokasi', sectionId: 'lokasi' },
+  { label: 'Tentang', href: '/#tentang', sectionId: 'tentang' },
+  { label: 'Produk', href: '/#produk', sectionId: 'produk' },
+  { label: 'Proses', href: '/#proses', sectionId: 'proses' },
+  { label: 'Klien', href: '/#klien', sectionId: 'klien' },
+  { label: 'Lokasi', href: '/#lokasi', sectionId: 'lokasi' },
 ];
 
 /**

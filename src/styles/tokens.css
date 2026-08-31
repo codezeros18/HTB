@@ -17,16 +17,21 @@
    BLUEPRINT.md §6.3. Semua rasio kontras sudah dihitung.
    Jangan mengembalikan #FF0000 — gagal WCAG AA (4.00:1). */
 :root {
-  /* REDESIGN (2026-08-30) — HITAM (hangat) + EMAS. Kontras dimaksimalkan
-     tanpa jatuh ke #000/#fff yang "harsh": near-black hangat #0a0908 terbaca
-     sebagai hitam, undertone-nya menyatu dengan emas. Semua rasio dihitung ulang.
-     Kedalaman lewat perbedaan surface + border, BUKAN shadow (§6.4). */
-  --color-bg: #0a0908; /* near-black hangat */
-  --color-surface: #141210; /* kartu / panel — lift halus dari hitam */
-  --color-surface-alt: #1e1b17; /* baris tabel selang-seling */
-  --color-text: #f6f4ef; /* warm white — 18.1:1 di atas bg — AAA */
-  --color-text-2: #b0a99c; /* warm grey — 8.5:1 bg · 8.0:1 surface — AAA */
-  --color-border: #2a2620; /* hairline dekoratif — JANGAN untuk border kontrol */
+  /* REDESIGN (2026-08-31) — GLASSMORPHISM / SAAS di atas basis HITAM hangat + EMAS.
+     - `--color-bg` tetap near-black hangat; global.css menambah glow radial
+       supaya blur punya sesuatu untuk dibiaskan.
+     - `--color-surface*` sekarang SEMI-TRANSPARAN: setiap kartu/panel yang
+       memakai token ini otomatis jadi "kaca" di atas glow. Warna efektif
+       (blend 78% #17140f + 22% bg) ≈ #141210 lama → rasio kontras teks
+       nyaris tak berubah (masih AAA).
+     - `--color-border` jadi hairline putih tipis (bukan cokelat gelap) —
+       tepi kaca. Border kontrol tetap `--color-border-strong`. */
+  --color-bg: #0a0908;
+  --color-surface: color-mix(in srgb, #17140f 78%, transparent);
+  --color-surface-alt: color-mix(in srgb, #221d16 82%, transparent);
+  --color-text: #f6f4ef; /* warm white — ~18:1 di atas bg — AAA */
+  --color-text-2: #b0a99c; /* warm grey — ~8.4:1 di atas bg — AAA */
+  --color-border: color-mix(in srgb, #f6f4ef 10%, transparent); /* hairline kaca */
   --color-border-strong: #6c665c; /* border kontrol — 3.5:1 di atas bg — lolos 3:1 UI */
   --color-accent: #e6b43e; /* emas — 10.4:1 di atas bg — AAA */
   --color-accent-hover: #f4cd64;
@@ -36,10 +41,22 @@
   --color-success: #4ade80;
   --color-error: #ff6b6b;
 
+  /* Chip terang untuk LOGO KLIEN — banyak logo asli berlatar putih; ditaruh
+     di chip terang biar semuanya terbaca & terlihat disengaja di bg gelap. */
+  --color-chip: color-mix(in srgb, #ffffff 95%, transparent);
+  --color-chip-ink: #17130e;
+
+  /* ---- Token KACA (glassmorphism) — dipakai global.css + komponen ---- */
+  --glass-blur: 16px;
+  --glass-saturate: 135%;
+  /* Kilau tepi atas + bayangan lembut mengambang (SaaS). */
+  --glass-highlight: inset 0 1px 0 0 color-mix(in srgb, #f6f4ef 9%, transparent);
+  --glass-elev: 0 12px 40px -14px rgba(0, 0, 0, 0.6);
+
   /* Penyesuaian arah (dipakai di global.css) */
   --fw-h3: 600;
   --font-smoothing: antialiased;
-  --shadow-card: none;
+  --shadow-card: var(--glass-elev);
 }
 
 /* ===== 2. ARAH B — MOTIVE DARK — tukar seluruh blok ini dengan blok di atas =====
@@ -79,27 +96,33 @@
 
 /* ===== 3. TIPOGRAFI — identik di kedua arah (BLUEPRINT.md §6.5) ===== */
 :root {
-  /* REDESIGN (2026-08-30) — SATU keluarga huruf: Poppins (dimuat via
-     Google Fonts di BaseLayout). Fallback face Archivo/Inter dilepas. */
-  --font-display: 'Poppins', 'Segoe UI', Arial, sans-serif;
-  --font-body: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  /* REDESIGN (2026-08-31) — Poppins DIGANTI. Poppins geometrik-bundar terbaca
+     "template", lemah di ukuran display raksasa. Sekarang:
+       display : Space Grotesk (grotesque modern, berkarakter, tajam di ukuran
+                 besar — pas untuk judul "OUR SERVICES"). Berat maks 700.
+       body/UI : Inter (standar SaaS: keterbacaan layar terbaik + `tabular-nums`
+                 untuk tabel harga/ukuran). SUDAH self-host di public/fonts.
+     Space Grotesk dimuat via Google Fonts di BaseLayout; Inter self-host. */
+  --font-display: 'Space Grotesk', 'Inter', 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Inter', 'Inter Fallback', 'Segoe UI', Arial, sans-serif;
 
-  /* Type scale — DESKTOP (≥768px). fs / lh / tracking / weight
-     REDESIGN — gaya creative-agency: display sangat besar & berat (Poppins 900). */
-  --fs-display: 64px; /* dulu 56 */
+  /* Type scale — DESKTOP (≥768px). fs / lh / tracking / weight.
+     Berat display turun 900→700 (batas Space Grotesk) — di ukuran besar +
+     tracking rapat tetap terbaca sangat tegas. */
+  --fs-display: 64px;
   --lh-display: 0.96;
   --ls-display: -0.03em;
-  --fw-display: 900;
+  --fw-display: 700;
 
-  --fs-h1: 44px; /* dulu 40 */
+  --fs-h1: 44px;
   --lh-h1: 1.02;
   --ls-h1: -0.025em;
-  --fw-h1: 800;
+  --fw-h1: 700;
 
   --fs-h2: 30px;
   --lh-h2: 1.12;
   --ls-h2: -0.02em;
-  --fw-h2: 800;
+  --fw-h2: 600;
 
   --fs-h3: 20px;
   --lh-h3: 1.3; /* dulu 1.25 */
@@ -191,10 +214,13 @@
   --section-pad-y: 104px;
   --section-pad-y-gallery-b: 144px;
 
-  /* Radius — tidak ada pill, tidak ada radius >8px */
-  --radius-chip: 2px;
-  --radius-control: 4px;
-  --radius-modal: 8px;
+  /* Radius — REDESIGN (glassmorphism/SaaS): sudut lebih lembut. Bukan pill
+     (kontrol 44px + radius 12px masih jelas persegi-membulat), tapi jauh
+     dari sudut tajam lama. `--radius-card` baru untuk kartu/panel besar. */
+  --radius-chip: 8px;
+  --radius-control: 12px;
+  --radius-card: 18px;
+  --radius-modal: 22px;
 
   /* Border */
   --border-width: 1px;

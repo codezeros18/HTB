@@ -429,3 +429,37 @@ export const layanan: Layanan[] = [
     ],
   },
 ];
+
+/**
+ * URL tujuan satu layanan — dipakai kartu homepage DAN mega menu navbar
+ * (satu sumber, dua pemakai). Layanan 1-kelompok ditautkan langsung ke
+ * daftar produknya (melompati halaman kelompok yang isinya cuma 1 kartu).
+ */
+export function layananHref(l: Layanan): string {
+  return l.sub.length === 1 && l.sub[0]
+    ? `/layanan/${l.slug}/${l.sub[0].slug}`
+    : `/layanan/${l.slug}`;
+}
+
+export interface LayananQuickLink {
+  label: string;
+  href: string;
+}
+
+/**
+ * Tautan "fast track" untuk mega menu navbar — REDESIGN 2026-08-30.
+ * Layanan multi-kelompok (Custom Apparel) menampilkan nama kelompok
+ * (Men/Women/dst). Layanan 1-kelompok menampilkan produknya langsung,
+ * karena kelompoknya sudah dilompati oleh `layananHref`.
+ */
+export function layananQuickLinks(l: Layanan): LayananQuickLink[] {
+  if (l.sub.length > 1) {
+    return l.sub.map((s) => ({ label: s.nama, href: `/layanan/${l.slug}/${s.slug}` }));
+  }
+  const satuSatunya = l.sub[0];
+  if (!satuSatunya) return [];
+  return satuSatunya.items.map((it) => ({
+    label: it.nama,
+    href: `/layanan/${l.slug}/${satuSatunya.slug}/${it.slug}`,
+  }));
+}

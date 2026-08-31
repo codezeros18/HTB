@@ -6,33 +6,14 @@
 @import './tokens.css';
 @import 'tailwindcss';
 
-/* ===== SELF-HOST FONT (BLUEPRINT.md §6.5 / §7.6) =====
-   Sumber: Archivo (Omnibus-Type) & Inter (Rasmus Andersson), SIL OFL 1.1.
-   Diunduh sebagai woff2 variabel, di-instance ke sumbu wght 400–800,
-   di-subset ke latin + latin-ext. NOL request ke fonts.googleapis.com
-   atau fonts.gstatic.com. Total 4 file ≈ 77 KB.
-   Hanya archivo-var-latin (800) & inter-var-latin (400) yang di-preload
-   di <head> layout (S03). */
+/* ===== FONT =====
+   REDESIGN (2026-08-31):
+     - BODY/UI : Inter — SELF-HOST (woff2 var, subset latin + latin-ext,
+       di public/fonts/). NOL request pihak ketiga.
+     - DISPLAY : Space Grotesk — dimuat via Google Fonts di BaseLayout
+       (menimpa aturan self-host, sama seperti Poppins sebelumnya).
+   Archivo & Poppins dilepas. */
 
-@font-face {
-  font-family: 'Archivo';
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url('/fonts/archivo-var-latin.woff2') format('woff2');
-  unicode-range:
-    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074,
-    U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
-@font-face {
-  font-family: 'Archivo';
-  font-style: normal;
-  font-weight: 400 800;
-  font-display: swap;
-  src: url('/fonts/archivo-var-latin-ext.woff2') format('woff2');
-  unicode-range:
-    U+0100-024F, U+0192, U+1E00-1EFF, U+2018-201E, U+2020-2022, U+2026, U+20A0-20BF, U+2122;
-}
 @font-face {
   font-family: 'Inter';
   font-style: normal;
@@ -53,17 +34,7 @@
     U+0100-024F, U+0192, U+1E00-1EFF, U+2018-201E, U+2020-2022, U+2026, U+20A0-20BF, U+2122;
 }
 
-/* Fallback face dengan metric override — menahan CLS saat swap.
-   Angka size-adjust/ascent/descent dihitung dari xHeight & hhea font
-   relatif terhadap Arial (upm 2048, xHeight 1062). */
-@font-face {
-  font-family: 'Archivo Fallback';
-  src: local('Segoe UI'), local('Arial');
-  size-adjust: 98.58%;
-  ascent-override: 89.06%;
-  descent-override: 21.3%;
-  line-gap-override: 0%;
-}
+/* Fallback face dengan metric override — menahan CLS saat swap Inter. */
 @font-face {
   font-family: 'Inter Fallback';
   src: local('Segoe UI'), local('Arial');
@@ -119,7 +90,6 @@
   }
 
   body {
-    background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-body);
     font-size: var(--fs-body-m);
@@ -127,6 +97,24 @@
     font-weight: var(--fw-body);
     -webkit-font-smoothing: var(--font-smoothing);
     -moz-osx-font-smoothing: grayscale;
+
+    /* REDESIGN (glassmorphism) — near-black + dua glow radial melekat
+       (`fixed`, tidak ikut scroll → nol parallax, nol layout shift).
+       Blur kaca di kartu/panel membiaskan glow ini jadi ada "isi". */
+    background-color: var(--color-bg);
+    background-image:
+      radial-gradient(
+        60rem 42rem at 6% -8%,
+        color-mix(in srgb, var(--color-accent) 15%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        52rem 42rem at 104% 108%,
+        color-mix(in srgb, var(--color-focus) 12%, transparent),
+        transparent 64%
+      );
+    background-attachment: fixed;
+    background-repeat: no-repeat;
   }
 
   h1,
@@ -318,5 +306,69 @@
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* =============================================================
+   PASS KACA UNIVERSAL — REDESIGN 2026-08-31.
+   Aturan ini SENGAJA di luar @layer (unlayered) dan HANYA menambah
+   `backdrop-filter` + `box-shadow` — properti yang komponen nyaris
+   tak pernah set — supaya menempel ke seluruh permukaan MOTIVE tanpa
+   bertengkar dengan scoped style tiap komponen.
+
+   Warna semi-transparan, hairline putih tipis, radius lembut, dan
+   elevasi sudah datang dari token (`--color-surface`, `--color-border`,
+   `--radius-*`, `--shadow-card`) — jadi kartu yang tidak masuk daftar
+   blur di bawah pun tetap terbaca sebagai "kaca", hanya tanpa blur.
+   Blur di-batasi ke panel besar demi biaya GPU.
+   ============================================================= */
+:where(
+  .svc__card,
+  .lyn__tile,
+  .lyd__media,
+  .lyd__lainnya-media,
+  .g__cell,
+  .mv-about__nilai-item,
+  .mv-proses__step,
+  .mv-proses__frame,
+  .mv-location-card,
+  .mv-material-card,
+  .mv-kontak__wa,
+  .mv-kontak__form-wrap,
+  .mv-kontak__gagal,
+  .mv-kontak__sukses,
+  .mv-services__chart-kosong,
+  .mv-modal__panel
+) {
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  box-shadow: var(--glass-elev), var(--glass-highlight);
+  /* Banyak kartu MOTIVE dulu SENGAJA sudut tajam (blueprint lama). Untuk
+     tema kaca/SaaS semuanya dibulatkan di sini — `:where` 0-spesifisitas
+     jadi komponen yang butuh sudut lain tetap bisa menimpa. */
+  border-radius: var(--radius-card);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  :where(
+    .svc__card,
+    .lyn__tile,
+    .lyd__lainnya-media,
+    .g__cell,
+    .mv-proses__step,
+    .mv-location-card
+  ) {
+    transition:
+      box-shadow var(--dur-base) var(--ease),
+      border-color var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease);
+  }
+
+  :where(.svc__card, .lyn__tile, .lyd__lainnya-media, .g__cell, .mv-proses__step):hover {
+    box-shadow:
+      0 18px 48px -14px rgba(0, 0, 0, 0.7),
+      0 0 0 1px color-mix(in srgb, var(--color-accent) 40%, transparent),
+      0 0 40px -10px color-mix(in srgb, var(--color-accent) 45%, transparent),
+      var(--glass-highlight);
   }
 }

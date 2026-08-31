@@ -1,30 +1,18 @@
 ---
 /**
- * Our Production Process — Sticky Media Stepper (BLUEPRINT §8 Section 5).
+ * Proses Produksi — REDESIGN 2026-08-31 (permintaan klien: "boring, ga ada
+ * meaning").
  *
- * ── Struktur ───────────────────────────────────────────────────
- * Desktop ≥1024px: grid 12 kolom. Kiri 5 kolom = panel DEKORATIF
- * `position: sticky` (CSS murni, nol scroll listener). Kanan 7 kolom
- * = `<ol>` berisi 11 `<li>` yang mengalir naik.
+ * Alur BOUSTROPHEDON (ular): 11 kartu kaca mengalir kiri→kanan, mentok
+ * kanan lalu turun & balik kanan→kiri, dst. Konektor garis putus-putus +
+ * chevron emas menyambungkan tiap tahap → jelas terbaca sebagai SATU alur:
+ * bahan datang → pola → potong → jahit → QC → kirim.
  *
- * Mobile <1024px: sticky DIMATIKAN TOTAL (bukan dikecilkan). Panel
- * disembunyikan, `<ol>` jadi satu kolom dengan pemisah 4 babak.
+ * Nol JavaScript, nol sticky panel (dibuang — dulu bergantung media yang
+ * tak pernah ada). Posisi grid tiap kartu dihitung di frontmatter dari
+ * indeksnya; di bawah 1024px degradasi ke daftar vertikal biasa.
  *
- * ── Semantik (T06.1) ───────────────────────────────────────────
- * SATU `<ol>` dengan 11 `<li>` — bukan div bernomor. Screen reader
- * mengumumkan "1 dari 11" dst. secara otomatis, jadi nomor besar yang
- * terlihat itu murni dekoratif (`aria-hidden`). Panel kiri seluruhnya
- * `aria-hidden="true"`: SETIAP informasi sudah ada di teks kanan,
- * karena aset media mungkin tidak pernah datang.
- *
- * ── Rencana B = KONDISI DEFAULT SEKARANG (T06.4) ───────────────
- * Diturunkan dari data, bukan flag manual:
- *   proses.filter((p) => p.media).length < 6
- * Saat ini 0 dari 11 tahap punya media, jadi panel menampilkan nomor
- * tahap raksasa + nama tahap. NOL elemen `<img>` dirender di seluruh
- * section, dan latarnya bertint aksen — bukan kotak abu (guardrail 7).
- * Begitu ≥6 media nyata masuk ke `proses.ts`, varian media menyala
- * sendiri tanpa mengubah satu baris pun struktur di sini.
+ * Konten `deskripsi` tetap dari `proses.ts` apa adanya (guardrail 1).
  */
 import { proses, babakProses } from '../../content/proses';
 import Container from '../layout/Container.astro';
@@ -36,421 +24,189 @@ interface Props {
 
 const { id }: Props = Astro.props;
 
-/* Derivasi Rencana B — satu ekspresi, dari data (AC T06.4). */
-const jumlahMedia = proses.filter((p) => p.media).length;
-const rencanaB = jumlahMedia < 6;
-
-/* Peta babak: nomor tahap pertama tiap babak → judul babaknya.
-   Dipakai untuk menyisipkan pemisah babak di mobile (T06.5).
-   Tipe key dilebarkan ke `number`/`string` secara eksplisit karena
-   `babakProses` dideklarasikan `as const` di proses.ts — tanpa ini
-   key-nya menyempit jadi union literal (1|4|6|9) dan `.get(t.nomor)`
-   ditolak typechecker. */
-const babakDariTahapPertama = new Map<number, { babak: string; judul: string }>(
-  babakProses.map((b) => [b.tahap[0], { babak: b.babak, judul: b.judul }])
-);
-const babakDariKode = new Map<string, string>(babakProses.map((b) => [b.babak, b.judul]));
-
+const COLS = 4;
+const judulBabak = new Map<string, string>(babakProses.map((b) => [b.babak, b.judul]));
 const nomorDua = (n: number): string => String(n).padStart(2, '0');
+
+type Flow = 'right' | 'left' | 'down' | 'end';
+
+const langkah = proses.map((t, i) => {
+  const row = Math.floor(i / COLS);
+  const posInRow = i % COLS;
+  // Baris genap mengalir kiri→kanan, baris ganjil kanan→kiri.
+  const visualCol = row % 2 === 0 ? posInRow : COLS - 1 - posInRow;
+  const nextRow = Math.floor((i + 1) / COLS);
+
+  let flow: Flow;
+  if (i === proses.length - 1) flow = 'end';
+  else if (nextRow !== row) flow = 'down';
+  else flow = row % 2 === 0 ? 'right' : 'left';
+
+  return { t, gridCol: visualCol + 1, gridRow: row + 1, flow };
+});
 ---
 
 <Container as="section" spacing="section" id={id}>
   <SectionHeading nomor="05" judul="Proses Produksi 11 Tahap" />
 
-  {/* REDESIGN — ikhtisar 4 babak: dari bahan datang sampai barang dikirim. */}
-  <ol class="mv-proses__ringkas" aria-label="Empat babak produksi">
+  <ol class="mv-flow" aria-label="Sebelas tahap produksi, berurutan">
     {
-      babakProses.map((b) => (
-        <li class="mv-proses__ringkas-item">
-          <span class="mv-proses__ringkas-nomor" aria-hidden="true">
-            {b.babak}
+      langkah.map(({ t, gridCol, gridRow, flow }) => (
+        <li class="mv-proses__step" data-flow={flow} style={`--vcol:${gridCol};--vrow:${gridRow}`}>
+          <span class="mv-proses__step-babak t-eyebrow">
+            <span class="sr-only">Babak {t.babak}: </span>
+            {judulBabak.get(t.babak)}
           </span>
-          <span class="mv-proses__ringkas-judul t-label">{b.judul}</span>
+          <span class="mv-proses__step-num" aria-hidden="true">
+            {nomorDua(t.nomor)}
+          </span>
+          <h3 class="mv-proses__step-nama t-h3">{t.nama}</h3>
+          {t.deskripsi && <p class="mv-proses__step-desc t-body-s">{t.deskripsi}</p>}
+          {flow !== 'end' && <span class="mv-proses__flow" aria-hidden="true" />}
         </li>
       ))
     }
   </ol>
-
-  <div class="mv-proses" data-process data-varian={rencanaB ? 'stepper' : 'media'}>
-    {
-      /*
-      PANEL KIRI — dekoratif sepenuhnya.
-      aria-hidden: seluruh isinya duplikat dari teks di kolom kanan.
-      Sticky-nya CSS murni; JavaScript hanya menukar kartu mana yang
-      opacity-nya 1 (crossfade), tidak pernah memposisikan panel.
-    */
-    }
-    <div class="mv-proses__panel" aria-hidden="true">
-      <div class="mv-proses__frame">
-        {
-          /* Progress bar 2px — hanya tampil kalau JS aktif (kalau tidak,
-            ia akan terkunci di 0% dan justru terlihat rusak). */
-        }
-        <span class="mv-proses__progress" data-progress-bar></span>
-
-        <div class="mv-proses__stack">
-          {
-            proses.map((t, i) => (
-              <div class:list={['mv-proses__card', i === 0 && 'is-active']} data-stage-card>
-                {!rencanaB && t.media && (
-                  <img
-                    class="mv-proses__img"
-                    src={t.media}
-                    alt=""
-                    width="900"
-                    height="600"
-                    loading={i === 0 ? 'eager' : 'lazy'}
-                    decoding="async"
-                  />
-                )}
-                <span class="mv-proses__card-nomor">{nomorDua(t.nomor)}</span>
-                <span class="mv-proses__card-nama">{t.nama}</span>
-                <span class="mv-proses__card-babak">
-                  Babak {t.babak} · {babakDariKode.get(t.babak)}
-                </span>
-              </div>
-            ))
-          }
-        </div>
-      </div>
-    </div>
-
-    {/* KOLOM KANAN — sumber kebenaran. Seluruh informasi ada di sini. */}
-    <ol class="mv-proses__list">
-      {
-        proses.map((t) => {
-          const mulaiBabak = babakDariTahapPertama.get(t.nomor);
-          return (
-            <li class="mv-proses__stage" data-stage data-babak={t.babak}>
-              {mulaiBabak && (
-                <p class="mv-proses__babak t-eyebrow">
-                  <span class="sr-only">Babak {mulaiBabak.babak}: </span>
-                  {mulaiBabak.judul}
-                </p>
-              )}
-
-              <span class="mv-proses__nomor" aria-hidden="true">
-                {nomorDua(t.nomor)}
-              </span>
-              <h3 class="mv-proses__nama t-h3">{t.nama}</h3>
-              {t.deskripsi && <p class="mv-proses__desc t-body-m">{t.deskripsi}</p>}
-
-              {/*
-                T06.6 — tanpa JavaScript, tiap blok memuat gambarnya
-                sendiri inline (panel kiri tidak bisa berganti tanpa JS).
-                Dalam Rencana B tidak ada media sama sekali, jadi blok
-                ini tidak merender apa pun — menjaga AC T06.4 "nol <img>".
-              */}
-              {!rencanaB && t.media && (
-                <noscript>
-                  <img
-                    class="mv-proses__img-inline"
-                    src={t.media}
-                    alt={`Tahap ${nomorDua(t.nomor)} — ${t.nama}`}
-                    width="900"
-                    height="600"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </noscript>
-              )}
-            </li>
-          );
-        })
-      }
-    </ol>
-  </div>
 </Container>
 
 <style>
-  /* ---------- ikhtisar 4 babak (REDESIGN) ---------- */
-  .mv-proses__ringkas {
+  .mv-flow {
     list-style: none;
-    margin: 0 0 var(--space-8);
+    margin: 0;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-3);
-    counter-reset: babak;
+    gap: var(--flow-gap, var(--space-6));
+    --flow-gap: var(--space-6);
   }
 
-  .mv-proses__ringkas-item {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    padding: var(--space-4);
-    border-block-start: 2px solid var(--color-accent);
-    background-color: var(--color-surface);
-  }
-
-  .mv-proses__ringkas-nomor {
-    font-family: var(--font-display);
-    font-weight: 900;
-    font-size: clamp(1.75rem, 4vw, 2.75rem);
-    line-height: 1;
-    color: var(--color-accent);
-  }
-
-  .mv-proses__ringkas-judul {
-    color: var(--color-text);
-  }
-
-  @media (max-width: 767.98px) {
-    .mv-proses__ringkas {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-  }
-
-  .mv-proses {
-    /* Navbar fixed setinggi 76px (Navbar.astro, S03). tokens.css DAN
-       Navbar.astro sama-sama terkunci di sprint ini, jadi angkanya
-       diulang di sini dengan catatan kopling. Pindahkan ke tokens.css
-       (mis. --nav-h) begitu file itu boleh disentuh lagi. */
-    --stepper-top: calc(76px + var(--space-5));
-    --stepper-panel-w: 5fr;
-    --stepper-list-w: 7fr;
-  }
-
-  /* ---------- desktop: grid 5 / 7 ---------- */
-  @media (min-width: 1024px) {
-    .mv-proses {
-      display: grid;
-      grid-template-columns: var(--stepper-panel-w) var(--stepper-list-w);
-      gap: var(--space-8);
-      align-items: start;
-    }
-
-    .mv-proses__panel {
-      position: sticky;
-      inset-block-start: var(--stepper-top);
-      /* align-self:start WAJIB — tanpa ini item grid ter-stretch setinggi
-         baris, dan elemen yang mengisi penuh induknya tidak punya ruang
-         untuk "menempel". Ini penyebab paling umum sticky-di-grid gagal. */
-      align-self: start;
-    }
-  }
-
-  /* ---------- panel dekoratif ---------- */
-  .mv-proses__frame {
+  .mv-proses__step {
     position: relative;
-    /* Rasio 3:2 = rasio aset "Proses/workshop" (CLAUDE.md aturan aset).
-       Kotak berdimensi tetap → nol layout shift saat kartu bertukar. */
-    aspect-ratio: 3 / 2;
-    overflow: hidden;
-    border: var(--border-width) solid var(--color-accent);
-    border-radius: var(--radius-control);
-    /* Latar bertint aksen, BUKAN abu netral (guardrail 7 / AC T06.4). */
-    background-color: var(--color-accent-soft);
-  }
+    grid-column: var(--vcol);
+    grid-row: var(--vrow);
 
-  .mv-proses__progress {
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    inline-size: 2px;
-    z-index: 2;
-    background-color: var(--color-accent);
-    transform: scaleY(var(--progress, 0));
-    transform-origin: top center;
-    /* Hanya transform — §6.7. Reduced-motion menolkan durasinya lewat
-       aturan global di global.css, jadi bar berpindah seketika. */
-    transition: transform var(--dur-slow) var(--ease);
-  }
-
-  /* Tanpa JS, progress tidak pernah terisi — sembunyikan agar tidak
-     terlihat seperti komponen rusak. `.js` dipasang observer.ts (S02). */
-  html:not(.js) .mv-proses__progress {
-    display: none;
-  }
-
-  .mv-proses__stack {
-    position: absolute;
-    inset: 0;
-  }
-
-  .mv-proses__card {
-    position: absolute;
-    inset: 0;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-6);
+    padding: var(--space-5);
 
-    opacity: 0;
-    pointer-events: none;
-    /* Crossfade 240ms (§8 Section 5). Dimatikan otomatis oleh aturan
-       reduced-motion global → pergantian jadi seketika, sticky tetap. */
-    transition: opacity var(--dur-slow) var(--ease);
+    border: var(--border-width) solid var(--color-border);
+    border-radius: var(--radius-card);
+    background-color: var(--color-surface);
+    /* blur + elevasi kaca dari pass universal di global.css */
   }
 
-  .mv-proses__card.is-active {
-    opacity: 1;
+  .mv-proses__step-babak {
+    color: var(--color-text-2);
   }
 
-  .mv-proses__img {
-    position: absolute;
-    inset: 0;
-    inline-size: 100%;
-    block-size: 100%;
-    object-fit: cover;
-  }
-
-  .mv-proses__card-nomor {
-    font-family: var(--font-display);
-    font-weight: var(--fw-display);
-    /* 180px persis (BLUEPRINT §8 Section 5 / AC T06.4). Nilai tetap,
-       bukan clamp() berbasis vw: panel ini HANYA dirender ≥1024px, dan
-       pada 1024px pun kolomnya ~380px — dua digit Archiva 800 @180px
-       (~200px) masih muat dengan padding 32px. clamp(…,13vw,…) yang
-       sempat dipakai justru menurunkan nilainya jadi 166px di 1280px. */
-    font-size: 180px;
-    line-height: 0.85;
-    letter-spacing: var(--ls-display);
-    font-variant-numeric: tabular-nums;
-    color: var(--color-accent);
-  }
-
-  .mv-proses__card-nama {
+  .mv-proses__step-num {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: var(--fs-h3);
-    line-height: var(--lh-h3);
-    color: var(--color-accent-hover);
-  }
-
-  .mv-proses__card-babak {
-    font-size: var(--fs-body-s);
-    line-height: var(--lh-body-s);
-    color: var(--color-accent-hover);
-    opacity: 0.8;
-  }
-
-  /* Varian media (belum aktif — lihat Rencana B di kepala file):
-     overlay gelap §6.8 agar teks tetap terbaca di atas foto. */
-  .mv-proses[data-varian='media'] .mv-proses__card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-color: var(--modal-backdrop);
-  }
-
-  .mv-proses[data-varian='media'] .mv-proses__card-nomor,
-  .mv-proses[data-varian='media'] .mv-proses__card-nama,
-  .mv-proses[data-varian='media'] .mv-proses__card-babak {
-    position: relative;
-    z-index: 1;
-    color: var(--color-bg);
-  }
-
-  /* ---------- daftar 11 tahap ---------- */
-  .mv-proses__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .mv-proses__stage {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-2);
-    padding-block: var(--space-6);
-    border-block-end: var(--border-width) solid var(--color-border);
-  }
-
-  .mv-proses__list > .mv-proses__stage:last-child {
-    border-block-end: 0;
-  }
-
-  @media (min-width: 1024px) {
-    .mv-proses__stage {
-      /* Tinggi minimum memberi ruang agar tepat SATU blok melewati garis
-         tengah viewport pada satu waktu — inti pemicu observer. */
-      min-block-size: 56vh;
-      justify-content: center;
-      border-block-end: 0;
-    }
-  }
-
-  .mv-proses__nomor {
-    font-family: var(--font-display);
-    font-weight: var(--fw-display);
-    /* 72px di desktop (BLUEPRINT §8 Section 5); lebih kecil di mobile. */
-    font-size: clamp(40px, 7vw, 72px);
-    line-height: 0.9;
-    letter-spacing: var(--ls-display);
-    font-variant-numeric: tabular-nums;
+    font-size: clamp(1.75rem, 3vw, 2.6rem);
+    line-height: 1;
+    letter-spacing: -0.02em;
     color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
   }
 
-  .mv-proses__nama {
+  .mv-proses__step-nama {
     color: var(--color-text);
     margin: 0;
   }
 
-  .mv-proses__desc {
+  .mv-proses__step-desc {
     color: var(--color-text-2);
     margin: 0;
-    max-inline-size: 54ch;
   }
 
-  .mv-proses__img-inline {
-    inline-size: 100%;
-    block-size: auto;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-    border-radius: var(--radius-control);
-    margin-block-start: var(--space-3);
+  /* ---------- konektor alur ---------- */
+  .mv-proses__flow {
+    position: absolute;
+    z-index: 1;
+    --flow-col: color-mix(in srgb, var(--color-accent) 60%, transparent);
   }
 
-  /* ---------- pemisah babak: mobile saja (T06.5) ---------- */
-  .mv-proses__babak {
-    color: var(--color-accent);
-    margin: 0 0 var(--space-2);
-    padding-block-end: var(--space-2);
-    border-block-end: 2px solid var(--color-accent);
-    align-self: stretch;
+  /* garis putus-putus horizontal (kanan / kiri) */
+  .mv-proses__step[data-flow='right'] .mv-proses__flow,
+  .mv-proses__step[data-flow='left'] .mv-proses__flow {
+    inset-block-start: 50%;
+    inline-size: var(--flow-gap);
+    block-size: 0;
+    border-block-start: 2px dashed var(--flow-col);
+  }
+  .mv-proses__step[data-flow='right'] .mv-proses__flow {
+    inset-inline-end: calc(-1 * var(--flow-gap));
+  }
+  .mv-proses__step[data-flow='left'] .mv-proses__flow {
+    inset-inline-start: calc(-1 * var(--flow-gap));
   }
 
-  @media (min-width: 1024px) {
-    /* Babak adalah ritme khusus mobile — di desktop 11 blok mengalir
-       tanpa jeda, sesuai konsep stepper (BLUEPRINT §1.4). */
-    .mv-proses__babak {
-      display: none;
-    }
+  /* garis vertikal (turun ke baris berikutnya) */
+  .mv-proses__step[data-flow='down'] .mv-proses__flow {
+    inset-inline-start: 50%;
+    inset-block-end: calc(-1 * var(--flow-gap));
+    inline-size: 0;
+    block-size: var(--flow-gap);
+    border-inline-start: 2px dashed var(--flow-col);
   }
 
-  /* ---------- mobile <1024px: sticky DIMATIKAN TOTAL (T06.5) ---------- */
+  /* chevron emas di ujung konektor */
+  .mv-proses__flow::after {
+    content: '';
+    position: absolute;
+    inline-size: 0;
+    block-size: 0;
+    border: 5px solid transparent;
+  }
+  .mv-proses__step[data-flow='right'] .mv-proses__flow::after {
+    inset-inline-end: -3px;
+    inset-block-start: -6px;
+    border-inline-start-color: var(--color-accent);
+  }
+  .mv-proses__step[data-flow='left'] .mv-proses__flow::after {
+    inset-inline-start: -3px;
+    inset-block-start: -6px;
+    border-inline-end-color: var(--color-accent);
+  }
+  .mv-proses__step[data-flow='down'] .mv-proses__flow::after {
+    inset-block-end: -3px;
+    inset-inline-start: -6px;
+    border-block-start-color: var(--color-accent);
+  }
+
+  /* ---------- tablet: 2 kolom, alur vertikal biasa ---------- */
   @media (max-width: 1023.98px) {
-    .mv-proses__panel {
-      /* Panel dekoratif, dan tanpa media ia tidak menambah informasi
-         apa pun di layar sempit — dibuang seluruhnya, bukan dikecilkan. */
-      display: none;
+    .mv-flow {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .mv-proses__step {
+      grid-column: auto !important;
+      grid-row: auto !important;
+    }
+    /* semua konektor jadi "turun" */
+    .mv-proses__step .mv-proses__flow {
+      inset-block: auto;
+      inset-inline: auto;
+      inset-inline-start: 50%;
+      inset-block-end: calc(-1 * var(--flow-gap));
+      inline-size: 0;
+      block-size: var(--flow-gap);
+      border-block-start: 0;
+      border-inline-start: 2px dashed var(--flow-col);
+    }
+    .mv-proses__step .mv-proses__flow::after {
+      inset: auto;
+      inset-block-end: -3px;
+      inset-inline-start: -6px;
+      border-color: transparent;
+      border-block-start-color: var(--color-accent);
     }
   }
 
-  /* ---------- T06.7: tanpa IntersectionObserver ---------- */
-  .mv-proses[data-no-io] {
-    display: block;
-  }
-
-  .mv-proses[data-no-io] .mv-proses__panel {
-    display: none;
-  }
-
-  .mv-proses[data-no-io] .mv-proses__babak {
-    display: block;
-  }
-
-  .mv-proses[data-no-io] .mv-proses__stage {
-    min-block-size: 0;
-    padding-block: var(--space-6);
-    border-block-end: var(--border-width) solid var(--color-border);
+  @media (max-width: 639.98px) {
+    .mv-flow {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
-
-<script>
-  import { initProcessStepper } from '../../scripts/process-stepper';
-  initProcessStepper();
-</script>

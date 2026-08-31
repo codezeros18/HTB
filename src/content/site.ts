@@ -45,7 +45,7 @@ export const site: SiteConfig = {
     eyebrow: 'OFFICIAL BRAND BY CV. HUIMORA TALENTA BERKARYA',
     h1: 'KONVEKSI CUSTOM APPAREL & RACEPACK',
     sub: 'Kaos, jersey, seragam, jaket, dan racepack lari — dikerjakan di workshop dan pabrik kami sendiri, dengan kontrol kualitas berlapis.',
-    ctaPrimer: 'Hubungi Kami via WhatsApp',
+    ctaPrimer: 'Chat WhatsApp',
     ctaSekunder: 'Lihat Katalog',
     // BLUEPRINT §1.2/§8 [FAKTA-PDF] — anchor 38k, baris kecil, BUKAN headline.
     anchorHarga: 'Mulai Rp 38.000/pcs untuk kaos PE Soft 20s, sudah termasuk 1 logo depan.',
@@ -136,7 +136,7 @@ export const site: SiteConfig = {
       'event-olahraga': 'Event & Olahraga',
       'komunitas-organisasi': 'Komunitas & Organisasi',
     },
-    ctaLabel: 'Diskusikan kebutuhan tim Anda',
+    ctaLabel: 'Chat WhatsApp',
   },
 
   /* =============================================================
@@ -204,7 +204,7 @@ export const site: SiteConfig = {
     pesanGagalJudul: 'Pesan gagal terkirim',
     pesanGagalDeskripsi:
       'Silakan coba lagi, atau langsung hubungi kami lewat WhatsApp supaya kebutuhan Anda tidak tertunda.',
-    labelWaJalanKeluar: 'Lanjut via WhatsApp',
+    labelWaJalanKeluar: 'Chat WhatsApp',
     // [GAP] — akun Web3Forms klien belum ada. Lihat catatan tipe di types.ts.
     web3formsAccessKey: null,
   },

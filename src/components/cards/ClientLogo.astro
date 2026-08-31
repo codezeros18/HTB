@@ -32,7 +32,7 @@ const tampilLogo = izinTayang && logo !== null;
 ---
 
 <li class:list={['mv-client', className]}>
-  <div class="mv-client__box">
+  <div class="mv-client__chip">
     {
       tampilLogo ? (
         <img
@@ -58,42 +58,51 @@ const tampilLogo = izinTayang && logo !== null;
     justify-content: center;
   }
 
-  .mv-client__box {
+  /* REDESIGN 2026-08-31 — border putih dibuang. Tiap logo di CHIP TERANG
+     rounded: logo berlatar putih (mayoritas aset) menyatu mulus, logo PNG
+     transparan dapat alas bersih. Glow emas lembut saat hover. */
+  .mv-client__chip {
     inline-size: 100%;
-    max-inline-size: var(--logo-box-w); /* 160px */
-    block-size: var(--logo-box-h); /* 80px — dikunci di semua viewport */
-    padding: var(--space-4); /* 16px */
+    max-inline-size: var(--logo-box-w);
+    block-size: var(--logo-box-h);
+    padding: var(--space-4);
     display: flex;
     align-items: center;
     justify-content: center;
-    /* Latar netral untuk SEMUA sel (mode teks & mode logo identik).
-       Guardrail 4 → token, bukan hex. Arah A: `--color-bg` = putih, sesuai
-       BLUEPRINT §8 Section 6 "kotak tetap putih". Bila Arah B (gelap)
-       diaktifkan, logo berlatar putih memang wajib dipotong dulu
-       (BLUEPRINT §6.4) — ditangani di titik itu, bukan di sini. */
-    background-color: var(--color-bg);
-    border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-control);
+
+    background-color: var(--color-chip);
+    border: 0;
+    border-radius: var(--radius-card);
+    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
+    transition:
+      transform var(--dur-base) var(--ease),
+      box-shadow var(--dur-base) var(--ease);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mv-client:hover .mv-client__chip {
+      transform: translateY(-3px);
+      box-shadow:
+        0 14px 34px -12px rgba(0, 0, 0, 0.65),
+        0 0 34px -6px color-mix(in srgb, var(--color-accent) 60%, transparent);
+    }
   }
 
   .mv-client__img {
     max-inline-size: 100%;
-    max-block-size: 44px; /* BLUEPRINT §8 Section 6 */
+    max-block-size: 46px;
     inline-size: auto;
     block-size: auto;
     object-fit: contain;
-    /* Nol filter — grayscale dilarang (menghapus identitas warna). */
   }
 
   .mv-client__nama {
-    font-family: var(--font-display);
-    font-weight: 600; /* Archivo 600 (BLUEPRINT §5.3) */
+    font-family: var(--font-body);
+    font-weight: 600;
     font-size: 12px;
     line-height: 1.2;
     text-align: center;
-    color: var(--color-text);
-    /* Nama panjang ("Politeknik Penerbangan Indonesia (PPI) Curug") tetap
-       terbaca penuh — dipotong baris, bukan ellipsis. */
+    color: var(--color-chip-ink); /* teks gelap di atas chip terang */
     overflow-wrap: anywhere;
     hyphens: auto;
   }

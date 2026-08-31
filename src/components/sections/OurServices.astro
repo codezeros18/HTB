@@ -13,7 +13,7 @@
  *
  * Kartu = tautan `<a>` biasa. NOL JavaScript di section ini.
  */
-import { layanan } from '../../content/layanan';
+import { layanan, layananHref } from '../../content/layanan';
 import Container from '../layout/Container.astro';
 
 interface Props {
@@ -21,10 +21,6 @@ interface Props {
 }
 
 const { id }: Props = Astro.props;
-
-/** Layanan 1-kelompok ditautkan langsung ke daftar produknya. */
-const hrefLayanan = (l: (typeof layanan)[number]): string =>
-  l.sub.length === 1 && l.sub[0] ? `/layanan/${l.slug}/${l.sub[0].slug}` : `/layanan/${l.slug}`;
 
 const jumlahItem = (l: (typeof layanan)[number]): number =>
   l.sub.reduce((n, s) => n + s.items.length, 0);
@@ -39,7 +35,7 @@ const jumlahItem = (l: (typeof layanan)[number]): number =>
   <div class="svc__cards">
     {
       layanan.map((l) => (
-        <a class="svc__card" href={hrefLayanan(l)}>
+        <a class="svc__card" href={layananHref(l)}>
           <span class="svc__card-media">
             <img
               src={l.foto}

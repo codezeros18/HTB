@@ -93,9 +93,11 @@ const {
   }
 
   .mv-modal__panel {
-    background-color: var(--color-bg);
+    /* REDESIGN — panel KACA (glassmorphism). blur + elevasi dari pass
+       universal di global.css; di sini warna + radius + kilau tepi. */
+    background-color: color-mix(in srgb, var(--color-bg) 82%, transparent);
     border: var(--border-width) solid var(--color-border);
-    border-radius: var(--radius-modal); /* 8px — satu-satunya radius 8 */
+    border-radius: var(--radius-modal);
     display: flex;
     flex-direction: column;
     max-block-size: calc(100dvh - 2 * var(--space-6));

@@ -30,13 +30,14 @@
  */
 import { site } from '../../content/site';
 import { navItems } from './nav-items';
+import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 import WhatsAppButton from '../ui/WhatsAppButton.astro';
 ---
 
 <header class="mv-nav" data-mv-nav>
   <div class="mv-nav__surface">
     <div class="mv-nav__inner">
-      <a class="mv-nav__logo" href="#top" aria-label={`${site.brand} — kembali ke atas`}>
+      <a class="mv-nav__logo" href="/#top" aria-label={`${site.brand} — kembali ke atas`}>
         <img
           class="mv-nav__logo-img"
           src="/images/logo/LOGO%20MOTIVE%20NEW%20PUTIH.png"
@@ -50,10 +51,39 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
         <ul class="mv-nav__list">
           {
             navItems.map((item) => (
-              <li>
+              <li
+                class:list={['mv-nav__item', item.sectionId === 'produk' && 'mv-nav__item--mega']}
+              >
                 <a class="mv-nav__link" href={item.href} data-nav-link={item.sectionId}>
                   <span class="mv-nav__linklabel">{item.label}</span>
                 </a>
+
+                {/* Mega menu "fast track" — REDESIGN 2026-08-30. HANYA di item
+                    Produk: banyak kategori sejak drill-down `/layanan/**` ada,
+                    jadi ditawarkan jalan pintas langsung dari navbar. CSS-only
+                    (buka via :hover/:focus-within pada <li>, deteksi nol JS). */}
+                {item.sectionId === 'produk' && (
+                  <div class="mv-mega">
+                    <div class="mv-mega__inner">
+                      {layanan.map((l) => (
+                        <div class="mv-mega__col">
+                          <a class="mv-mega__col-title t-label" href={layananHref(l)}>
+                            {l.nama}
+                          </a>
+                          <ul class="mv-mega__list">
+                            {layananQuickLinks(l).map((q) => (
+                              <li>
+                                <a class="mv-mega__link" href={q.href}>
+                                  {q.label}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </li>
             ))
           }
@@ -66,13 +96,7 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
             Di mobile, CTA tetap terlihat; yang disembunyikan adalah
             daftar link (BLUEPRINT §8: korbankan menu, bukan CTA). */
         }
-        <WhatsAppButton
-          konteks="navbar"
-          label="Hubungi Kami"
-          class="mv-nav__cta"
-          variant="secondary"
-          ikon={false}
-        />
+        <WhatsAppButton konteks="navbar" class="mv-nav__cta" variant="secondary" ikon={false} />
 
         <button
           type="button"
@@ -102,10 +126,8 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
 <style>
   .mv-nav,
   .mv-nav-spacer {
-    /* REDESIGN (2026-08-28) — navbar transparan, tinggi tetap 64px, tanpa
-       susut saat scroll (--nav-shrink: 0 menonaktifkan kedua transform). */
+    /* REDESIGN (2026-08-28) — navbar transparan, tinggi tetap 64px, nol susut. */
     --nav-h: 64px;
-    --nav-shrink: 0px;
   }
 
   /* ---------- kerangka ---------- */
@@ -146,16 +168,32 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
     overflow: hidden;
     pointer-events: auto;
 
-    /* REDESIGN — transparan penuh: nol latar, nol border bawah. */
+    /* Transparan di puncak halaman (di atas hero). REDESIGN — begitu discroll
+       (`[data-scrolled]`), permukaan jadi kaca gelap tipis (glassmorphism)
+       supaya navbar tetap terbaca di atas konten putih/terang di bawahnya.
+       SENGAJA tidak memakai `transform` di sini (atau di .mv-nav__inner) —
+       transform apa pun membuat elemen ini jadi containing block baru untuk
+       descendant `position: fixed`, yang akan mematahkan posisi & memotong
+       mega menu (.mv-mega) yang bersarang di dalam navlist. */
     background-color: transparent;
-    border-block-end: 0;
+    border-block-end: var(--border-width) solid transparent;
 
-    transition: transform var(--dur-base) var(--ease);
+    transition:
+      background-color var(--dur-base) var(--ease),
+      backdrop-filter var(--dur-base) var(--ease),
+      border-block-end-color var(--dur-base) var(--ease);
   }
 
   .mv-nav[data-scrolled] .mv-nav__surface {
-    /* Tepi bawah + border mendarat di y=60. Murni transform. */
-    transform: translateY(calc(-1 * var(--nav-shrink)));
+    background-color: color-mix(in srgb, var(--color-bg) 72%, transparent);
+    /* Urutan SENGAJA: prefix dulu, properti standar terakhir. Build tool
+       (esbuild CSS minifier) mem-fold pasangan prefixed+standar bernilai
+       identik jadi satu deklarasi — yang selamat adalah yang ditulis
+       PALING BELAKANG. Standar di baris terakhir memastikan browser modern
+       (yang membaca `backdrop-filter` tanpa prefix) tetap dapat nilainya. */
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    backdrop-filter: blur(14px) saturate(140%);
+    border-block-end-color: color-mix(in srgb, var(--color-text) 12%, transparent);
   }
 
   /* ---------- isi ---------- */
@@ -175,13 +213,6 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
     max-inline-size: var(--container-max);
     margin-inline: auto;
     padding-inline: var(--edge-pad);
-
-    transition: transform var(--dur-base) var(--ease);
-  }
-
-  .mv-nav[data-scrolled] .mv-nav__inner {
-    /* Setengah dari penyusutan — mengembalikan isi ke tengah pita 60px. */
-    transform: translateY(calc(var(--nav-shrink) / 2));
   }
 
   /* ---------- logo (kolom kiri) ---------- */
@@ -285,6 +316,110 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
     outline-offset: var(--focus-ring-offset);
   }
 
+  /* ---------- mega menu "Produk" (REDESIGN 2026-08-30) ----------
+     Buka via :hover / :focus-within pada <li> — NOL JavaScript. .mv-mega
+     posisinya `fixed` (bukan absolute): lebar penuh viewport & tidak
+     dibatasi lebar link pemicunya, meniru pola mega-menu Uniqlo. Karena ia
+     tetap anak DOM dari <li>, mengarahkan pointer ke panel tetap dianggap
+     "menghover <li>" walau posisinya di layar terpisah dari link — jembatan
+     hover tanpa celah (li tinggi 44px, panel mulai persis di y=64px). */
+  .mv-nav__item {
+    position: relative;
+  }
+
+  .mv-mega {
+    position: fixed;
+    inset-block-start: var(--nav-h);
+    inset-inline: 0;
+    z-index: 49;
+
+    background-color: color-mix(in srgb, var(--color-bg) 94%, transparent);
+    /* Urutan sengaja — lihat catatan di .mv-nav__surface[data-scrolled]. */
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+    border-block-end: var(--border-width) solid var(--color-border);
+
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition:
+      opacity var(--dur-base) var(--ease),
+      transform var(--dur-base) var(--ease),
+      visibility 0s linear var(--dur-base);
+  }
+
+  .mv-nav__item--mega:hover .mv-mega,
+  .mv-nav__item--mega:focus-within .mv-mega {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition-delay: 0s;
+  }
+
+  .mv-mega__inner {
+    max-inline-size: var(--container-max);
+    margin-inline: auto;
+    padding-inline: var(--edge-pad);
+    padding-block: var(--space-7);
+
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+
+  .mv-mega__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .mv-mega__col-title {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  .mv-mega__col-title:hover {
+    text-decoration: underline;
+  }
+
+  .mv-mega__col-title:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-mega__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .mv-mega__link {
+    display: flex;
+    align-items: center;
+    color: var(--color-text-2);
+    text-decoration: none;
+    font-size: var(--fs-body-s);
+    min-block-size: var(--tap-min);
+  }
+
+  .mv-mega__link:hover {
+    color: var(--color-text);
+  }
+
+  .mv-mega__link:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mv-mega {
+      transition-duration: 0ms;
+    }
+  }
+
   /* ---------- aksi (kolom kanan) ---------- */
   .mv-nav__aksi {
     justify-self: end;
@@ -297,9 +432,11 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
      custom property mengalir ke ui/Button lewat cascade (pola sama seperti Hero),
      tanpa menyentuh Button.astro. Varian tombol = secondary (lihat markup). */
   .mv-nav__cta {
+    /* Tombol secondary = kaca; di navbar transparan paksa teks + tepi putih. */
     --color-text: #ffffff;
-    --color-border-strong: #ffffff;
-    --color-surface: rgba(255, 255, 255, 0.14);
+    --color-border: rgba(255, 255, 255, 0.55);
+    --color-surface: rgba(255, 255, 255, 0.1);
+    --color-surface-alt: rgba(255, 255, 255, 0.18);
   }
 
   .mv-nav__hamburger {
