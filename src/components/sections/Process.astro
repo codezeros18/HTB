@@ -1,18 +1,27 @@
 ---
 /**
  * Proses Produksi — REDESIGN 2026-08-31 (permintaan klien: "boring, ga ada
- * meaning").
+ * meaning"), diperbaiki 2026-08-31 (fix: arah panah salah di breakpoint
+ * kecil).
  *
- * Alur BOUSTROPHEDON (ular): 11 kartu kaca mengalir kiri→kanan, mentok
- * kanan lalu turun & balik kanan→kiri, dst. Konektor garis putus-putus +
- * chevron emas menyambungkan tiap tahap → jelas terbaca sebagai SATU alur:
- * bahan datang → pola → potong → jahit → QC → kirim.
+ * Alur BOUSTROPHEDON (ular): kartu kaca mengalir kiri→kanan, mentok kanan
+ * lalu turun & balik kanan→kiri, dst. Konektor garis putus-putus + chevron
+ * emas menyambungkan tiap tahap → jelas terbaca sebagai SATU alur.
  *
- * Nol JavaScript, nol sticky panel (dibuang — dulu bergantung media yang
- * tak pernah ada). Posisi grid tiap kartu dihitung di frontmatter dari
- * indeksnya; di bawah 1024px degradasi ke daftar vertikal biasa.
+ * ── Kenapa dihitung 4× (bukan 1×) ──────────────────────────────────
+ * Posisi grid & ARAH tiap konektor bergantung pada JUMLAH KOLOM (baris
+ * genap/ganjil menentukan kiri→kanan atau kanan→kiri). Situs ini punya
+ * 4 lebar grid berbeda (4/3/2/1 kolom) di 4 breakpoint berbeda — kalau
+ * arah cuma dihitung sekali untuk 4 kolom lalu dipaksa "selalu turun" di
+ * breakpoint lain (bug versi sebelumnya), panahnya salah arah begitu
+ * layout berubah. Di sini `susunLangkah(cols)` dihitung terpisah untuk
+ * cols=4/3/2/1, hasilnya disimpan sebagai custom property + atribut
+ * `data-flow-c{N}` PER KARTU, dan CSS memilih set yang sesuai per
+ * breakpoint — tiap lebar grid dapat arah panahnya sendiri yang benar.
+ * cols=1 otomatis selalu "turun" (satu kolom = tidak ada kiri/kanan).
  *
- * Konten `deskripsi` tetap dari `proses.ts` apa adanya (guardrail 1).
+ * Nol JavaScript, nol sticky panel. Konten `deskripsi` tetap dari
+ * `proses.ts` apa adanya (guardrail 1).
  */
 import { proses, babakProses } from '../../content/proses';
 import Container from '../layout/Container.astro';
@@ -24,26 +33,46 @@ interface Props {
 
 const { id }: Props = Astro.props;
 
-const COLS = 4;
 const judulBabak = new Map<string, string>(babakProses.map((b) => [b.babak, b.judul]));
 const nomorDua = (n: number): string => String(n).padStart(2, '0');
 
 type Flow = 'right' | 'left' | 'down' | 'end';
+interface Posisi {
+  gridCol: number;
+  gridRow: number;
+  flow: Flow;
+}
 
-const langkah = proses.map((t, i) => {
-  const row = Math.floor(i / COLS);
-  const posInRow = i % COLS;
-  // Baris genap mengalir kiri→kanan, baris ganjil kanan→kiri.
-  const visualCol = row % 2 === 0 ? posInRow : COLS - 1 - posInRow;
-  const nextRow = Math.floor((i + 1) / COLS);
+/** Boustrophedon generik untuk N kolom — lihat catatan di atas. */
+function susunLangkah(cols: number): Posisi[] {
+  return proses.map((_, i) => {
+    const row = Math.floor(i / cols);
+    const posInRow = i % cols;
+    const visualCol = row % 2 === 0 ? posInRow : cols - 1 - posInRow;
+    const nextRow = Math.floor((i + 1) / cols);
 
-  let flow: Flow;
-  if (i === proses.length - 1) flow = 'end';
-  else if (nextRow !== row) flow = 'down';
-  else flow = row % 2 === 0 ? 'right' : 'left';
+    let flow: Flow;
+    if (i === proses.length - 1) flow = 'end';
+    else if (nextRow !== row) flow = 'down';
+    else flow = row % 2 === 0 ? 'right' : 'left';
 
-  return { t, gridCol: visualCol + 1, gridRow: row + 1, flow };
-});
+    return { gridCol: visualCol + 1, gridRow: row + 1, flow };
+  });
+}
+
+// Lebar grid per breakpoint — cocokkan dengan @media di <style> di bawah.
+const c4 = susunLangkah(4); // ≥1024px
+const c3 = susunLangkah(3); // 768–1023.98px
+const c2 = susunLangkah(2); // 480–767.98px
+const c1 = susunLangkah(1); // <480px — selalu 1 kolom, arah selalu "turun"
+
+const langkah = proses.map((t, i) => ({
+  t,
+  c4: c4[i]!,
+  c3: c3[i]!,
+  c2: c2[i]!,
+  c1: c1[i]!,
+}));
 ---
 
 <Container as="section" spacing="section" id={id}>
@@ -51,8 +80,15 @@ const langkah = proses.map((t, i) => {
 
   <ol class="mv-flow" aria-label="Sebelas tahap produksi, berurutan">
     {
-      langkah.map(({ t, gridCol, gridRow, flow }) => (
-        <li class="mv-proses__step" data-flow={flow} style={`--vcol:${gridCol};--vrow:${gridRow}`}>
+      langkah.map(({ t, c4, c3, c2, c1 }) => (
+        <li
+          class="mv-proses__step"
+          data-flow-c4={c4.flow}
+          data-flow-c3={c3.flow}
+          data-flow-c2={c2.flow}
+          data-flow-c1={c1.flow}
+          style={`--vcol-c4:${c4.gridCol};--vrow-c4:${c4.gridRow};--vcol-c3:${c3.gridCol};--vrow-c3:${c3.gridRow};--vcol-c2:${c2.gridCol};--vrow-c2:${c2.gridRow};--vrow-c1:${c1.gridRow}`}
+        >
           <span class="mv-proses__step-babak t-eyebrow">
             <span class="sr-only">Babak {t.babak}: </span>
             {judulBabak.get(t.babak)}
@@ -62,7 +98,7 @@ const langkah = proses.map((t, i) => {
           </span>
           <h3 class="mv-proses__step-nama t-h3">{t.nama}</h3>
           {t.deskripsi && <p class="mv-proses__step-desc t-body-s">{t.deskripsi}</p>}
-          {flow !== 'end' && <span class="mv-proses__flow" aria-hidden="true" />}
+          <span class="mv-proses__flow" aria-hidden="true" />
         </li>
       ))
     }
@@ -75,16 +111,12 @@ const langkah = proses.map((t, i) => {
     margin: 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--flow-gap, var(--space-6));
     --flow-gap: var(--space-6);
   }
 
   .mv-proses__step {
     position: relative;
-    grid-column: var(--vcol);
-    grid-row: var(--vrow);
-
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -120,38 +152,13 @@ const langkah = proses.map((t, i) => {
     margin: 0;
   }
 
-  /* ---------- konektor alur ---------- */
+  /* ---------- konektor: kerangka bersama, arah diisi per breakpoint ---------- */
   .mv-proses__flow {
     position: absolute;
     z-index: 1;
     --flow-col: color-mix(in srgb, var(--color-accent) 60%, transparent);
   }
 
-  /* garis putus-putus horizontal (kanan / kiri) */
-  .mv-proses__step[data-flow='right'] .mv-proses__flow,
-  .mv-proses__step[data-flow='left'] .mv-proses__flow {
-    inset-block-start: 50%;
-    inline-size: var(--flow-gap);
-    block-size: 0;
-    border-block-start: 2px dashed var(--flow-col);
-  }
-  .mv-proses__step[data-flow='right'] .mv-proses__flow {
-    inset-inline-end: calc(-1 * var(--flow-gap));
-  }
-  .mv-proses__step[data-flow='left'] .mv-proses__flow {
-    inset-inline-start: calc(-1 * var(--flow-gap));
-  }
-
-  /* garis vertikal (turun ke baris berikutnya) */
-  .mv-proses__step[data-flow='down'] .mv-proses__flow {
-    inset-inline-start: 50%;
-    inset-block-end: calc(-1 * var(--flow-gap));
-    inline-size: 0;
-    block-size: var(--flow-gap);
-    border-inline-start: 2px dashed var(--flow-col);
-  }
-
-  /* chevron emas di ujung konektor */
   .mv-proses__flow::after {
     content: '';
     position: absolute;
@@ -159,54 +166,177 @@ const langkah = proses.map((t, i) => {
     block-size: 0;
     border: 5px solid transparent;
   }
-  .mv-proses__step[data-flow='right'] .mv-proses__flow::after {
-    inset-inline-end: -3px;
-    inset-block-start: -6px;
-    border-inline-start-color: var(--color-accent);
-  }
-  .mv-proses__step[data-flow='left'] .mv-proses__flow::after {
-    inset-inline-start: -3px;
-    inset-block-start: -6px;
-    border-inline-end-color: var(--color-accent);
-  }
-  .mv-proses__step[data-flow='down'] .mv-proses__flow::after {
-    inset-block-end: -3px;
-    inset-inline-start: -6px;
-    border-block-start-color: var(--color-accent);
+
+  /* Tahap terakhir (flow "end") tidak punya konektor keluar, di breakpoint mana pun. */
+  .mv-proses__step[data-flow-c4='end'] .mv-proses__flow,
+  .mv-proses__step[data-flow-c3='end'] .mv-proses__flow,
+  .mv-proses__step[data-flow-c2='end'] .mv-proses__flow,
+  .mv-proses__step[data-flow-c1='end'] .mv-proses__flow {
+    display: none;
   }
 
-  /* ---------- tablet: 2 kolom, alur vertikal biasa ---------- */
-  @media (max-width: 1023.98px) {
+  /* ===== ≥1024px — 4 kolom ===== */
+  @media (min-width: 1024px) {
     .mv-flow {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
     .mv-proses__step {
-      grid-column: auto !important;
-      grid-row: auto !important;
+      grid-column: var(--vcol-c4);
+      grid-row: var(--vrow-c4);
     }
-    /* semua konektor jadi "turun" */
-    .mv-proses__step .mv-proses__flow {
-      inset-block: auto;
-      inset-inline: auto;
+
+    .mv-proses__step[data-flow-c4='right'] .mv-proses__flow,
+    .mv-proses__step[data-flow-c4='left'] .mv-proses__flow {
+      inset-block-start: 50%;
+      inline-size: var(--flow-gap);
+      block-size: 0;
+      border-block-start: 2px dashed var(--flow-col);
+    }
+    .mv-proses__step[data-flow-c4='right'] .mv-proses__flow {
+      inset-inline-end: calc(-1 * var(--flow-gap));
+    }
+    .mv-proses__step[data-flow-c4='left'] .mv-proses__flow {
+      inset-inline-start: calc(-1 * var(--flow-gap));
+    }
+    .mv-proses__step[data-flow-c4='down'] .mv-proses__flow {
       inset-inline-start: 50%;
       inset-block-end: calc(-1 * var(--flow-gap));
       inline-size: 0;
       block-size: var(--flow-gap);
-      border-block-start: 0;
       border-inline-start: 2px dashed var(--flow-col);
     }
-    .mv-proses__step .mv-proses__flow::after {
-      inset: auto;
+    .mv-proses__step[data-flow-c4='right'] .mv-proses__flow::after {
+      inset-inline-end: -3px;
+      inset-block-start: -6px;
+      border-inline-start-color: var(--color-accent);
+    }
+    .mv-proses__step[data-flow-c4='left'] .mv-proses__flow::after {
+      inset-inline-start: -3px;
+      inset-block-start: -6px;
+      border-inline-end-color: var(--color-accent);
+    }
+    .mv-proses__step[data-flow-c4='down'] .mv-proses__flow::after {
       inset-block-end: -3px;
       inset-inline-start: -6px;
-      border-color: transparent;
       border-block-start-color: var(--color-accent);
     }
   }
 
-  @media (max-width: 639.98px) {
+  /* ===== 768–1023.98px — 3 kolom ===== */
+  @media (min-width: 768px) and (max-width: 1023.98px) {
+    .mv-flow {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .mv-proses__step {
+      grid-column: var(--vcol-c3);
+      grid-row: var(--vrow-c3);
+    }
+
+    .mv-proses__step[data-flow-c3='right'] .mv-proses__flow,
+    .mv-proses__step[data-flow-c3='left'] .mv-proses__flow {
+      inset-block-start: 50%;
+      inline-size: var(--flow-gap);
+      block-size: 0;
+      border-block-start: 2px dashed var(--flow-col);
+    }
+    .mv-proses__step[data-flow-c3='right'] .mv-proses__flow {
+      inset-inline-end: calc(-1 * var(--flow-gap));
+    }
+    .mv-proses__step[data-flow-c3='left'] .mv-proses__flow {
+      inset-inline-start: calc(-1 * var(--flow-gap));
+    }
+    .mv-proses__step[data-flow-c3='down'] .mv-proses__flow {
+      inset-inline-start: 50%;
+      inset-block-end: calc(-1 * var(--flow-gap));
+      inline-size: 0;
+      block-size: var(--flow-gap);
+      border-inline-start: 2px dashed var(--flow-col);
+    }
+    .mv-proses__step[data-flow-c3='right'] .mv-proses__flow::after {
+      inset-inline-end: -3px;
+      inset-block-start: -6px;
+      border-inline-start-color: var(--color-accent);
+    }
+    .mv-proses__step[data-flow-c3='left'] .mv-proses__flow::after {
+      inset-inline-start: -3px;
+      inset-block-start: -6px;
+      border-inline-end-color: var(--color-accent);
+    }
+    .mv-proses__step[data-flow-c3='down'] .mv-proses__flow::after {
+      inset-block-end: -3px;
+      inset-inline-start: -6px;
+      border-block-start-color: var(--color-accent);
+    }
+  }
+
+  /* ===== 480–767.98px — 2 kolom ===== */
+  @media (min-width: 480px) and (max-width: 767.98px) {
+    .mv-flow {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .mv-proses__step {
+      grid-column: var(--vcol-c2);
+      grid-row: var(--vrow-c2);
+    }
+
+    .mv-proses__step[data-flow-c2='right'] .mv-proses__flow,
+    .mv-proses__step[data-flow-c2='left'] .mv-proses__flow {
+      inset-block-start: 50%;
+      inline-size: var(--flow-gap);
+      block-size: 0;
+      border-block-start: 2px dashed var(--flow-col);
+    }
+    .mv-proses__step[data-flow-c2='right'] .mv-proses__flow {
+      inset-inline-end: calc(-1 * var(--flow-gap));
+    }
+    .mv-proses__step[data-flow-c2='left'] .mv-proses__flow {
+      inset-inline-start: calc(-1 * var(--flow-gap));
+    }
+    .mv-proses__step[data-flow-c2='down'] .mv-proses__flow {
+      inset-inline-start: 50%;
+      inset-block-end: calc(-1 * var(--flow-gap));
+      inline-size: 0;
+      block-size: var(--flow-gap);
+      border-inline-start: 2px dashed var(--flow-col);
+    }
+    .mv-proses__step[data-flow-c2='right'] .mv-proses__flow::after {
+      inset-inline-end: -3px;
+      inset-block-start: -6px;
+      border-inline-start-color: var(--color-accent);
+    }
+    .mv-proses__step[data-flow-c2='left'] .mv-proses__flow::after {
+      inset-inline-start: -3px;
+      inset-block-start: -6px;
+      border-inline-end-color: var(--color-accent);
+    }
+    .mv-proses__step[data-flow-c2='down'] .mv-proses__flow::after {
+      inset-block-end: -3px;
+      inset-inline-start: -6px;
+      border-block-start-color: var(--color-accent);
+    }
+  }
+
+  /* ===== <480px — 1 kolom: tidak ada kiri/kanan, SELALU turun ===== */
+  @media (max-width: 479.98px) {
     .mv-flow {
       grid-template-columns: 1fr;
+    }
+    .mv-proses__step {
+      grid-column: 1;
+      grid-row: var(--vrow-c1);
+    }
+
+    .mv-proses__step[data-flow-c1='down'] .mv-proses__flow {
+      inset-inline-start: 50%;
+      inset-block-end: calc(-1 * var(--flow-gap));
+      inline-size: 0;
+      block-size: var(--flow-gap);
+      border-inline-start: 2px dashed var(--flow-col);
+    }
+    .mv-proses__step[data-flow-c1='down'] .mv-proses__flow::after {
+      inset-block-end: -3px;
+      inset-inline-start: -6px;
+      border-block-start-color: var(--color-accent);
     }
   }
 </style>

@@ -49,6 +49,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://motive.exam
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+    {
+      /* REDESIGN 2026-08-31 — favicon dari mark "////" logo MOTIVE (dulu
+        nol favicon sama sekali → tab browser pakai ikon generik). Wordmark
+        asli terlalu lebar (rasio ~7,7:1) untuk kotak favicon, jadi dipotong
+        ke bagian mark-nya saja + latar warna brand `--color-bg`. */
+    }
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon/favicon-48.png" />
+    <link rel="apple-touch-icon" href="/favicon/apple-touch-icon.png" />
+
     <title>{title}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />

@@ -30,7 +30,6 @@ import { SECTION_IDS } from '../components/layout/nav-items';
 import Hero from '../components/sections/Hero.astro';
 import About from '../components/sections/About.astro';
 import OurServices from '../components/sections/OurServices.astro';
-import Services from '../components/sections/Services.astro';
 import Process from '../components/sections/Process.astro';
 import Clients from '../components/sections/Clients.astro';
 import Gallery from '../components/sections/Gallery.astro';
@@ -46,7 +45,12 @@ import Contact from '../components/sections/Contact.astro';
       memegang anchor #produk. Katalog detail tetap di <Services> di bawahnya. */
   }
   <OurServices id={SECTION_IDS.produk} />
-  <Services />
+  {
+    /* REDESIGN 2026-08-31 — <Services> (Bahan & Panduan Ukuran) DIHAPUS dari
+       homepage atas permintaan klien: 8 tabel ukuran semua belum diverifikasi
+       (isinya cuma "sedang diperbarui" + CTA WA) → tidak berguna. File
+       komponennya tetap ada untuk dipulihkan kalau data ukuran/bahan turun. */
+  }
   <Process id={SECTION_IDS.proses} />
   <Clients id={SECTION_IDS.klien} />
   <Gallery id={SECTION_IDS.galeri} />

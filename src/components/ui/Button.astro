@@ -140,8 +140,14 @@ const tagProps = href
   }
 
   .mv-btn__label {
-    /* Label tombol: 13px / 700 / +0.08em / UPPERCASE — §6.5 */
-    display: inline-block;
+    /* Label tombol: 13px / 700 / +0.09em / UPPERCASE — §6.5.
+       REDESIGN — inline-flex + nowrap: ikon yang di-slot (mis. glif WhatsApp
+       dari WhatsAppButton) TETAP di samping teks, tidak menumpuk di atasnya
+       walau tombolnya sempit. */
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    white-space: nowrap;
   }
 
   .mv-btn__ikon {

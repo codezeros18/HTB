@@ -1,16 +1,14 @@
 ---
 /**
  * Location — 3 lokasi sebagai rantai produksi bernomor (S08).
+ * REDESIGN 2026-08-31 — peta sungguhan (Leaflet), lihat LocationCard &
+ * `src/scripts/map-facade.ts`. `embedSrc` (iframe Google Maps) dibuang,
+ * diganti `lat`/`lng` dari `lokasi.ts`.
  *
  * BLUEPRINT §8 Section 8: "bukan tiga alamat setara, tapi tiga tahap
  * rantai produksi bernomor." Urutan array `lokasi.ts` (head-office →
  * workshop → factory) MEMANG urutan penomoran 01/02/03 — jangan diubah
  * di sini; kalau urutannya perlu berubah, ubah di lokasi.ts (S01).
- *
- * `embedSrc` dibangun di sini dari `alamat`, BUKAN disimpan di
- * lokasi.ts — string pencarian Maps sudah cukup deterministik dari
- * alamat (sama seperti `mapsUrl` yang sudah ada), jadi tidak perlu
- * field baru di file content milik S01.
  */
 import { site } from '../../content/site';
 import { lokasi } from '../../content/lokasi';
@@ -25,9 +23,6 @@ interface Props {
 const { id }: Props = Astro.props;
 
 const { lokasiIntro } = site;
-
-const embedSrc = (alamat: string): string =>
-  `https://www.google.com/maps?q=${encodeURIComponent(alamat)}&output=embed`;
 ---
 
 <Container as="section" spacing="section" id={id}>
@@ -42,10 +37,9 @@ const embedSrc = (alamat: string): string =>
             peran={l.peran}
             alamat={l.alamat}
             slug={l.slug}
-            deskripsiPeran={l.deskripsiPeran}
+            lat={l.koordinat?.lat ?? 0}
+            lng={l.koordinat?.lng ?? 0}
             mapsUrl={l.mapsUrl}
-            telepon={l.telepon}
-            embedSrc={embedSrc(l.alamat)}
             labelTampilkanPeta={lokasiIntro.labelTampilkanPeta}
             labelBukaMaps={lokasiIntro.labelBukaMaps}
           />
@@ -59,6 +53,9 @@ const embedSrc = (alamat: string): string =>
   .mv-lokasi__list {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* REDESIGN — baris di-stretch (default align-items grid) supaya
+       ketiga kartu SELALU tinggi identik; masing-masing card `height:100%`. */
+    align-items: stretch;
     gap: var(--space-5);
     list-style: none;
     margin: 0;

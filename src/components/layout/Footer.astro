@@ -27,7 +27,14 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
 <footer class="mv-footer">
   <div class="mv-footer__inner">
     <div class="mv-footer__kolom mv-footer__kolom--merek">
-      <span class="mv-footer__merek">{site.brand}</span>
+      <img
+        class="mv-footer__merek"
+        src="/images/logo/LOGO%20MOTIVE%20NEW%20PUTIH.png"
+        alt={site.brand}
+        width="1721"
+        height="223"
+        loading="lazy"
+      />
       <p class="mv-footer__official t-body-s">Official brand by {site.namaCV}</p>
       <p class="mv-footer__tagline t-body-s">{site.tagline}</p>
     </div>
@@ -136,11 +143,11 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
 
   .mv-footer__merek {
     display: block;
-    font-family: var(--font-display);
-    font-weight: var(--fw-display);
-    font-size: 22px;
-    letter-spacing: var(--ls-h1);
-    color: var(--color-text);
+    inline-size: auto;
+    block-size: auto;
+    max-block-size: 28px;
+    max-inline-size: 200px;
+    object-fit: contain;
   }
 
   .mv-footer__official,

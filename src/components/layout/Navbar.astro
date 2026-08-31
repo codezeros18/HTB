@@ -31,7 +31,6 @@
 import { site } from '../../content/site';
 import { navItems } from './nav-items';
 import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
-import WhatsAppButton from '../ui/WhatsAppButton.astro';
 ---
 
 <header class="mv-nav" data-mv-nav>
@@ -92,12 +91,11 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
 
       <div class="mv-nav__aksi">
         {
-          /* Urutan DOM = urutan Tab: logo → 5 link → CTA → hamburger.
-            Di mobile, CTA tetap terlihat; yang disembunyikan adalah
-            daftar link (BLUEPRINT §8: korbankan menu, bukan CTA). */
+          /* REDESIGN 2026-08-31 — tombol WhatsApp DIHAPUS dari navbar
+            (permintaan klien): CTA WA sudah cukup lewat hero + Contact,
+            dan di mobile tetap terjangkau lewat WhatsAppButton di dalam
+            MobileMenu (dipicu tombol hamburger di bawah). */
         }
-        <WhatsAppButton konteks="navbar" class="mv-nav__cta" variant="secondary" ikon={false} />
-
         <button
           type="button"
           class="mv-nav__hamburger"
@@ -426,17 +424,6 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
     display: flex;
     align-items: center;
     gap: var(--space-3);
-  }
-
-  /* REDESIGN — CTA navbar: outline putih di atas navbar transparan. Override
-     custom property mengalir ke ui/Button lewat cascade (pola sama seperti Hero),
-     tanpa menyentuh Button.astro. Varian tombol = secondary (lihat markup). */
-  .mv-nav__cta {
-    /* Tombol secondary = kaca; di navbar transparan paksa teks + tepi putih. */
-    --color-text: #ffffff;
-    --color-border: rgba(255, 255, 255, 0.55);
-    --color-surface: rgba(255, 255, 255, 0.1);
-    --color-surface-alt: rgba(255, 255, 255, 0.18);
   }
 
   .mv-nav__hamburger {
