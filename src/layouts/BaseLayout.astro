@@ -77,6 +77,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://motive.exam
       type="font/woff2"
       crossorigin
     />
+    {
+      /* Public Sans — font navbar (lihat catatan lisensi di global.css). Navbar
+        tampak di atas layar sejak awal, jadi di-preload sama seperti Inter. */
+    }
+    <link
+      rel="preload"
+      href="/fonts/public-sans-variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link

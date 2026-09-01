@@ -346,7 +346,7 @@ export const layanan: Layanan[] = [
   {
     slug: 'campus-package',
     nama: 'Campus Package',
-    ringkas: 'Paket perlengkapan acara dan kepanitiaan kampus.',
+    ringkas: 'Perlengkapan acara kampus.',
     foto: `${B}/Campus%20Package/BAJU%20KAMPUS.png`,
     sub: [
       {
@@ -385,7 +385,7 @@ export const layanan: Layanan[] = [
   {
     slug: 'merchandise',
     nama: 'Merchandise',
-    ringkas: 'Suvenir dan perlengkapan pendukung acara.',
+    ringkas: 'Suvenir dan merchandise acara.',
     foto: `${B}/Merchandise/GOODIE%20BAG.png`,
     sub: [
       {

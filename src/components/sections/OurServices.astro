@@ -21,9 +21,6 @@ interface Props {
 }
 
 const { id }: Props = Astro.props;
-
-const jumlahItem = (l: (typeof layanan)[number]): number =>
-  l.sub.reduce((n, s) => n + s.items.length, 0);
 ---
 
 <Container as="section" spacing="section" id={id}>
@@ -44,12 +41,13 @@ const jumlahItem = (l: (typeof layanan)[number]): number =>
               loading="lazy"
               decoding="async"
             />
+            <span class="svc__card-scrim" aria-hidden="true" />
           </span>
           <span class="svc__card-body">
-            <span class="svc__card-nama t-h3">{l.nama}</span>
-            <span class="svc__card-ringkas t-body-s">{l.ringkas}</span>
-            <span class="svc__card-cue t-label" aria-hidden="true">
-              {jumlahItem(l)} produk &rarr;
+            <span class="svc__card-nama">{l.nama}</span>
+            <span class="svc__card-ringkas">{l.ringkas}</span>
+            <span class="svc__card-cta" aria-hidden="true">
+              Lihat Produk
             </span>
           </span>
         </a>
@@ -81,21 +79,19 @@ const jumlahItem = (l: (typeof layanan)[number]): number =>
     gap: var(--space-3);
   }
 
+  /* REDESIGN 2026-09-01 (referensi satisfyrunning.com, permintaan klien) —
+     kartu jadi foto penuh potret dengan isi (judul, deskripsi singkat,
+     tombol) DITUMPUK DI TENGAH foto, bukan panel teks terpisah di bawah.
+     Jumlah produk & deskripsi panjang dihapus dari tampilan. */
   .svc__card {
-    display: flex;
-    flex-direction: column;
+    position: relative;
+    display: block;
     text-decoration: none;
-    border: var(--border-width) solid var(--color-border);
-    background-color: var(--color-surface);
-    color: var(--color-text);
     overflow: hidden;
-    transition:
-      border-color var(--dur-fast) var(--ease),
-      transform var(--dur-fast) var(--ease);
+    transition: transform var(--dur-fast) var(--ease);
   }
 
   .svc__card:hover {
-    border-color: var(--color-accent);
     transform: translateY(-2px);
   }
 
@@ -105,8 +101,10 @@ const jumlahItem = (l: (typeof layanan)[number]): number =>
   }
 
   .svc__card-media {
+    position: relative;
     display: block;
-    aspect-ratio: 4 / 5;
+    /* Rasio potret tinggi mengikuti referensi (≈1352×2076). */
+    aspect-ratio: 1352 / 2076;
     overflow: hidden;
   }
 
@@ -117,24 +115,66 @@ const jumlahItem = (l: (typeof layanan)[number]): number =>
     display: block;
   }
 
+  /* Scrim gelap tipis supaya teks putih di tengah tetap terbaca di foto
+     apa pun tanpa perlu overlay warna solid yang menutupi produk. */
+  .svc__card-scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      180deg,
+      rgba(6, 5, 4, 0.15) 0%,
+      rgba(6, 5, 4, 0.05) 35%,
+      rgba(6, 5, 4, 0.45) 100%
+    );
+  }
+
   .svc__card-body {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
     display: flex;
     flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
     gap: var(--space-2);
-    padding: var(--space-4);
+    padding: var(--space-5);
   }
 
   .svc__card-nama {
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: clamp(1.5rem, 2vw + 1rem, 2.25rem);
+    line-height: 1;
+    letter-spacing: -0.01em;
     color: var(--color-text);
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
   }
 
   .svc__card-ringkas {
-    color: var(--color-text-2);
+    color: var(--color-text);
+    font-size: var(--fs-body-s);
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
   }
 
-  .svc__card-cue {
-    color: var(--color-accent);
-    margin-block-start: var(--space-1);
+  /* Tombol pill — pengecualian sengaja dari aturan "nol rounded" situs:
+     elemen CTA kecil di atas foto, bukan kartu/panel, mengikuti spesifikasi
+     referensi klien persis (radius 16px pada tinggi ~34px = bentuk pil). */
+  .svc__card-cta {
+    margin-block-start: var(--space-2);
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-text);
+    color: var(--color-accent-ink);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding-block: 9px;
+    padding-inline: 20px;
+    border-radius: 999px;
   }
 
   @media (max-width: 1023.98px) {

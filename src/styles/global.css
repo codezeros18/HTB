@@ -44,6 +44,35 @@
   line-gap-override: 0%;
 }
 
+/* NAVBAR SAJA (2026-09-01) — "HelveticaNowDisplay" dari referensi klien
+   adalah font berlisensi Monotype, TIDAK BOLEH di-load dari mana pun
+   tanpa lisensi resmi (nol CDN diam-diam, guardrail proyek). "Public
+   Sans" dipakai sebagai pengganti sementara: open-source (SIL OFL),
+   dan memang dirancang USWDS sebagai alternatif bebas-lisensi untuk
+   Helvetica — bentuk huruf & proporsi paling dekat yang bisa dimuat
+   sah sampai file font asli klien tersedia. SELF-HOST, satu file
+   variable font menutupi weight 400–600 yang dipakai navbar. */
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/public-sans-variable.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Public Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/public-sans-variable.woff2') format('woff2');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 /* ===== PEMETAAN TOKEN → TAILWIND (BLUEPRINT.md §6.3–§6.6) =====
    `inline` = utilitas memancarkan var(--token) langsung, jadi menukar
    Arah A/B di tokens.css ikut mengubah seluruh kelas Tailwind. */

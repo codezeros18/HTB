@@ -142,13 +142,14 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 
   .mv-nav {
     /* Font navbar SAJA (bukan global — instruksi eksplisit pemilik proyek).
-       "HelveticaNowDisplay" itu sendiri font berlisensi (Monotype), TIDAK
-       di-load dari mana pun di sini (nol CDN diam-diam) — baris ini murni
-       daftar fallback, jadi browser jatuh ke -apple-system/Segoe UI/Arial
-       yang paling dekat. Kalau file font resminya ada, tinggal tambah
-       @font-face lalu daftar ini otomatis terisi. */
+       "HelveticaNowDisplay" dari referensi klien berlisensi Monotype dan
+       TIDAK di-load (nol CDN diam-diam, guardrail proyek). "Public Sans"
+       (SIL OFL, self-hosted — lihat @font-face di global.css) dipakai
+       sebagai pengganti nyata yang benar-benar tampil beda dari font body
+       (Inter) & display (Space Grotesk) situs, sampai file lisensi asli
+       klien tersedia — baru itu tinggal disisipkan di depan daftar ini. */
     --nav-font:
-      'HelveticaNowDisplay', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
+      'Public Sans', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
       'helvetica neue', helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
   }
 
@@ -294,11 +295,12 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
     padding-inline: 12px;
     color: #ffffff;
     text-decoration: none;
-    /* REDESIGN — font navbar mengikuti referensi (HelveticaNowDisplay
-       fallback chain), ukuran dinaikkan (16→18px) untuk kesan lebih tegas. */
+    /* REDESIGN 2026-09-01 — ukuran dinaikkan lagi (18→20px) + weight 600
+       (400 terasa terlalu tipis di Public Sans dibanding referensi; 600
+       dipilih persis karena itu satu-satunya weight tebal yang di-@font-face). */
     font-family: var(--nav-font);
-    font-size: 18px;
-    font-weight: 400;
+    font-size: 20px;
+    font-weight: 600;
     line-height: normal;
     transition: color var(--dur-fast) var(--ease);
   }
