@@ -142,14 +142,12 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 
   .mv-nav {
     /* Font navbar SAJA (bukan global — instruksi eksplisit pemilik proyek).
-       "HelveticaNowDisplay" dari referensi klien berlisensi Monotype dan
-       TIDAK di-load (nol CDN diam-diam, guardrail proyek). "Public Sans"
-       (SIL OFL, self-hosted — lihat @font-face di global.css) dipakai
-       sebagai pengganti nyata yang benar-benar tampil beda dari font body
-       (Inter) & display (Space Grotesk) situs, sampai file lisensi asli
-       klien tersedia — baru itu tinggal disisipkan di depan daftar ini. */
+       Referensi awal minta "HelveticaNowDisplay" (font berlisensi Monotype,
+       tidak bisa di-load legal) — permintaan itu dilepas (2026-09-01, klien
+       minta skip), diganti "Switzer" (self-hosted, gratis komersial — lihat
+       @font-face di global.css) sebagai pilihan final navbar. */
     --nav-font:
-      'Public Sans', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
+      'Switzer', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
       'helvetica neue', helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
   }
 
