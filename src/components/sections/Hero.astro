@@ -1,20 +1,28 @@
 ---
 /**
- * Hero — REDESIGN 2026-08-30 (permintaan klien, iterasi 2).
+ * Hero — REDESIGN 2026-08-31 (iterasi 3, permintaan klien).
  *
- * Kombinasi PUTIH + EMAS, bukan monokrom:
- *   - eyebrow  : emas   (aksen kecil di atas)
- *   - garis    : emas   (rule 64px)
- *   - headline : putih  (massa teks utama)
- *   - deskripsi: muted / putih di atas foto
- *   - CTA      : SATU tombol emas solid — titik warna yang bikin hero "hidup"
+ * Dipangkas jadi HANYA headline:
+ *   - Eyebrow ("OFFICIAL BRAND BY CV. HUIMORA...") DIHAPUS — sudah
+ *     redundan dengan About Us (baris fakta di sana tetap menampilkannya).
+ *   - Deskripsi (`hero.sub`) DIHAPUS.
+ *   - Tombol CTA DIHAPUS — WhatsApp ("Let's Talk") sudah ada di navbar.
+ *   Field-field itu tetap ada di `site.hero` (kontrak tipe), cuma tidak
+ *   dirender di sini.
  *
- * Semua rata tengah. Field lama di `site.hero` dipertahankan (kontrak tipe).
+ * Headline dibuat lebih "branding": ukuran jauh lebih besar (scoped lokal,
+ * tidak menyentuh token --fs-display global), font mengikuti referensi
+ * ("LocomotiveNew" — font berlisensi, TIDAK di-load; ini murni rantai
+ * fallback ke -apple-system/Segoe UI/Arial, sama seperti navbar), bobot
+ * dinaikkan ke 800 supaya tetap terasa tebal di font fallback (font asli
+ * referensi terasa berat walau ditulis "Regular" karena memang custom
+ * display face). Garis emas tetap sebagai aksen dekoratif non-teks
+ * pengganti posisi eyebrow.
+ *
  * Guardrail 9 tetap: hero TIDAK dianimasikan masuk.
  */
 import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
-import WhatsAppButton from '../ui/WhatsAppButton.astro';
 
 interface Props {
   id?: string;
@@ -47,13 +55,8 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
   }
 
   <Container as="div" class="mv-hero__inner">
-    <p class="mv-hero__eyebrow t-eyebrow">{hero.eyebrow}</p>
     <span class="mv-hero__rule" aria-hidden="true"></span>
-    <h1 class="mv-hero__h1 t-display">{hero.h1}</h1>
-    <p class="mv-hero__sub t-body-l">{hero.sub}</p>
-    <div class="mv-hero__cta">
-      <WhatsAppButton konteks="hero" label={hero.ctaPrimer} size="lg" />
-    </div>
+    <h1 class="mv-hero__h1">{hero.h1}</h1>
   </Container>
 </section>
 
@@ -61,6 +64,11 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
   .mv-hero {
     --hero-ink: rgb(255 255 255);
     --hero-overlay: var(--modal-backdrop);
+
+    /* Font headline SAJA (bukan global) — lihat catatan lisensi di atas file. */
+    --hero-font:
+      'LocomotiveNew', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
+      'helvetica neue', helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
 
     position: relative;
     display: flex;
@@ -99,51 +107,36 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
     flex-direction: column;
     align-items: center;
     text-align: center;
-    max-inline-size: 64rem;
+    max-inline-size: 72rem;
     margin-inline: auto;
     padding-block: var(--space-8);
-    gap: var(--space-4);
-  }
-
-  /* Aksen emas — dipakai kecil-kecil, bukan di seluruh teks. */
-  .mv-hero__eyebrow {
-    color: var(--color-accent);
-    margin: 0;
+    gap: var(--space-6);
   }
 
   .mv-hero__rule {
     inline-size: 64px;
     block-size: 2px;
     background-color: var(--color-accent);
-    margin-block: var(--space-2);
   }
 
-  /* Headline PUTIH — massa teks utama. */
+  /* Headline besar & "branding" — ukuran lokal, tidak memakai --fs-display
+     global (dipakai section lain seperti "OUR SERVICES"). */
   .mv-hero__h1 {
+    font-family: var(--hero-font);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(2.75rem, 7vw, 6.5rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
     color: var(--color-text);
     margin: 0;
+    text-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
   }
 
-  .mv-hero__sub {
-    color: var(--color-text-2);
-    max-inline-size: 54ch;
-    margin: 0;
-  }
-
-  .mv-hero__cta {
-    margin-block-start: var(--space-4);
-  }
-
-  /* Varian foto: teks jadi putih terang di atas overlay (headline tetap putih,
-     deskripsi & eyebrow tetap terbaca). Eyebrow tetap emas. */
-  .mv-hero[data-varian='foto'] .mv-hero__h1,
-  .mv-hero[data-varian='foto'] .mv-hero__sub {
+  /* Varian foto: headline putih terang + bayangan lebih dalam supaya
+     tetap tajam di atas overlay gelap. */
+  .mv-hero[data-varian='foto'] .mv-hero__h1 {
     color: var(--hero-ink);
-  }
-
-  @media (max-width: 639.98px) {
-    .mv-hero__cta > * {
-      inline-size: 100%;
-    }
+    text-shadow: 0 12px 46px rgba(0, 0, 0, 0.55);
   }
 </style>

@@ -1,25 +1,24 @@
 ---
 /**
  * LocationCard — satu tahap dalam rantai produksi bernomor (S08).
- * REDESIGN 2026-08-31 (permintaan klien):
- *   - Ketiga kartu WAJIB tinggi & lebar identik (dulu tidak sejajar karena
- *     panjang alamat beda-beda). Diselesaikan dengan: kartu `height: 100%`
- *     (grid induk men-stretch baris), blok alamat dikunci 2 baris
- *     (`-webkit-line-clamp`), dan area peta `flex: 1` menyerap sisa ruang.
- *   - Peta sungguhan (Leaflet + tile CARTO gelap) via facade pattern — lihat
- *     `src/scripts/map-facade.ts`. Begitu peta hidup, blok alamat teks
- *     DISEMBUNYIKAN (`[data-map-live]`) — visual-driven, bukan diulang jadi
- *     teks. Alamat lengkap tetap ada di popup peta & atribut `<address>`
- *     (screen reader tetap dapat teksnya).
+ * REDESIGN 2026-08-31 (permintaan klien, iterasi 2):
+ *   - Peta TIDAK LAGI di balik tombol "Tampilkan peta" — otomatis dimuat
+ *     begitu kartu mendekati layar (IntersectionObserver, lihat
+ *     `src/scripts/location-maps.ts`), jadi sudah siap saat pengunjung
+ *     sampai di section ini. Tombol "Buka di Google Maps" DIHAPUS —
+ *     rute keluar sekarang ada di POPUP pin peta ("Rute di Google Maps →").
+ *   - Ketiga kartu tinggi & lebar identik: `height:100%` (grid induk
+ *     men-stretch baris) + alamat dikunci 2 baris (`-webkit-line-clamp`)
+ *     + area peta `flex:1` menyerap sisa ruang.
+ *   - Begitu peta hidup, blok alamat teks disembunyikan VISUAL (tetap ada
+ *     di DOM untuk screen reader) — visual-driven.
  *
  * `deskripsiPeran`/`telepon` — [GAP], selalu null saat ini → tidak
- * dirender sama sekali, jaga struktur kartu tetap ringkas & seragam.
+ * dirender, jaga struktur kartu tetap ringkas & seragam.
  *
  * Markup alamat pakai `<address>` + `itemprop` (AC T08.3); `id={slug}`
  * cocok fragmen `@id` blok `LocalBusiness` di StructuredData.astro.
  */
-import Button from '../ui/Button.astro';
-
 interface Props {
   nomor: string;
   peran: string;
@@ -28,23 +27,10 @@ interface Props {
   lat: number;
   lng: number;
   mapsUrl: string | null;
-  labelTampilkanPeta: string;
-  labelBukaMaps: string;
   class?: string;
 }
 
-const {
-  nomor,
-  peran,
-  alamat,
-  slug,
-  lat,
-  lng,
-  mapsUrl,
-  labelTampilkanPeta,
-  labelBukaMaps,
-  class: className,
-}: Props = Astro.props;
+const { nomor, peran, alamat, slug, lat, lng, mapsUrl, class: className }: Props = Astro.props;
 ---
 
 <article
@@ -69,42 +55,36 @@ const {
 
   <div
     class="mv-loc__map"
-    data-map-facade
+    data-map-auto
     data-lat={lat}
     data-lng={lng}
     data-title={peran}
     data-address={alamat}
     data-maps-url={mapsUrl}
   >
-    <div class="mv-loc__facade">
-      <svg
-        class="mv-loc__facade-svg"
-        viewBox="0 0 320 200"
-        role="img"
-        aria-label={`Ilustrasi peta lokasi ${peran}`}
-      >
-        <rect width="320" height="200" class="mv-loc__facade-bg"></rect>
-        <path d="M0 60H320M0 130H320M80 0V200M230 0V200" class="mv-loc__facade-garis"></path>
-        <circle cx="160" cy="95" r="7" class="mv-loc__facade-titik"></circle>
+    {/* Placeholder singkat sebelum Leaflet hidup — bukan kotak abu (guardrail 7). */}
+    <div class="mv-loc__placeholder" aria-hidden="true">
+      <svg viewBox="0 0 320 200" role="presentation">
+        <rect width="320" height="200" class="mv-loc__placeholder-bg"></rect>
         <path
           d="M160 60c-14 0-25 11-25 25 0 18 25 45 25 45s25-27 25-45c0-14-11-25-25-25Z"
-          class="mv-loc__facade-pin"></path>
-        <circle cx="160" cy="84" r="7" class="mv-loc__facade-lubang"></circle>
+          class="mv-loc__placeholder-pin"></path>
+        <circle cx="160" cy="84" r="7" class="mv-loc__placeholder-lubang"></circle>
       </svg>
-
-      <button type="button" class="mv-loc__show t-label" data-map-facade-trigger>
-        {labelTampilkanPeta}
-      </button>
     </div>
-  </div>
 
-  {
-    mapsUrl && (
-      <Button href={mapsUrl} variant="secondary" newTab class="mv-loc__link">
-        {labelBukaMaps}
-      </Button>
-    )
-  }
+    {
+      /* Jaring pengaman tanpa JS: satu-satunya jalan keluar peta kalau
+        Leaflet tak pernah hidup. Nol dampak saat JS aktif — <noscript>. */
+      mapsUrl && (
+        <noscript>
+          <a class="mv-loc__noscript-link" href={mapsUrl} target="_blank" rel="noopener noreferrer">
+            Buka peta di Google Maps →
+          </a>
+        </noscript>
+      )
+    }
+  </div>
 </article>
 
 <style>
@@ -112,8 +92,8 @@ const {
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
-    /* REDESIGN — tinggi PENUH baris grid (Location.astro men-stretch),
-       jadi ketiga kartu selalu identik terlepas dari panjang alamat. */
+    /* Tinggi PENUH baris grid (Location.astro men-stretch) — ketiga kartu
+       selalu identik terlepas dari panjang alamat. */
     block-size: 100%;
     padding: var(--space-5);
     border: var(--border-width) solid var(--color-border);
@@ -175,71 +155,45 @@ const {
     border: var(--border-width) solid var(--color-border);
   }
 
-  .mv-loc__facade {
+  .mv-loc__placeholder {
     position: absolute;
     inset: 0;
   }
 
-  .mv-loc__facade-svg {
+  .mv-loc__placeholder svg {
     display: block;
     inline-size: 100%;
     block-size: 100%;
   }
 
-  .mv-loc__facade-bg {
+  .mv-loc__placeholder-bg {
     fill: var(--color-surface-alt);
   }
 
-  .mv-loc__facade-garis {
-    fill: none;
-    stroke: var(--color-border-strong);
-    stroke-width: 1;
-    opacity: 0.5;
-  }
-
-  .mv-loc__facade-titik {
+  .mv-loc__placeholder-pin {
     fill: var(--color-accent);
-    opacity: 0.18;
+    opacity: 0.6;
   }
 
-  .mv-loc__facade-pin {
-    fill: var(--color-accent);
-  }
-
-  .mv-loc__facade-lubang {
+  .mv-loc__placeholder-lubang {
     fill: var(--color-surface);
+    opacity: 0.6;
   }
 
-  .mv-loc__show {
+  .mv-loc__noscript-link {
     position: absolute;
     inset-block-end: var(--space-3);
     inset-inline-start: 50%;
     transform: translateX(-50%);
-    appearance: none;
-    cursor: pointer;
-    min-block-size: var(--tap-min);
-    padding-inline: var(--space-4);
-    border: var(--border-width) solid var(--color-text);
-    border-radius: var(--radius-control);
-    background-color: var(--color-bg);
     color: var(--color-text);
+    background-color: var(--color-bg);
+    border: var(--border-width) solid var(--color-text);
+    padding-block: var(--space-2);
+    padding-inline: var(--space-4);
+    text-decoration: none;
   }
 
-  .mv-loc__show:hover {
-    background-color: var(--color-surface);
-  }
-
-  .mv-loc__show:focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-focus);
-    outline-offset: var(--focus-ring-offset);
-  }
-
-  .mv-loc__show[disabled] {
-    cursor: wait;
-    opacity: 0.7;
-  }
-
-  /* Leaflet ditaruh di sini oleh map-facade.ts setelah diklik. */
+  /* Leaflet ditaruh di sini oleh location-maps.ts. */
   .mv-loc__map :global(.mv-loc__leaflet) {
     position: absolute;
     inset: 0;
@@ -272,10 +226,5 @@ const {
     border: 2px solid var(--color-accent-ink);
     transform: rotate(-45deg);
     box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-accent) 40%, transparent);
-  }
-
-  .mv-loc__link {
-    align-self: flex-start;
-    flex: 0 0 auto;
   }
 </style>

@@ -28,7 +28,7 @@
  *
  * Props: —  (isi navigasi berasal dari `nav-items.ts`)
  */
-import { site } from '../../content/site';
+import { site, waLink } from '../../content/site';
 import { navItems } from './nav-items';
 import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 ---
@@ -91,11 +91,22 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 
       <div class="mv-nav__aksi">
         {
-          /* REDESIGN 2026-08-31 — tombol WhatsApp DIHAPUS dari navbar
-            (permintaan klien): CTA WA sudah cukup lewat hero + Contact,
-            dan di mobile tetap terjangkau lewat WhatsAppButton di dalam
-            MobileMenu (dipicu tombol hamburger di bawah). */
+          /* REDESIGN 2026-08-31 (iterasi 2) — CTA WA kembali, tapi BUKAN
+            tombol kotak: tautan teks polos "Let's Talk" memakai kelas link
+            nav yang sama (`.mv-nav__link`/`.mv-nav__linklabel`) supaya
+            animasi underline saat hover didapat GRATIS, tanpa duplikasi
+            CSS. Disembunyikan <1024px — di mobile WA tetap lewat hamburger
+            → WhatsAppButton di dalam MobileMenu. */
         }
+        <a
+          class="mv-nav__link mv-nav__cta-link"
+          href={waLink('navbar')}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <span class="mv-nav__linklabel">Let's Talk</span>
+        </a>
+
         <button
           type="button"
           class="mv-nav__hamburger"
@@ -124,8 +135,21 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 <style>
   .mv-nav,
   .mv-nav-spacer {
-    /* REDESIGN (2026-08-28) — navbar transparan, tinggi tetap 64px, nol susut. */
-    --nav-h: 64px;
+    /* REDESIGN 2026-08-31 (perombakan navbar, referensi layout+font baru) —
+       tinggi 64→60px, nol susut. */
+    --nav-h: 60px;
+  }
+
+  .mv-nav {
+    /* Font navbar SAJA (bukan global — instruksi eksplisit pemilik proyek).
+       "HelveticaNowDisplay" itu sendiri font berlisensi (Monotype), TIDAK
+       di-load dari mana pun di sini (nol CDN diam-diam) — baris ini murni
+       daftar fallback, jadi browser jatuh ke -apple-system/Segoe UI/Arial
+       yang paling dekat. Kalau file font resminya ada, tinggal tambah
+       @font-face lalu daftar ini otomatis terisi. */
+    --nav-font:
+      'HelveticaNowDisplay', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
+      'helvetica neue', helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
   }
 
   /* ---------- kerangka ---------- */
@@ -210,6 +234,9 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 
     max-inline-size: var(--container-max);
     margin-inline: auto;
+    /* REDESIGN 2026-09-01 — dulu di-hardcode 40px lokal di sini; sekarang
+       --edge-pad global sudah 40px (lihat tokens.css), jadi navbar dan
+       section lain otomatis sejajar tepat di edge yang sama. */
     padding-inline: var(--edge-pad);
   }
 
@@ -264,14 +291,29 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
     display: inline-flex;
     align-items: center;
     min-block-size: var(--tap-min);
-    /* REDESIGN — spec a.tab: padding-inline 12px, 16px / 400 / line-height normal, putih. */
     padding-inline: 12px;
     color: #ffffff;
     text-decoration: none;
-    font-size: 16px;
+    /* REDESIGN — font navbar mengikuti referensi (HelveticaNowDisplay
+       fallback chain), ukuran dinaikkan (16→18px) untuk kesan lebih tegas. */
+    font-family: var(--nav-font);
+    font-size: 18px;
     font-weight: 400;
     line-height: normal;
     transition: color var(--dur-fast) var(--ease);
+  }
+
+  .mv-nav__cta-link {
+    /* Tautan "Let's Talk" — sama persis dengan link nav lain (termasuk
+       animasi underline saat hover), hanya disembunyikan di mobile karena
+       WA sudah terjangkau lewat hamburger → MobileMenu. */
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
+    .mv-nav__cta-link {
+      display: inline-flex;
+    }
   }
 
   .mv-nav__linklabel {

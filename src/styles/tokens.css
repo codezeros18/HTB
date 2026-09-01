@@ -214,22 +214,26 @@
   --section-pad-y: 104px;
   --section-pad-y-gallery-b: 144px;
 
-  /* Radius — REDESIGN (glassmorphism/SaaS): sudut lebih lembut. Bukan pill
-     (kontrol 44px + radius 12px masih jelas persegi-membulat), tapi jauh
-     dari sudut tajam lama. `--radius-card` baru untuk kartu/panel besar. */
-  --radius-chip: 8px;
-  --radius-control: 12px;
-  --radius-card: 18px;
-  --radius-modal: 22px;
+  /* Radius — REDESIGN 2026-08-31 (permintaan klien): SaaS modern versi ini
+     BUKAN sudut lembut, tapi kotak murni — kaca (blur/transparansi) tetap
+     jalan, hanya sudutnya nol. Satu-satunya radius bukan-nol di seluruh
+     situs adalah pin peta Leaflet (bentuk teardrop, itu ikon, bukan kartu). */
+  --radius-chip: 0px;
+  --radius-control: 0px;
+  --radius-card: 0px;
+  --radius-modal: 0px;
 
   /* Border */
   --border-width: 1px;
 
-  /* Grid & container */
-  --container-max: 1280px;
+  /* Grid & container — REDESIGN 2026-09-01 (permintaan klien): navbar
+     terasa "sempit banget" dibanding referensi (~1524.8px). Dilebarkan di
+     SATU token bersama supaya navbar dan semua section ikut lebar yang
+     sama secara otomatis (bukan perbaikan navbar-only). */
+  --container-max: 1600px;
   --grid-columns: 12;
   --grid-gutter: 24px;
-  --edge-pad: 24px;
+  --edge-pad: 40px;
 
   /* Breakpoint (referensi; nilai kanonik ada di @theme Tailwind) */
   --bp-xs: 360px;

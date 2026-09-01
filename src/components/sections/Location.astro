@@ -1,9 +1,10 @@
 ---
 /**
  * Location — 3 lokasi sebagai rantai produksi bernomor (S08).
- * REDESIGN 2026-08-31 — peta sungguhan (Leaflet), lihat LocationCard &
- * `src/scripts/map-facade.ts`. `embedSrc` (iframe Google Maps) dibuang,
- * diganti `lat`/`lng` dari `lokasi.ts`.
+ * REDESIGN 2026-08-31 (iterasi 2) — peta Leaflet dimuat OTOMATIS begitu
+ * kartu mendekati layar (nol tombol "Tampilkan peta"), lihat LocationCard
+ * & `src/scripts/location-maps.ts`. `embedSrc` (iframe Google Maps) dan
+ * label facade lama dibuang, diganti `lat`/`lng` dari `lokasi.ts`.
  *
  * BLUEPRINT §8 Section 8: "bukan tiga alamat setara, tapi tiga tahap
  * rantai produksi bernomor." Urutan array `lokasi.ts` (head-office →
@@ -40,8 +41,6 @@ const { lokasiIntro } = site;
             lat={l.koordinat?.lat ?? 0}
             lng={l.koordinat?.lng ?? 0}
             mapsUrl={l.mapsUrl}
-            labelTampilkanPeta={lokasiIntro.labelTampilkanPeta}
-            labelBukaMaps={lokasiIntro.labelBukaMaps}
           />
         </li>
       ))
@@ -97,6 +96,6 @@ const { lokasiIntro } = site;
 </style>
 
 <script>
-  import { initMapFacade } from '../../scripts/map-facade';
-  initMapFacade();
+  import { initLocationMaps } from '../../scripts/location-maps';
+  initLocationMaps();
 </script>

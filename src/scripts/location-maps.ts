@@ -1,19 +1,26 @@
 /* =============================================================
-   map-facade.ts — Peta facade → Leaflet HANYA setelah diklik.
-   REDESIGN 2026-08-31 (permintaan klien: peta interaktif sungguhan,
-   bukan iframe Google Maps statis).
+   location-maps.ts — Peta Leaflet dimuat otomatis saat kartu lokasi
+   mendekati viewport (bukan lagi menunggu klik tombol).
+   REDESIGN 2026-09-01 (permintaan klien: "dari awal udah ditunjukkan
+   aja dan ga perlu button buka google maps").
 
    Kenapa Leaflet, bukan MapLibre GL: MapLibre ≈200 KB gzip sendirian
    sudah melewati batas keras JS 80 KB (CLAUDE.md), bahkan kalau
    di-lazy-load. Leaflet ≈42 KB gzip pas untuk kebutuhan "3 pin lokasi".
 
-   Cara kerja (facade pattern tetap dipertahankan, AC T08.2): setiap
-   kartu lokasi merender SVG statis (nol request) + tombol "Tampilkan
-   peta". Leaflet (JS+CSS dari cdnjs) & tile CARTO gelap baru diminta
-   SETELAH diklik — nol request pihak ketiga sebelum interaksi
-   (guardrail 6). `leafletPromise` di-cache supaya 3 kartu berbagi SATU
-   unduhan Leaflet, bukan tiga.
+   Cara kerja: setiap kartu lokasi merender SVG statis (nol request)
+   sebagai placeholder. `observeElement` (IntersectionObserver bersama,
+   lihat observer.ts) memicu pemuatan Leaflet (JS+CSS dari cdnjs) +
+   tile CARTO gelap begitu kartu mendekati layar (rootMargin besar =
+   preload sebelum benar-benar terlihat, biar tidak ada jeda kosong
+   saat discroll). Peta TIDAK lagi menunggu interaksi klik — trade-off
+   yang disetujui klien demi visual-first, guardrail 6 (nol request
+   pihak ketiga sebelum interaksi) sengaja dilonggarkan di sini atas
+   instruksi eksplisit. `leafletPromise` di-cache supaya 3 kartu
+   berbagi SATU unduhan Leaflet, bukan tiga.
    ============================================================= */
+
+import { observeElement } from './observer';
 
 const LEAFLET_VERSION = '1.9.4';
 const LEAFLET_CSS = `https://cdnjs.cloudflare.com/ajax/libs/leaflet/${LEAFLET_VERSION}/leaflet.min.css`;
@@ -81,14 +88,10 @@ function loadLeaflet(): Promise<LeafletStatic> {
   return leafletPromise;
 }
 
-function bukaPeta(wrapper: HTMLElement, tombol: HTMLButtonElement): void {
+function muatPeta(wrapper: HTMLElement): void {
   const lat = Number(wrapper.dataset.lat);
   const lng = Number(wrapper.dataset.lng);
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-
-  const labelAsal = tombol.textContent ?? '';
-  tombol.disabled = true;
-  tombol.textContent = 'Memuat…';
 
   loadLeaflet()
     .then((L) => {
@@ -134,23 +137,21 @@ function bukaPeta(wrapper: HTMLElement, tombol: HTMLButtonElement): void {
       wrapper.closest<HTMLElement>('.mv-loc')?.setAttribute('data-map-live', '');
     })
     .catch(() => {
-      tombol.disabled = false;
-      tombol.textContent = labelAsal;
+      // Gagal muat (mis. offline) — placeholder SVG + <noscript> tetap ada,
+      // pengunjung masih bisa lewat tautan Google Maps di LocationCard.
     });
 }
 
-export function initMapFacade(): void {
-  const pemicu = document.querySelectorAll<HTMLButtonElement>('[data-map-facade-trigger]');
+export function initLocationMaps(): void {
+  const kartu = document.querySelectorAll<HTMLElement>('[data-map-auto]');
 
-  pemicu.forEach((tombol) => {
-    tombol.addEventListener(
-      'click',
-      () => {
-        const wrapper = tombol.closest<HTMLElement>('[data-map-facade]');
-        if (!wrapper) return;
-        bukaPeta(wrapper, tombol);
+  kartu.forEach((wrapper) => {
+    observeElement(
+      wrapper,
+      (entry) => {
+        if (entry.isIntersecting) muatPeta(wrapper);
       },
-      { once: true }
+      { rootMargin: '600px 0px', threshold: 0, once: true }
     );
   });
 }
