@@ -72,7 +72,9 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
 
     position: relative;
     display: flex;
-    align-items: center;
+    /* REDESIGN 2026-09-01 — headline dipindah ke pojok kiri bawah
+       (sesuai referensi locomotive.ca), bukan lagi center. */
+    align-items: flex-end;
     overflow: hidden;
     /* Hero full-screen. Navbar transparan menumpang di atasnya. */
     min-height: 100vh;
@@ -105,10 +107,9 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
     z-index: 2;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    text-align: left;
     max-inline-size: 72rem;
-    margin-inline: auto;
     padding-block: var(--space-8);
     gap: var(--space-6);
   }
