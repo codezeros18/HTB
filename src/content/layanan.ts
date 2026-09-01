@@ -54,7 +54,7 @@ export const layanan: Layanan[] = [
   {
     slug: 'custom-apparel',
     nama: 'Custom Apparel',
-    ringkas: 'Pakaian pria, wanita, olahraga, outerwear, dan seragam.',
+    ringkas: 'Kaos, jaket, seragam custom.',
     foto: `${CA}/MEN/Thumbnail.png`,
     sub: [
       {
@@ -286,7 +286,7 @@ export const layanan: Layanan[] = [
   {
     slug: 'running-package',
     nama: 'Running Package',
-    ringkas: 'Satu paket produksi untuk race day, dari jersey sampai medali.',
+    ringkas: 'Jersey sampai medali lomba.',
     foto: `${B}/Running%20Package/THUMBNAIL%20RUNNING%20PACKAGE.png`,
     sub: [
       {
