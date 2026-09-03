@@ -44,17 +44,10 @@ const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
     <title>Probe primitif — MOTIVE</title>
-    {/* TEPAT 2 preload — S03 (T03.1) wajib memindahkan dua baris ini ke BaseLayout <head> */}
+    {/* Satu font situs — Plus Jakarta Sans (self-host, lihat global.css). */}
     <link
       rel="preload"
-      href="/fonts/archivo-var-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
-    <link
-      rel="preload"
-      href="/fonts/inter-var-latin.woff2"
+      href="/fonts/plus-jakarta-sans-var-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin

@@ -2,9 +2,9 @@
 /**
  * BaseLayout — kerangka <html> untuk seluruh halaman.
  *
- * Isi <head> berasal dari `site.ts` (guardrail 5). Tepat 2 font
- * di-preload: Archivo (display) & Inter (body) subset latin —
- * menutup utang T00.3 yang sebelumnya menumpang di probe.astro.
+ * Isi <head> berasal dari `site.ts` (guardrail 5). SATU font untuk
+ * seluruh situs — Plus Jakarta Sans (self-host, subset latin di-preload).
+ * Nol request pihak ketiga (guardrail 6).
  *
  * Props:
  *   title        judul halaman. Default `site.meta.title`.
@@ -66,27 +66,17 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://motive.exam
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     {
-      /* REDESIGN (2026-08-31) — Inter (body/UI) SELF-HOST + preload.
-        Space Grotesk (display) via Google Fonts — menimpa guardrail 6.
-        Poppins & Archivo dilepas. */
+      /* REDESIGN (2026-09-04) — SATU font: Plus Jakarta Sans, SELF-HOST.
+        Subset latin di-preload (paling umum); latin-ext dimuat on-demand
+        oleh @font-face di global.css. Nol Google Fonts, nol preconnect
+        pihak ketiga. */
     }
     <link
       rel="preload"
-      href="/fonts/inter-var-latin.woff2"
+      href="/fonts/plus-jakarta-sans-var-latin.woff2"
       as="font"
       type="font/woff2"
       crossorigin
-    />
-    {
-      /* Switzer — font navbar (lihat catatan lisensi di global.css). Navbar
-        tampak di atas layar sejak awal, jadi di-preload sama seperti Inter. */
-    }
-    <link rel="preload" href="/fonts/switzer-600.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"
     />
 
     {/* Open Graph */}

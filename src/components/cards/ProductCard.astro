@@ -87,18 +87,8 @@ const hargaTeks =
 
   .product-tile__price {
     margin-block-start: 12px;
-    /* UniqloProRegular tidak tersedia (nol @font-face) → jatuh ke stack yang
-       seragam dengan nama produk, supaya tampil mirip dan konsisten. */
-    font-family:
-      UniqloProRegular,
-      'Twemoji Country Flags',
-      'Segoe UI',
-      'Helvetica Neue',
-      Helvetica,
-      Arial,
-      -apple-system,
-      system-ui,
-      sans-serif;
+    /* REDESIGN 2026-09-04 — ikut satu font situs (Plus Jakarta Sans). */
+    font-family: var(--font-body);
     font-size: 20px;
     line-height: 24px;
     font-weight: 400;
@@ -108,15 +98,7 @@ const hargaTeks =
 
   .product-tile__name {
     margin-block-start: 8px;
-    font-family:
-      'Twemoji Country Flags',
-      'Segoe UI',
-      'Helvetica Neue',
-      Helvetica,
-      Arial,
-      -apple-system,
-      system-ui,
-      sans-serif;
+    font-family: var(--font-body);
     font-size: 17px;
     line-height: 22.1px;
     font-weight: 400;

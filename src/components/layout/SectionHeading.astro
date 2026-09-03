@@ -2,9 +2,10 @@
 /**
  * SectionHeading — REDESIGN 2026-09-04 (permintaan klien).
  *
- * Judul section raksasa bergaya sama dengan "Our Services": Space Grotesk
- * 900, UPPERCASE, warna emas (`--color-accent`), `clamp(2.75rem, 12vw,
- * 9rem)`. Nomor "01".."10" + garis 56×2px versi lama DIBUANG total.
+ * Judul section raksasa bergaya sama dengan "Our Services": --font-display
+ * (Plus Jakarta Sans) weight 800, UPPERCASE, warna emas (`--color-accent`),
+ * `clamp(2.75rem, 12vw, 9rem)`. Nomor "01".."10" + garis 56×2px versi lama
+ * DIBUANG total.
  *
  * Posisi horizontal berbeda-beda per section (permintaan klien):
  *   start  kiri (default)   · center  tengah   · end  kanan
@@ -61,7 +62,7 @@ const {
 
   .mv-heading__judul {
     font-family: var(--font-display);
-    font-weight: 900;
+    font-weight: 800;
     text-transform: uppercase;
     color: var(--color-accent);
     font-size: clamp(2.75rem, 12vw, 9rem);

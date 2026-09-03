@@ -140,17 +140,6 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
     --nav-h: 60px;
   }
 
-  .mv-nav {
-    /* Font navbar SAJA (bukan global — instruksi eksplisit pemilik proyek).
-       Referensi awal minta "HelveticaNowDisplay" (font berlisensi Monotype,
-       tidak bisa di-load legal) — permintaan itu dilepas (2026-09-01, klien
-       minta skip), diganti "Switzer" (self-hosted, gratis komersial — lihat
-       @font-face di global.css) sebagai pilihan final navbar. */
-    --nav-font:
-      'Switzer', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
-      'helvetica neue', helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
-  }
-
   /* ---------- kerangka ---------- */
   .mv-nav {
     position: fixed;
@@ -293,10 +282,9 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
     padding-inline: 12px;
     color: #ffffff;
     text-decoration: none;
-    /* REDESIGN 2026-09-01 — ukuran dinaikkan lagi (18→20px) + weight 600
-       (400 terasa terlalu tipis di Public Sans dibanding referensi; 600
-       dipilih persis karena itu satu-satunya weight tebal yang di-@font-face). */
-    font-family: var(--nav-font);
+    /* REDESIGN 2026-09-04 — navbar ikut satu font situs (Plus Jakarta Sans).
+       Ukuran 20px, weight 600. */
+    font-family: var(--font-body);
     font-size: 20px;
     font-weight: 600;
     line-height: normal;

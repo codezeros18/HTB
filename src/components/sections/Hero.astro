@@ -11,13 +11,9 @@
  *   dirender di sini.
  *
  * Headline dibuat lebih "branding": ukuran jauh lebih besar (scoped lokal,
- * tidak menyentuh token --fs-display global), font mengikuti referensi
- * ("LocomotiveNew" — font berlisensi, TIDAK di-load; ini murni rantai
- * fallback ke -apple-system/Segoe UI/Arial, sama seperti navbar), bobot
- * dinaikkan ke 800 supaya tetap terasa tebal di font fallback (font asli
- * referensi terasa berat walau ditulis "Regular" karena memang custom
- * display face). Garis emas tetap sebagai aksen dekoratif non-teks
- * pengganti posisi eyebrow.
+ * tidak menyentuh token --fs-display global), memakai font situs
+ * (Plus Jakarta Sans lewat --font-display) dengan bobot 800. Garis emas
+ * tetap sebagai aksen dekoratif non-teks pengganti posisi eyebrow.
  *
  * Guardrail 9 tetap: hero TIDAK dianimasikan masuk.
  */
@@ -64,11 +60,6 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
   .mv-hero {
     --hero-ink: rgb(255 255 255);
     --hero-overlay: var(--modal-backdrop);
-
-    /* Font headline SAJA (bukan global) — lihat catatan lisensi di atas file. */
-    --hero-font:
-      'LocomotiveNew', -apple-system, BlinkMacSystemFont, 'avenir next', avenir, 'segoe ui',
-      'helvetica neue', helvetica, Cantarell, Ubuntu, roboto, noto, arial, sans-serif;
 
     position: relative;
     display: flex;
@@ -123,7 +114,7 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
   /* Headline besar & "branding" — ukuran lokal, tidak memakai --fs-display
      global (dipakai section lain seperti "OUR SERVICES"). */
   .mv-hero__h1 {
-    font-family: var(--hero-font);
+    font-family: var(--font-display);
     font-weight: 800;
     text-transform: uppercase;
     font-size: clamp(2.75rem, 7vw, 6.5rem);

@@ -96,18 +96,17 @@
 
 /* ===== 3. TIPOGRAFI — identik di kedua arah (BLUEPRINT.md §6.5) ===== */
 :root {
-  /* REDESIGN (2026-08-31) — Poppins DIGANTI. Poppins geometrik-bundar terbaca
-     "template", lemah di ukuran display raksasa. Sekarang:
-       display : Space Grotesk (grotesque modern, berkarakter, tajam di ukuran
-                 besar — pas untuk judul "OUR SERVICES"). Berat maks 700.
-       body/UI : Inter (standar SaaS: keterbacaan layar terbaik + `tabular-nums`
-                 untuk tabel harga/ukuran). SUDAH self-host di public/fonts.
-     Space Grotesk dimuat via Google Fonts di BaseLayout; Inter self-host. */
-  --font-display: 'Space Grotesk', 'Inter', 'Segoe UI', Arial, sans-serif;
-  --font-body: 'Inter', 'Inter Fallback', 'Segoe UI', Arial, sans-serif;
+  /* REDESIGN (2026-09-04, permintaan klien) — SATU font untuk SEMUANYA:
+     Plus Jakarta Sans (SIL OFL, gratis komersial). Space Grotesk / Inter /
+     Switzer / fallback LocomotiveNew semuanya dilepas. Variable font
+     (weight 200–800) di-SELF-HOST di public/fonts/ — nol request pihak
+     ketiga (guardrail 6). display & body memakai family yang sama;
+     bedanya cuma weight/size lewat token type-scale di bawah. */
+  --font-display: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
 
   /* Type scale — DESKTOP (≥768px). fs / lh / tracking / weight.
-     Berat display turun 900→700 (batas Space Grotesk) — di ukuran besar +
+     Berat display maks 800 (batas Plus Jakarta Sans) — di ukuran besar +
      tracking rapat tetap terbaca sangat tegas. */
   --fs-display: 64px;
   --lh-display: 0.96;
