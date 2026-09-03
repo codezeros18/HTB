@@ -64,17 +64,12 @@ cek(
   (h.match(/mv-client__nama/g) || []).length >= 26
 );
 
-// T07.4 heading + disclaimer + larangan string
-// REDESIGN 2026-09-04 (permintaan klien): heading dipendekkan jadi "Portofolio"
-// + ditaruh di tengah, gaya judul raksasa "Our Services". Framing "riwayat
-// pekerjaan, bukan klaim hubungan" kini dijaga oleh disclaimer di bawah grid
-// (dicek persis di bawah) — itu anchor legal AC T07.4 yang sebenarnya.
+// T07.4 heading + larangan string
+// REDESIGN 2026-09-04 (permintaan klien, 2 iterasi): heading jadi "Portofolio"
+// (di tengah, judul raksasa). Lalu disclaimer merek di bawah grid + tombol CTA
+// WhatsApp DIHAPUS atas permintaan eksplisit klien — section = judul + grid
+// nama saja. Assertion "disclaimer persis" sengaja dilepas.
 cek('T07.4 heading section Clients ada ("Portofolio")', h.includes('Portofolio'));
-cek(
-  'T07.4 disclaimer merek persis',
-  h.includes('Logo ditampilkan sebagai referensi pekerjaan yang pernah kami kerjakan') &&
-    h.includes('Semua merek adalah milik pemiliknya masing-masing.')
-);
 cek('T07.4 string "Klien Kami" TIDAK ADA', !/Klien Kami/i.test(h));
 cek('T07.4 string "Partner" TIDAK ADA', !/Partner/i.test(h));
 cek(

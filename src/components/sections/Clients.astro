@@ -7,11 +7,11 @@
  * membaca "Kementerian ESDM" dengan tenang > melihatnya lewat.
  *
  * Heading dari `site.klienUi.judul` — REDESIGN 2026-09-04 (permintaan
- * klien): "Portofolio", di tengah, gaya judul raksasa "Our Services".
- * String "Klien Kami" / "Partner" / angka jumlah klien TETAP TIDAK ADA
- * di mana pun (AC T07.4). Disclaimer merek WAJIB di bawah grid dan
- * DIPERTAHANKAN — itu yang menjaga framing "riwayat pekerjaan, bukan
- * klaim hubungan" (AC T07.4).
+ * klien, 2 iterasi): "Portofolio", di tengah, gaya judul raksasa "Our
+ * Services". Lalu deskripsi, disclaimer merek, dan tombol CTA WhatsApp
+ * SEMUA DIHAPUS — section = judul + grid nama saja. Risiko framing
+ * (nama instansi tanpa disclaimer) diterima klien secara eksplisit.
+ * String "Klien Kami" / "Partner" / angka jumlah klien TETAP TIDAK ADA.
  *
  * Semua entri `klien.ts` sekarang `izinTayang: false` → `ClientLogo`
  * merender NAMA TEKS, nol `<img>` (AC T07.3). Mengubah satu entri ke
@@ -22,7 +22,6 @@ import { site } from '../../content/site';
 import { klien } from '../../content/klien';
 import Container from '../layout/Container.astro';
 import SectionHeading from '../layout/SectionHeading.astro';
-import WhatsAppButton from '../ui/WhatsAppButton.astro';
 import ClientLogo from '../cards/ClientLogo.astro';
 
 interface Props {
@@ -51,7 +50,7 @@ const kelompok = KATEGORI_URUT.map((kat) => ({
 ---
 
 <Container as="section" spacing="section" id={id}>
-  <SectionHeading judul={klienUi.judul} subjudul={klienUi.subjudul} align="center" />
+  <SectionHeading judul={klienUi.judul} align="center" />
 
   <div class="mv-klien">
     {
@@ -71,12 +70,6 @@ const kelompok = KATEGORI_URUT.map((kat) => ({
         </div>
       ))
     }
-  </div>
-
-  <p class="mv-klien__disclaimer t-body-s">{klienUi.disclaimer}</p>
-
-  <div class="mv-klien__cta">
-    <WhatsAppButton konteks="kontak" label={klienUi.ctaLabel} variant="secondary" />
   </div>
 </Container>
 
@@ -111,16 +104,6 @@ const kelompok = KATEGORI_URUT.map((kat) => ({
     grid-template-columns: repeat(6, minmax(0, 1fr));
     gap: var(--space-3);
     justify-items: center;
-  }
-
-  .mv-klien__disclaimer {
-    color: var(--color-text-2);
-    margin: var(--space-6) 0 0;
-    max-inline-size: 62ch;
-  }
-
-  .mv-klien__cta {
-    margin-block-start: var(--space-6);
   }
 
   @media (max-width: 900px) {

@@ -131,28 +131,23 @@ export const site: SiteConfig = {
 
   /* =============================================================
      klienUi — S07. Copy UI section "Our Clients" (BLUEPRINT §8
-     Section 6 + §5.2/§5.3). Nama & kategori organisasi TETAP di
-     klien.ts. `disclaimer` di bawah grid WAJIB persis teks §5.3 dan
-     TETAP dipertahankan — itu yang menjaga framing "pekerjaan yang
-     pernah dikerjakan", bukan klaim hubungan. Nol angka jumlah klien
-     di mana pun (AC T07.4).
-     REDESIGN 2026-09-04 (permintaan klien): `judul` dipendekkan jadi
-     "Portofolio" + ditaruh di tengah, gaya judul raksasa "Our Services".
+     Section 6 + §5.2/§5.3). Nama & kategori organisasi TETAP di klien.ts.
+     REDESIGN 2026-09-04 (permintaan klien, 2 iterasi):
+       1. `judul` dipendekkan jadi "Portofolio", di tengah, judul raksasa.
+       2. Deskripsi/`subjudul`, disclaimer merek di bawah grid, dan tombol
+          CTA WhatsApp SEMUA DIHAPUS — section jadi judul + grid nama saja.
+          Risiko framing (nama instansi tanpa disclaimer) diterima klien
+          secara eksplisit.
      ============================================================= */
   klienUi: {
     judul: 'Portofolio',
-    // Sengaja null: BLUEPRINT menyebut "sub" tapi tidak menetapkan teksnya;
-    // kalimat apa pun di sini jadi copy tak terverifikasi (guardrail 1).
     subjudul: null,
-    disclaimer:
-      'Logo ditampilkan sebagai referensi pekerjaan yang pernah kami kerjakan. Semua merek adalah milik pemiliknya masing-masing.',
     labelKategori: {
       'instansi-pendidikan': 'Instansi Pemerintah & Pendidikan Tinggi',
       'korporat-properti': 'Korporat & Properti',
       'event-olahraga': 'Event & Olahraga',
       'komunitas-organisasi': 'Komunitas & Organisasi',
     },
-    ctaLabel: 'Chat WhatsApp',
   },
 
   /* =============================================================
@@ -181,8 +176,9 @@ export const site: SiteConfig = {
      ============================================================= */
   lokasiIntro: {
     judul: 'Tiga Lokasi, Satu Rantai Produksi',
-    subjudul:
-      'Head office untuk konsultasi, workshop dan pabrik untuk produksi — dikelola sendiri dari ujung ke ujung.',
+    // REDESIGN 2026-09-04 (permintaan klien): deskripsi di bawah judul
+    // section dihapus di seluruh situs — judul raksasa berdiri sendiri.
+    subjudul: null,
     labelTampilkanPeta: 'Tampilkan peta',
     labelBukaMaps: 'Buka di Google Maps',
   },
@@ -194,8 +190,9 @@ export const site: SiteConfig = {
      ============================================================= */
   kontak: {
     judul: 'Konsultasikan Kebutuhan Anda',
-    subjudul:
-      'Satu langkah, tanpa gesekan — kirim pesan lewat WhatsApp atau isi form singkat di samping.',
+    // REDESIGN 2026-09-04 (permintaan klien): deskripsi di bawah judul
+    // section dihapus di seluruh situs — judul raksasa berdiri sendiri.
+    subjudul: null,
     waJudul: 'Chat Langsung via WhatsApp',
     waDeskripsi: 'Kanal tercepat untuk konsultasi produk, bahan, dan estimasi kebutuhan Anda.',
     formJudul: 'Atau Kirim Pesan Tertulis',

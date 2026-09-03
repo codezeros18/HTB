@@ -124,14 +124,8 @@ try {
   );
   cek('T07.3 nol <img> klien di DOM (izinTayang semua false)', klienImg === 0);
 
-  // Keyboard: Tab mencapai CTA penutup section klien
-  const ctaReach = await page.evaluate(async () => {
-    const cta = document.querySelector('.mv-klien__cta a, .mv-klien__cta button');
-    if (!cta) return false;
-    cta.focus();
-    return document.activeElement === cta;
-  });
-  cek('T07 CTA penutup klien fokusabel via keyboard', ctaReach === true);
+  // REDESIGN 2026-09-04 (permintaan klien): tombol CTA WhatsApp penutup
+  // section Portofolio DIHAPUS — cek "CTA fokusabel" dilepas.
 
   cek('nol error runtime di console', errs.length === 0, errs.join(' | '));
 

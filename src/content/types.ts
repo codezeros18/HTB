@@ -272,18 +272,16 @@ export interface KlienUiContent {
   /**
    * H2 SectionHeading. REDESIGN 2026-09-04 (permintaan klien): dipendekkan
    * jadi "Portofolio" + ditaruh di tengah, gaya judul raksasa "Our Services".
-   * Disclaimer merek di bawah grid TETAP wajib — framing "pekerjaan yang
-   * pernah dikerjakan" tetap terjaga lewat disclaimer itu.
+   * Iterasi berikutnya (permintaan klien): disclaimer merek DI BAWAH grid
+   * DIHAPUS, tombol CTA WhatsApp DIHAPUS — section jadi judul + grid nama
+   * saja. Risiko framing (menampilkan nama instansi tanpa disclaimer)
+   * diterima klien secara eksplisit.
    */
   judul: string;
-  /** Sub opsional. `null` → tidak dirender (hindari copy tak terverifikasi). */
+  /** Sub opsional. `null` → tidak dirender (deskripsi judul dihapus di semua section). */
   subjudul: string | null;
-  /** Disclaimer merek WAJIB di bawah grid (BLUEPRINT §5.3, persis). */
-  disclaimer: string;
   /** Label tampil per kategori — kunci = nilai `KategoriKlien`. */
   labelKategori: Record<KategoriKlien, string>;
-  /** Label CTA penutup section. */
-  ctaLabel: string;
 }
 
 /* ---------- gallery (S07) ---------- */
