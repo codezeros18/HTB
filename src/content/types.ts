@@ -258,10 +258,23 @@ export interface ServicesContent {
   panduanUkuranBelumVerifikasi: string;
 }
 
+/* ---------- proses intro (S06) ---------- */
+
+export interface ProsesIntroContent {
+  /** H2 SectionHeading. REDESIGN 2026-09-04 — judul pendek gaya "Our Services". */
+  judul: string;
+  subjudul: string | null;
+}
+
 /* ---------- clients UI (S07) ---------- */
 
 export interface KlienUiContent {
-  /** H2 SectionHeading — WAJIB "PERNAH DIPERCAYA OLEH" (BLUEPRINT §5.3). */
+  /**
+   * H2 SectionHeading. REDESIGN 2026-09-04 (permintaan klien): dipendekkan
+   * jadi "Portofolio" + ditaruh di tengah, gaya judul raksasa "Our Services".
+   * Disclaimer merek di bawah grid TETAP wajib — framing "pekerjaan yang
+   * pernah dikerjakan" tetap terjaga lewat disclaimer itu.
+   */
   judul: string;
   /** Sub opsional. `null` → tidak dirender (hindari copy tak terverifikasi). */
   subjudul: string | null;
@@ -385,6 +398,7 @@ export interface SiteConfig {
   hero: HeroContent;
   about: AboutContent;
   services: ServicesContent;
+  prosesIntro: ProsesIntroContent;
   klienUi: KlienUiContent;
   galeri: GaleriContent;
   lokasiIntro: LokasiIntroContent;

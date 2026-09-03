@@ -65,7 +65,6 @@ const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
       <!-- ===== Skala tipe ===== -->
       <Container as="section" spacing="section">
         <SectionHeading
-          nomor="01"
           judul="Skala tipe"
           subjudul="Nilai berasal dari tokens.css dan berubah sendiri di bawah 768px."
         />
@@ -82,7 +81,7 @@ const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
 
       <!-- ===== Button ===== -->
       <Container as="section" spacing="section">
-        <SectionHeading nomor="02" judul="Button" subjudul="3 varian × 2 ukuran × state." />
+        <SectionHeading judul="Button" subjudul="3 varian × 2 ukuran × state." />
         <div class="row">
           <Button variant="primary">Primary</Button>
           <Button variant="secondary">Secondary</Button>
@@ -102,7 +101,6 @@ const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
       <!-- ===== Table ===== -->
       <Container as="section" spacing="section">
         <SectionHeading
-          nomor="03"
           judul="Table"
           subjudul="Tabel 8 kolom. Di 360px digeser sendiri, halaman tidak ikut meluber."
         />
@@ -125,11 +123,7 @@ const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
 
       <!-- ===== Tab ===== -->
       <Container as="section" spacing="section">
-        <SectionHeading
-          nomor="04"
-          judul="Tab"
-          subjudul="Panah kiri/kanan, Home/End, deep link #bahan."
-        />
+        <SectionHeading judul="Tab" subjudul="Panah kiri/kanan, Home/End, deep link #bahan." />
         <Tab
           label="Kategori uji"
           tabs={[
@@ -167,7 +161,6 @@ const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
       <!-- ===== Modal ===== -->
       <Container as="section" spacing="section">
         <SectionHeading
-          nomor="05"
           judul="Modal"
           subjudul="dialog native — Esc menutup, Tab terkunci, fokus kembali ke pemicu."
         />
@@ -193,7 +186,6 @@ const kelompokBahan = [...new Set(bahan.map((b) => b.kelompok))];
       <!-- ===== Badge + MediaFallback ===== -->
       <Container as="section" spacing="section" last>
         <SectionHeading
-          nomor="06"
           judul="Badge & MediaFallback"
           subjudul="MediaFallback bukan kotak abu — blok tipografis bertint aksen."
         />

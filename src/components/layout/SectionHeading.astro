@@ -1,33 +1,32 @@
 ---
 /**
- * SectionHeading — nomor + garis 56×2px + H2 + subheading opsional.
+ * SectionHeading — REDESIGN 2026-09-04 (permintaan klien).
  *
- * Struktur visual dikunci di sini supaya kesepuluh section identik dan
- * pemanggil tidak perlu mengatur jaraknya sendiri (AC T02.1).
+ * Judul section raksasa bergaya sama dengan "Our Services": Space Grotesk
+ * 900, UPPERCASE, warna emas (`--color-accent`), `clamp(2.75rem, 12vw,
+ * 9rem)`. Nomor "01".."10" + garis 56×2px versi lama DIBUANG total.
+ *
+ * Posisi horizontal berbeda-beda per section (permintaan klien):
+ *   start  kiri (default)   · center  tengah   · end  kanan
  *
  * Props:
- *   nomor     "01".."10". Dekoratif — disembunyikan dari screen reader
- *             karena urutan sudah tersirat dari DOM.
- *   judul     teks H2. Dirender UPPERCASE lewat CSS, bukan lewat data,
- *             supaya nilai aslinya tetap terbaca screen reader (§6.5).
- *   subjudul  opsional. `null` → paragrafnya TIDAK dirender sama sekali
- *             (guardrail 1: nol baris kosong menggantung).
- *   id        dipasang ke <h2>; pakai untuk aria-labelledby di section.
+ *   judul     teks heading. Uppercase lewat CSS, bukan data — nilai asli
+ *             tetap terbaca screen reader (§6.5).
+ *   subjudul  opsional. `null` → paragrafnya TIDAK dirender (guardrail 1).
+ *   id        dipasang ke heading; untuk `aria-labelledby` di section.
  *   as        tingkat heading. Default 'h2'.
- *   align     'start' (default) atau 'center'.
+ *   align     'start' (default) | 'center' | 'end'.
  */
 interface Props {
-  nomor?: string | null;
   judul: string;
   subjudul?: string | null;
   id?: string;
   as?: 'h2' | 'h3';
-  align?: 'start' | 'center';
+  align?: 'start' | 'center' | 'end';
   class?: string;
 }
 
 const {
-  nomor = null,
   judul,
   subjudul = null,
   id,
@@ -38,15 +37,7 @@ const {
 ---
 
 <header class:list={['mv-heading', `mv-heading--${align}`, className]}>
-  {
-    nomor && (
-      <span class="mv-heading__nomor t-eyebrow" aria-hidden="true">
-        {nomor}
-      </span>
-    )
-  }
-  <span class="mv-heading__rule" aria-hidden="true"></span>
-  <Heading id={id} class="mv-heading__judul t-h2">{judul}</Heading>
+  <Heading id={id} class="mv-heading__judul">{judul}</Heading>
   {subjudul && <p class="mv-heading__sub t-body-l">{subjudul}</p>}
 </header>
 
@@ -63,22 +54,24 @@ const {
     text-align: center;
   }
 
-  .mv-heading__nomor {
-    color: var(--color-accent);
-    margin-block-end: var(--space-3); /* 12px */
-  }
-
-  .mv-heading__rule {
-    display: block;
-    inline-size: var(--rule-w); /* 56px */
-    block-size: var(--rule-h); /* 2px */
-    background-color: var(--color-accent);
-    margin-block-end: var(--space-4); /* 16px */
+  .mv-heading--end {
+    align-items: flex-end;
+    text-align: right;
   }
 
   .mv-heading__judul {
-    color: var(--color-text);
+    font-family: var(--font-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    color: var(--color-accent);
+    font-size: clamp(2.75rem, 12vw, 9rem);
+    line-height: 0.9;
+    letter-spacing: -0.03em;
     margin: 0;
+    /* Kata tunggal super-panjang (mis. "KONSULTASIKAN") boleh patah
+       daripada memaksa halaman melebar di 360px. */
+    overflow-wrap: break-word;
+    overflow: hidden;
   }
 
   .mv-heading__sub {
@@ -89,6 +82,10 @@ const {
 
   .mv-heading--center .mv-heading__sub {
     margin-inline: auto;
+  }
+
+  .mv-heading--end .mv-heading__sub {
+    margin-inline-start: auto;
   }
 
   @media (max-width: 767.98px) {

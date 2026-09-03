@@ -24,6 +24,7 @@
  * `proses.ts` apa adanya (guardrail 1).
  */
 import { proses, babakProses } from '../../content/proses';
+import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
 import SectionHeading from '../layout/SectionHeading.astro';
 
@@ -76,7 +77,7 @@ const langkah = proses.map((t, i) => ({
 ---
 
 <Container as="section" spacing="section" id={id}>
-  <SectionHeading nomor="05" judul="Proses Produksi 11 Tahap" />
+  <SectionHeading judul={site.prosesIntro.judul} subjudul={site.prosesIntro.subjudul} align="end" />
 
   <ol class="mv-flow" aria-label="Sebelas tahap produksi, berurutan">
     {

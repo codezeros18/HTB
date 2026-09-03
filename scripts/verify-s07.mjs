@@ -65,7 +65,11 @@ cek(
 );
 
 // T07.4 heading + disclaimer + larangan string
-cek('T07.4 H2 "PERNAH DIPERCAYA OLEH" ada', h.includes('PERNAH DIPERCAYA OLEH'));
+// REDESIGN 2026-09-04 (permintaan klien): heading dipendekkan jadi "Portofolio"
+// + ditaruh di tengah, gaya judul raksasa "Our Services". Framing "riwayat
+// pekerjaan, bukan klaim hubungan" kini dijaga oleh disclaimer di bawah grid
+// (dicek persis di bawah) — itu anchor legal AC T07.4 yang sebenarnya.
+cek('T07.4 heading section Clients ada ("Portofolio")', h.includes('Portofolio'));
 cek(
   'T07.4 disclaimer merek persis',
   h.includes('Logo ditampilkan sebagai referensi pekerjaan yang pernah kami kerjakan') &&

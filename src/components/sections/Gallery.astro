@@ -11,6 +11,7 @@
  * produksi nyata dikirim). Tanpa JS: 9 sel tampil statis, tanpa shuffle.
  */
 import { galeriFoto } from '../../content/galeri';
+import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
 
 interface Props {
@@ -28,8 +29,7 @@ const pool = JSON.stringify(galeriFoto);
 
 <Container as="section" spacing="section" id={id}>
   <header class="g__head">
-    <p class="t-eyebrow g__eyebrow">Galeri</p>
-    <h2 class="g__title">Hasil Produksi</h2>
+    <h2 class="g__title">{site.galeri.judul}</h2>
   </header>
 
   <div class="g__grid" data-gallery data-gallery-pool={pool}>
@@ -55,20 +55,19 @@ const pool = JSON.stringify(galeriFoto);
     margin-block-end: var(--space-7);
   }
 
-  .g__eyebrow {
-    color: var(--color-accent);
-    margin: 0 0 var(--space-3);
-  }
-
+  /* REDESIGN 2026-09-04 — gaya judul raksasa yang sama dengan "Our
+     Services" & SectionHeading: emas, Space Grotesk 900, clamp besar. */
   .g__title {
     font-family: var(--font-display);
     font-weight: 900;
     text-transform: uppercase;
-    color: var(--color-text);
-    font-size: clamp(2.25rem, 9vw, 6rem);
-    line-height: 0.92;
+    color: var(--color-accent);
+    font-size: clamp(2.75rem, 12vw, 9rem);
+    line-height: 0.9;
     letter-spacing: -0.03em;
     margin: 0;
+    overflow-wrap: break-word;
+    overflow: hidden;
   }
 
   .g__grid {

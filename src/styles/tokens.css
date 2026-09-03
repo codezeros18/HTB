@@ -291,7 +291,8 @@
   --btn-pad-x: var(--space-5); /* 24px */
   --btn-pad-x-lg: var(--space-6); /* 32px */
 
-  /* SectionHeading — garis 56×2px (TASKS T02.1) */
+  /* Garis aksen 56×2px — dipakai MediaFallback. (SectionHeading tidak
+     lagi memakainya sejak REDESIGN 2026-09-04: judul raksasa tanpa garis.) */
   --rule-w: 56px;
   --rule-h: 2px;
 

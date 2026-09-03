@@ -6,9 +6,12 @@
  * (aturan rawan #1 & #2). Untuk audiens yang mengevaluasi risiko vendor,
  * membaca "Kementerian ESDM" dengan tenang > melihatnya lewat.
  *
- * Heading WAJIB "PERNAH DIPERCAYA OLEH" (dari `site.klienUi.judul`).
- * String "Klien Kami" / "Partner" / angka jumlah klien TIDAK ADA di
- * mana pun (AC T07.4). Disclaimer merek WAJIB di bawah grid (AC T07.4).
+ * Heading dari `site.klienUi.judul` — REDESIGN 2026-09-04 (permintaan
+ * klien): "Portofolio", di tengah, gaya judul raksasa "Our Services".
+ * String "Klien Kami" / "Partner" / angka jumlah klien TETAP TIDAK ADA
+ * di mana pun (AC T07.4). Disclaimer merek WAJIB di bawah grid dan
+ * DIPERTAHANKAN — itu yang menjaga framing "riwayat pekerjaan, bukan
+ * klaim hubungan" (AC T07.4).
  *
  * Semua entri `klien.ts` sekarang `izinTayang: false` → `ClientLogo`
  * merender NAMA TEKS, nol `<img>` (AC T07.3). Mengubah satu entri ke
@@ -48,7 +51,7 @@ const kelompok = KATEGORI_URUT.map((kat) => ({
 ---
 
 <Container as="section" spacing="section" id={id}>
-  <SectionHeading nomor="06" judul={klienUi.judul} subjudul={klienUi.subjudul} />
+  <SectionHeading judul={klienUi.judul} subjudul={klienUi.subjudul} align="center" />
 
   <div class="mv-klien">
     {

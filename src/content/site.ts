@@ -117,14 +117,30 @@ export const site: SiteConfig = {
   },
 
   /* =============================================================
+     prosesIntro — S06. Judul section "Production" / Proses Produksi.
+     REDESIGN 2026-09-04 (permintaan klien): judul pendek 2 kata bergaya
+     "Our Services" (raksasa, emas), diposisikan di KANAN. Dulu string
+     "Proses Produksi 11 Tahap" di-hardcode di Process.astro — dipindah
+     ke sini (guardrail 5). Hitungan "11 tahap" tetap tersirat dari
+     <ol aria-label> + nomor kartu 01..11, tak perlu di judul.
+     ============================================================= */
+  prosesIntro: {
+    judul: 'Proses Produksi',
+    subjudul: null,
+  },
+
+  /* =============================================================
      klienUi — S07. Copy UI section "Our Clients" (BLUEPRINT §8
      Section 6 + §5.2/§5.3). Nama & kategori organisasi TETAP di
-     klien.ts. `judul` WAJIB persis "PERNAH DIPERCAYA OLEH" (pernyataan
-     riwayat transaksi, bukan klaim hubungan) — dan `disclaimer` WAJIB
-     persis teks §5.3. Nol angka jumlah klien di mana pun (AC T07.4).
+     klien.ts. `disclaimer` di bawah grid WAJIB persis teks §5.3 dan
+     TETAP dipertahankan — itu yang menjaga framing "pekerjaan yang
+     pernah dikerjakan", bukan klaim hubungan. Nol angka jumlah klien
+     di mana pun (AC T07.4).
+     REDESIGN 2026-09-04 (permintaan klien): `judul` dipendekkan jadi
+     "Portofolio" + ditaruh di tengah, gaya judul raksasa "Our Services".
      ============================================================= */
   klienUi: {
-    judul: 'PERNAH DIPERCAYA OLEH',
+    judul: 'Portofolio',
     // Sengaja null: BLUEPRINT menyebut "sub" tapi tidak menetapkan teksnya;
     // kalimat apa pun di sini jadi copy tak terverifikasi (guardrail 1).
     subjudul: null,
@@ -148,7 +164,9 @@ export const site: SiteConfig = {
      ============================================================= */
   galeri: {
     foto: [],
-    judul: 'Hasil Produksi',
+    // REDESIGN 2026-09-04 (permintaan klien): 1 kata, gaya judul raksasa
+    // "Our Services", diposisikan di KIRI. Dulu "Hasil Produksi".
+    judul: 'Produksi',
     subjudul: null,
     blokTeksB: null,
     labelPerbesar: 'Perbesar',
