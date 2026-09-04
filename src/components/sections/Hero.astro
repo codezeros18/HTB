@@ -1,24 +1,21 @@
 ---
 /**
- * Hero — REDESIGN 2026-08-31 (iterasi 3, permintaan klien).
+ * Hero — REDESIGN 2026-09-04 (permintaan klien): hero jadi HANYA gambar
+ * latar, NOL teks. `motive.png` (hitam-putih) sudah memuat logo MOTIVE di
+ * tengah frame, dan headline "KONVEKSI CUSTOM APPAREL & RACEPACK" dipindah
+ * ke section About (`about.judul`). Tidak ada lagi h1 / eyebrow / sub /
+ * CTA / garis aksen.
  *
- * Dipangkas jadi HANYA headline:
- *   - Eyebrow ("OFFICIAL BRAND BY CV. HUIMORA...") DIHAPUS — sudah
- *     redundan dengan About Us (baris fakta di sana tetap menampilkannya).
- *   - Deskripsi (`hero.sub`) DIHAPUS.
- *   - Tombol CTA DIHAPUS — WhatsApp ("Let's Talk") sudah ada di navbar.
- *   Field-field itu tetap ada di `site.hero` (kontrak tipe), cuma tidak
- *   dirender di sini.
+ * `mv-hero__scrim` = gradien gelap tipis di ~40% atas frame. Itu BUKAN
+ * overlay teks hero (tidak ada teksnya) — fungsinya menjaga keterbacaan
+ * tautan navbar (putih) yang menumpang transparan di atas bagian atas
+ * `motive.png` yang terang. Guardrail aksesibilitas: kontras navbar wajib
+ * lolos.
  *
- * Headline dibuat lebih "branding": ukuran jauh lebih besar (scoped lokal,
- * tidak menyentuh token --fs-display global), memakai font situs
- * (Plus Jakarta Sans lewat --font-display) dengan bobot 800. Garis emas
- * tetap sebagai aksen dekoratif non-teks pengganti posisi eyebrow.
- *
- * Guardrail 9 tetap: hero TIDAK dianimasikan masuk.
+ * Guardrail 9 tetap: hero TIDAK dianimasikan masuk — gambar LCP dimuat
+ * eager + fetchpriority high + di-preload.
  */
 import { site } from '../../content/site';
-import Container from '../layout/Container.astro';
 
 interface Props {
   id?: string;
@@ -27,45 +24,32 @@ interface Props {
 const { id }: Props = Astro.props;
 
 const { hero } = site;
-const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
 ---
 
-<section id={id} class="mv-hero" data-varian={varian}>
+<section id={id} class="mv-hero">
   {
-    varian === 'foto' && hero.fotoSrc && (
+    hero.fotoSrc && (
       <>
         <link rel="preload" as="image" href={hero.fotoSrc} fetchpriority="high" />
         <img
           class="mv-hero__foto"
           src={hero.fotoSrc}
           alt={hero.fotoAlt ?? ''}
-          width="1536"
-          height="1024"
+          width="2880"
+          height="1608"
           fetchpriority="high"
           loading="eager"
           decoding="async"
         />
-        <div class="mv-hero__overlay" aria-hidden="true" />
+        <div class="mv-hero__scrim" aria-hidden="true" />
       </>
     )
   }
-
-  <Container as="div" class="mv-hero__inner">
-    <span class="mv-hero__rule" aria-hidden="true"></span>
-    <h1 class="mv-hero__h1">{hero.h1}</h1>
-  </Container>
 </section>
 
 <style>
   .mv-hero {
-    --hero-ink: rgb(255 255 255);
-    --hero-overlay: var(--modal-backdrop);
-
     position: relative;
-    display: flex;
-    /* REDESIGN 2026-09-01 — headline dipindah ke pojok kiri bawah
-       (sesuai referensi locomotive.ca), bukan lagi center. */
-    align-items: flex-end;
     overflow: hidden;
     /* Hero full-screen. Navbar transparan menumpang di atasnya. */
     min-height: 100vh;
@@ -83,52 +67,20 @@ const varian = hero.fotoTersedia && hero.fotoSrc ? 'foto' : 'tanpa-foto';
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
-    z-index: 0;
+    display: block;
   }
 
-  .mv-hero__overlay {
+  .mv-hero__scrim {
     position: absolute;
-    inset: 0;
-    z-index: 1;
-    background-color: var(--hero-overlay);
-  }
-
-  .mv-hero__inner {
-    position: relative;
-    z-index: 2;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    text-align: left;
-    max-inline-size: 72rem;
-    padding-block: var(--space-8);
-    gap: var(--space-6);
-  }
-
-  .mv-hero__rule {
-    inline-size: 64px;
-    block-size: 2px;
-    background-color: var(--color-accent);
-  }
-
-  /* Headline besar & "branding" — ukuran lokal, tidak memakai --fs-display
-     global (dipakai section lain seperti "OUR SERVICES"). */
-  .mv-hero__h1 {
-    font-family: var(--font-display);
-    font-weight: 800;
-    text-transform: uppercase;
-    font-size: clamp(2.75rem, 7vw, 6.5rem);
-    line-height: 0.98;
-    letter-spacing: -0.02em;
-    color: var(--color-text);
-    margin: 0;
-    text-shadow: 0 10px 40px rgba(0, 0, 0, 0.35);
-  }
-
-  /* Varian foto: headline putih terang + bayangan lebih dalam supaya
-     tetap tajam di atas overlay gelap. */
-  .mv-hero[data-varian='foto'] .mv-hero__h1 {
-    color: var(--hero-ink);
-    text-shadow: 0 12px 46px rgba(0, 0, 0, 0.55);
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: 40%;
+    pointer-events: none;
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--color-bg) 62%, transparent) 0%,
+      color-mix(in srgb, var(--color-bg) 24%, transparent) 45%,
+      transparent 100%
+    );
   }
 </style>

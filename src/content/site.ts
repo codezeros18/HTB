@@ -43,6 +43,8 @@ export const site: SiteConfig = {
      ============================================================= */
   hero: {
     eyebrow: 'OFFICIAL BRAND BY CV. HUIMORA TALENTA BERKARYA',
+    // REDESIGN 2026-09-04 (permintaan klien): hero jadi NOL teks — headline
+    // ini dipindah ke `about.judul`. Field dipertahankan demi kontrak tipe.
     h1: 'KONVEKSI CUSTOM APPAREL & RACEPACK',
     sub: 'Kaos, jersey, seragam, jaket, dan racepack lari — dikerjakan di workshop dan pabrik kami sendiri, dengan kontrol kualitas berlapis.',
     ctaPrimer: 'Chat WhatsApp',
@@ -50,13 +52,15 @@ export const site: SiteConfig = {
     // BLUEPRINT §1.2/§8 [FAKTA-PDF] — anchor 38k, baris kecil, BUKAN headline.
     anchorHarga: 'Mulai Rp 38.000/pcs untuk kaos PE Soft 20s, sudah termasuk 1 logo depan.',
     stripJudul: 'Pernah dipercaya oleh',
-    // REDESIGN (2026-08-30) — foto hero dari klien: lantai produksi nyata,
-    // `public/images/HERO SECTION/Hero Section.png` (1536×1024).
-    // ⚠️ Masih PNG ~3,0 MB belum dioptimasi. WAJIB dikompres (AVIF/WebP,
-    // target ≤180 KB) + `srcset` sebelum produksi — kalau tidak LCP jebol.
+    // REDESIGN 2026-09-04 (permintaan klien) — hero jadi HANYA gambar, nol
+    // teks. `motive.png` (2880×1608, hitam-putih) sudah memuat logo MOTIVE
+    // di tengah frame, jadi tidak perlu headline lagi di hero.
+    // ⚠️ PNG ~1,7 MB belum dioptimasi. WAJIB dikompres (AVIF/WebP, target
+    // ≤180 KB) + `srcset` sebelum produksi — kalau tidak LCP jebol.
     fotoTersedia: true,
-    fotoSrc: '/images/HERO%20SECTION/Hero%20Section.png',
-    fotoAlt: 'Lantai produksi MOTIVE — deretan penjahit mengerjakan pesanan apparel',
+    fotoSrc: '/images/hero/motive.png',
+    fotoAlt:
+      'MOTIVE — lantai produksi apparel: deretan meja jahit dan operator, dengan logo MOTIVE di tengah',
     statusApproval: 'draft',
   },
 
@@ -66,7 +70,11 @@ export const site: SiteConfig = {
      ============================================================= */
   about: {
     // BLUEPRINT §7.7 — H2 target section About.
-    judul: 'Vendor Apparel dengan Produksi Sendiri',
+    // REDESIGN 2026-09-04 (permintaan klien): headline hero "KONVEKSI CUSTOM
+    // APPAREL & RACEPACK" dipindah ke sini (hero jadi nol teks). Nilai lama
+    // "Vendor Apparel dengan Produksi Sendiri" dilepas — 2 paragraf di
+    // bawah sudah menjelaskan MOTIVE.
+    judul: 'KONVEKSI CUSTOM APPAREL & RACEPACK',
     paragraf: [
       'Bergerak di industri apparel, kami memahami bahwa setiap event dan organisasi membutuhkan identitas visual yang berkualitas. Itulah mengapa kami hadir untuk memenuhi kebutuhan vendor pakaian Anda dengan standar profesionalisme tinggi.',
       'Kami berkomitmen memberikan solusi produksi yang efisien tanpa mengesampingkan detail. Dengan jaminan ketepatan waktu dan garansi kualitas hasil produksi, kami memastikan material yang Anda terima selalu sesuai dengan kesepakatan awal.',
