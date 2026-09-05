@@ -199,43 +199,17 @@ export const site: SiteConfig = {
 
   /* =============================================================
      kontak — S08. Copy UI section "Contact" (BLUEPRINT §8 Section 9).
-     WhatsApp = CTA utama (lihat Contact.astro untuk hierarki visual);
-     form = jalur sekunder, 5 field, Web3Forms, honeypot bukan CAPTCHA.
+     REDESIGN 2026-09-05 (permintaan klien): form 5-field + Web3Forms +
+     honeypot DIHAPUS TOTAL — client semua closing lewat WhatsApp, form
+     tertulis tidak diperlukan. Section jadi judul + satu tombol WhatsApp,
+     nol kartu/kotak. Field-field form lama (label, placeholder, pesan
+     sukses/gagal, honeypot, web3formsAccessKey) ikut dibuang dari sini
+     DAN dari `KontakContent` (types.ts) — bukan cuma disembunyikan,
+     karena tidak ada rencana form ditampilkan lagi.
      ============================================================= */
   kontak: {
-    judul: 'Konsultasikan Kebutuhan Anda',
-    // REDESIGN 2026-09-04 (permintaan klien): deskripsi di bawah judul
-    // section dihapus di seluruh situs — judul raksasa berdiri sendiri.
+    judul: 'How Can We Help',
     subjudul: null,
-    waJudul: 'Chat Langsung via WhatsApp',
-    waDeskripsi: 'Kanal tercepat untuk konsultasi produk, bahan, dan estimasi kebutuhan Anda.',
-    formJudul: 'Atau Kirim Pesan Tertulis',
-    labelNama: 'Nama',
-    labelInstansi: 'Instansi / Organisasi',
-    labelKontak: 'WhatsApp atau Email',
-    placeholderKontak: '08xx-xxxx-xxxx atau nama@email.com',
-    labelJenisKebutuhan: 'Jenis kebutuhan',
-    placeholderJenisKebutuhan: 'Pilih salah satu',
-    opsiJenisKebutuhan: [
-      'Apparel custom (kaos, jaket, dll)',
-      'Racepack lomba lari',
-      'Seragam instansi / korporat',
-      'Lainnya',
-    ],
-    labelJumlahPcs: 'Perkiraan jumlah (pcs)',
-    labelSubmit: 'Kirim Pesan',
-    labelSubmitting: 'MENGIRIM…',
-    // Nama field honeypot — sengaja generik, TIDAK boleh diisi manusia.
-    honeypotNama: 'mv_website',
-    honeypotLabel: 'Jangan diisi bila Anda manusia',
-    pesanWajibDiisi: 'Wajib diisi.',
-    pesanSukses: 'Pesan terkirim. Kami akan segera membalas lewat email atau WhatsApp.',
-    pesanGagalJudul: 'Pesan gagal terkirim',
-    pesanGagalDeskripsi:
-      'Silakan coba lagi, atau langsung hubungi kami lewat WhatsApp supaya kebutuhan Anda tidak tertunda.',
-    labelWaJalanKeluar: 'Chat WhatsApp',
-    // [GAP] — akun Web3Forms klien belum ada. Lihat catatan tipe di types.ts.
-    web3formsAccessKey: null,
   },
 };
 

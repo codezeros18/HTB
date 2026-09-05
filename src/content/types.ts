@@ -338,40 +338,15 @@ export interface LokasiIntroContent {
 /* ---------- contact (S08) ---------- */
 
 export interface KontakContent {
-  /** H2 SectionHeading — BLUEPRINT §8 Section 9. */
+  /**
+   * H2 SectionHeading — BLUEPRINT §8 Section 9.
+   * REDESIGN 2026-09-05 (permintaan klien): form 5-field + Web3Forms +
+   * honeypot DIHAPUS TOTAL (client semua closing lewat WhatsApp). Section
+   * sekarang cuma judul + satu tombol WhatsApp — seluruh field form lama
+   * dibuang dari sini, bukan cuma disembunyikan.
+   */
   judul: string;
   subjudul: string | null;
-  waJudul: string;
-  waDeskripsi: string;
-  formJudul: string;
-  labelNama: string;
-  labelInstansi: string;
-  labelKontak: string;
-  placeholderKontak: string;
-  labelJenisKebutuhan: string;
-  placeholderJenisKebutuhan: string;
-  /** Opsi `<select>` — kategori routing pesan, bukan klaim data. */
-  opsiJenisKebutuhan: string[];
-  labelJumlahPcs: string;
-  labelSubmit: string;
-  labelSubmitting: string;
-  /** Nama field honeypot — TIDAK boleh terlihat manusia (AC T08.5). */
-  honeypotNama: string;
-  /** Label honeypot — hanya terbaca bot; manusia tak pernah melihatnya. */
-  honeypotLabel: string;
-  pesanWajibDiisi: string;
-  pesanSukses: string;
-  pesanGagalJudul: string;
-  pesanGagalDeskripsi: string;
-  labelWaJalanKeluar: string;
-  /**
-   * [GAP] — kunci akun Web3Forms milik klien belum ada. `null` → submit
-   * tidak pernah memanggil endpoint pihak ketiga; form langsung jatuh ke
-   * state gagal + jalan keluar WhatsApp (nol permintaan dikirim dengan
-   * kredensial palsu). Isi field ini di sini saat klien sudah punya akun —
-   * nol perubahan kode lain diperlukan.
-   */
-  web3formsAccessKey: string | null;
 }
 
 export interface SiteConfig {
