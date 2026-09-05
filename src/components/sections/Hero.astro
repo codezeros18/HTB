@@ -1,18 +1,21 @@
 ---
 /**
- * Hero — REDESIGN 2026-09-04 (permintaan klien): hero jadi HANYA gambar
- * latar, NOL teks. `motive.png` (hitam-putih) sudah memuat logo MOTIVE di
- * tengah frame, dan headline "KONVEKSI CUSTOM APPAREL & RACEPACK" dipindah
- * ke section About (`about.judul`). Tidak ada lagi h1 / eyebrow / sub /
- * CTA / garis aksen.
+ * Hero — REDESIGN 2026-09-05 (permintaan klien, iterasi 5).
  *
- * `mv-hero__scrim` = gradien gelap tipis di ~40% atas frame. Itu BUKAN
- * overlay teks hero (tidak ada teksnya) — fungsinya menjaga keterbacaan
- * tautan navbar (putih) yang menumpang transparan di atas bagian atas
- * `motive.png` yang terang. Guardrail aksesibilitas: kontras navbar wajib
- * lolos.
+ * Riwayat singkat: mulai dari h1 raksasa + eyebrow + sub + CTA → dipangkas
+ * jadi h1 saja di pojok kiri-bawah → dipangkas lagi jadi NOL teks (cuma
+ * foto `motive.png`, headline pindah ke About) → SEKARANG: foto asli
+ * "Hero Section.png" (lantai produksi) diputihkan (lihat catatan di
+ * `site.hero.fotoSrc`), logo MOTIVE hitam ditumpuk di tengah, dan tagline
+ * singkat ditaruh di bawah logo — "simple, to the point", bukan display
+ * raksasa lagi.
  *
- * Guardrail 9 tetap: hero TIDAK dianimasikan masuk — gambar LCP dimuat
+ * Kenapa teks gelap (bukan putih seperti iterasi foto-gelap sebelumnya):
+ * latar sekarang terang (foto diputihkan), jadi logo/tagline pakai warna
+ * gelap (`--color-bg`, token near-black situs — dipakai terbalik sebagai
+ * "tinta gelap" di atas latar terang, bukan hex baru).
+ *
+ * Guardrail 9 tetap: hero TIDAK dianimasikan masuk — foto LCP dimuat
  * eager + fetchpriority high + di-preload.
  */
 import { site } from '../../content/site';
@@ -35,8 +38,8 @@ const { hero } = site;
           class="mv-hero__foto"
           src={hero.fotoSrc}
           alt={hero.fotoAlt ?? ''}
-          width="2880"
-          height="1608"
+          width="1536"
+          height="1024"
           fetchpriority="high"
           loading="eager"
           decoding="async"
@@ -45,10 +48,25 @@ const { hero } = site;
       </>
     )
   }
+
+  <div class="mv-hero__inner">
+    <img
+      class="mv-hero__logo"
+      src="/images/logo/LOGO%20MOTIVE%20NEW.png"
+      alt="MOTIVE"
+      width="1700"
+      height="215"
+      loading="eager"
+      decoding="async"
+    />
+    <p class="mv-hero__tagline">{hero.h1}</p>
+  </div>
 </section>
 
 <style>
   .mv-hero {
+    --hero-ink: var(--color-bg);
+
     position: relative;
     overflow: hidden;
     /* Hero full-screen. Navbar transparan menumpang di atasnya. */
@@ -70,6 +88,8 @@ const { hero } = site;
     display: block;
   }
 
+  /* Gradien gelap tipis di ~40% atas frame — jaga kontras tautan navbar
+     putih yang menumpang transparan di atas foto yang sekarang terang. */
   .mv-hero__scrim {
     position: absolute;
     inset-block-start: 0;
@@ -78,9 +98,43 @@ const { hero } = site;
     pointer-events: none;
     background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--color-bg) 62%, transparent) 0%,
-      color-mix(in srgb, var(--color-bg) 24%, transparent) 45%,
+      color-mix(in srgb, var(--color-bg) 45%, transparent) 0%,
+      color-mix(in srgb, var(--color-bg) 14%, transparent) 45%,
       transparent 100%
     );
+  }
+
+  .mv-hero__inner {
+    /* absolute + inset:0 (bukan flex di .mv-hero + block biasa di sini) —
+       block biasa dengan min-block-size:100% TIDAK stretch tanpa parent
+       flex/grid, hasilnya kolaps ke tinggi konten dan nempel di ATAS,
+       nabrak navbar. absolute+inset:0 pasti mengisi seluruh .mv-hero. */
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-4);
+    text-align: center;
+    padding-inline: var(--edge-pad);
+  }
+
+  .mv-hero__logo {
+    inline-size: clamp(220px, 26vw, 420px);
+    block-size: auto;
+  }
+
+  /* Tagline "simple, to the point" — bukan display raksasa seperti
+     iterasi sebelumnya, cukup satu baris tenang di bawah logo. */
+  .mv-hero__tagline {
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: clamp(0.8rem, 1.3vw, 1.05rem);
+    color: var(--hero-ink);
+    margin: 0;
   }
 </style>

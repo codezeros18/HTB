@@ -43,8 +43,11 @@ export const site: SiteConfig = {
      ============================================================= */
   hero: {
     eyebrow: 'OFFICIAL BRAND BY CV. HUIMORA TALENTA BERKARYA',
-    // REDESIGN 2026-09-04 (permintaan klien): hero jadi NOL teks — headline
-    // ini dipindah ke `about.judul`. Field dipertahankan demi kontrak tipe.
+    // REDESIGN 2026-09-05 (permintaan klien, iterasi 5): headline balik lagi
+    // ke hero — sekarang jadi tagline kecil "simple, to the point" di bawah
+    // logo MOTIVE, bukan h1 raksasa seperti iterasi sebelumnya. `about.judul`
+    // (S04, redesign 2026-09-04) TETAP memakai teks yang sama — belum
+    // diminta klien untuk diganti, jadi dibiarkan.
     h1: 'KONVEKSI CUSTOM APPAREL & RACEPACK',
     sub: 'Kaos, jersey, seragam, jaket, dan racepack lari — dikerjakan di workshop dan pabrik kami sendiri, dengan kontrol kualitas berlapis.',
     ctaPrimer: 'Chat WhatsApp',
@@ -52,15 +55,18 @@ export const site: SiteConfig = {
     // BLUEPRINT §1.2/§8 [FAKTA-PDF] — anchor 38k, baris kecil, BUKAN headline.
     anchorHarga: 'Mulai Rp 38.000/pcs untuk kaos PE Soft 20s, sudah termasuk 1 logo depan.',
     stripJudul: 'Pernah dipercaya oleh',
-    // REDESIGN 2026-09-04 (permintaan klien) — hero jadi HANYA gambar, nol
-    // teks. `motive.png` (2880×1608, hitam-putih) sudah memuat logo MOTIVE
-    // di tengah frame, jadi tidak perlu headline lagi di hero.
-    // ⚠️ PNG ~1,7 MB belum dioptimasi. WAJIB dikompres (AVIF/WebP, target
+    // REDESIGN 2026-09-05 (permintaan klien, iterasi 5) — balik pakai foto
+    // asli `HERO SECTION/Hero Section.png` (lantai produksi, 1536×1024),
+    // tapi diputihkan (grayscale + overlay putih 55%) meniru tampilan
+    // `motive.png` (iterasi sebelumnya) via script sharp satu-kali — lihat
+    // `public/images/hero/hero-section-whitened.png`. Logo MOTIVE ("item"/
+    // hitam, `LOGO MOTIVE NEW.png`) ditumpuk di tengah sebagai elemen
+    // terpisah oleh Hero.astro, bukan dibakar ke dalam foto.
+    // ⚠️ PNG ~1,3 MB belum dioptimasi. WAJIB dikompres (AVIF/WebP, target
     // ≤180 KB) + `srcset` sebelum produksi — kalau tidak LCP jebol.
     fotoTersedia: true,
-    fotoSrc: '/images/hero/motive.png',
-    fotoAlt:
-      'MOTIVE — lantai produksi apparel: deretan meja jahit dan operator, dengan logo MOTIVE di tengah',
+    fotoSrc: '/images/hero/hero-section-whitened.png',
+    fotoAlt: 'Lantai produksi MOTIVE — deretan operator menjahit pesanan apparel',
     statusApproval: 'draft',
   },
 
