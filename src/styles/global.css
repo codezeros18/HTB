@@ -79,6 +79,12 @@
   html {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+    /* Scroll halus untuk lompatan anchor (nav → #section). Dimatikan
+       otomatis oleh blok `prefers-reduced-motion: reduce` di bawah.
+       `scroll-padding-top` menahan section supaya tidak tersembunyi di
+       balik navbar 60px yang muncul setelah hero. */
+    scroll-behavior: smooth;
+    scroll-padding-top: 72px;
   }
 
   body {

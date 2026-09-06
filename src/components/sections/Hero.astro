@@ -16,7 +16,9 @@
  * "tinta gelap" di atas latar terang, bukan hex baru).
  *
  * Guardrail 9 tetap: hero TIDAK dianimasikan masuk — foto LCP dimuat
- * eager + fetchpriority high + di-preload.
+ * eager + fetchpriority high + di-preload. Chevron isyarat scroll +
+ * perilaku "scroll pertama = lompat halus melewati hero" ditangani
+ * `hero-scroll.ts` (JS non-blocking) & CSS — LCP tidak menunggu apa pun.
  */
 import { site } from '../../content/site';
 
@@ -61,7 +63,14 @@ const { hero } = site;
     />
     <p class="mv-hero__tagline">{hero.h1}</p>
   </div>
+
+  <div class="mv-hero__cue" aria-hidden="true"></div>
 </section>
+
+<script>
+  import { initHeroScroll } from '../../scripts/hero-scroll';
+  initHeroScroll();
+</script>
 
 <style>
   .mv-hero {
@@ -136,5 +145,55 @@ const { hero } = site;
     font-size: clamp(0.8rem, 1.3vw, 1.05rem);
     color: var(--hero-ink);
     margin: 0;
+  }
+
+  /* Isyarat "scroll ke bawah" — chevron di tepi bawah hero. Murni CSS.
+     Memudar begitu `hero-scroll.ts` menandai [data-scrolled]. */
+  .mv-hero__cue {
+    position: absolute;
+    inset-block-end: clamp(16px, 4vh, 40px);
+    inset-inline: 0;
+    z-index: 2;
+    inline-size: 24px;
+    block-size: 24px;
+    margin-inline: auto;
+    color: var(--hero-ink);
+    opacity: 0.7;
+    pointer-events: none;
+    transition: opacity var(--dur-base) var(--ease);
+  }
+
+  .mv-hero__cue::before {
+    content: '';
+    position: absolute;
+    inset-block-start: 3px;
+    inset-inline: 5px;
+    block-size: 12px;
+    border-inline-end: 2px solid currentColor;
+    border-block-end: 2px solid currentColor;
+    transform: rotate(45deg);
+  }
+
+  .mv-hero[data-scrolled] .mv-hero__cue {
+    opacity: 0;
+    animation: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mv-hero__cue {
+      animation: mv-hero-cue 1.9s var(--ease) infinite;
+    }
+  }
+
+  @keyframes mv-hero-cue {
+    0%,
+    100% {
+      transform: translateY(0);
+      opacity: 0.55;
+    }
+    50% {
+      transform: translateY(7px);
+      opacity: 0.9;
+    }
   }
 </style>

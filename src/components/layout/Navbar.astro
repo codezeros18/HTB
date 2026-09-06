@@ -26,14 +26,34 @@
  * Observer bersama dari S02, bukan `addEventListener('scroll')`.
  * Section aktif memakai observer yang sama dengan threshold 0.35.
  *
- * Props: —  (isi navigasi berasal dari `nav-items.ts`)
+ * ── Navbar tersembunyi di atas hero (REDESIGN 2026-09-06) ──────
+ * Di homepage (`heroNav`), navbar mulai TERSEMBUNYI (`data-nav-hidden`
+ * di markup, jadi nol flash) dan baru muncul setelah `.mv-hero`
+ * benar-benar tergeser lewat — observer di <script>. Sembunyi pakai
+ * opacity + visibility saja (NOL transform: transform di sini/di
+ * .mv-nav__inner memutus posisi .mv-mega yang `position: fixed`).
+ * <noscript> mengembalikan navbar bila JS mati.
+ *
+ * Props:
+ *   heroNav  homepage — navbar mulai tersembunyi & di-reveal setelah hero.
  */
 import { site, waLink } from '../../content/site';
 import { navItems } from './nav-items';
 import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
+
+interface Props {
+  heroNav?: boolean;
+}
+
+const { heroNav = false }: Props = Astro.props;
 ---
 
-<header class="mv-nav" data-mv-nav>
+<header
+  class="mv-nav"
+  data-mv-nav
+  data-nav-hidden={heroNav ? '' : undefined}
+  data-mv-nav-herohide={heroNav ? '' : undefined}
+>
   <div class="mv-nav__surface">
     <div class="mv-nav__inner">
       <a class="mv-nav__logo" href="/#top" aria-label={`${site.brand} — kembali ke atas`}>
@@ -132,6 +152,23 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
   <span class="mv-nav__sentinel" data-mv-nav-sentinel></span>
 </div>
 
+{
+  /* JS mati → observer hero tak pernah jalan → navbar akan macet
+    tersembunyi di homepage. Kembalikan visibilitasnya. */
+}
+<noscript>
+  <style>
+    .mv-nav[data-nav-hidden] .mv-nav__surface,
+    .mv-nav[data-nav-hidden] .mv-nav__inner {
+      opacity: 1;
+      visibility: visible;
+    }
+    .mv-nav[data-nav-hidden] .mv-nav__surface {
+      pointer-events: auto;
+    }
+  </style>
+</noscript>
+
 <style>
   .mv-nav,
   .mv-nav-spacer {
@@ -191,7 +228,23 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
     transition:
       background-color var(--dur-base) var(--ease),
       backdrop-filter var(--dur-base) var(--ease),
-      border-block-end-color var(--dur-base) var(--ease);
+      border-block-end-color var(--dur-base) var(--ease),
+      opacity var(--dur-base) var(--ease);
+  }
+
+  /* Homepage: navbar mulai tersembunyi (data-nav-hidden di markup), di-reveal
+     oleh observer hero di <script>. Sembunyi = opacity + visibility saja
+     (NOL transform — lihat catatan .mv-mega). visibility instan supaya
+     tautan tidak fokusabel selagi tak terlihat; opacity yang di-fade. */
+  .mv-nav__inner {
+    transition: opacity var(--dur-base) var(--ease);
+  }
+
+  .mv-nav[data-nav-hidden] .mv-nav__surface,
+  .mv-nav[data-nav-hidden] .mv-nav__inner {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   .mv-nav[data-scrolled] .mv-nav__surface {
@@ -542,6 +595,25 @@ import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
       },
       { threshold: 0, rootMargin: '0px', once: false }
     );
+  }
+
+  /* --- homepage: navbar tersembunyi di atas hero, muncul setelah lewat ---
+     `data-nav-hidden` sudah ada di markup (nol flash). Selagi .mv-hero
+     memotong viewport → tetap sembunyi; begitu tergeser lewat → tampil.
+     Tanpa IntersectionObserver (browser lawas) → langsung tampilkan. */
+  if (nav?.hasAttribute('data-mv-nav-herohide')) {
+    const hero = document.querySelector<HTMLElement>('.mv-hero');
+    if (hero && typeof IntersectionObserver === 'function') {
+      observeElement(
+        hero,
+        (entry) => {
+          nav.toggleAttribute('data-nav-hidden', entry.isIntersecting);
+        },
+        { threshold: 0, rootMargin: '0px', once: false }
+      );
+    } else {
+      nav.removeAttribute('data-nav-hidden');
+    }
   }
 
   /* --- underline section aktif (threshold 0.35, observer bersama S02) --- */

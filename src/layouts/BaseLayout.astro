@@ -15,6 +15,8 @@
  *                S10/T10.1; merujuk berkas yang belum ada lebih buruk
  *                daripada tidak ada tag sama sekali.
  *   jsonLd       sisipkan blok JSON-LD. Default true (matikan di 404).
+ *   heroNav      homepage — navbar mulai tersembunyi, muncul setelah hero
+ *                tergeser lewat (REDESIGN 2026-09-06). Default false.
  */
 import { site } from '../content/site';
 import SkipLink from '../components/layout/SkipLink.astro';
@@ -30,6 +32,7 @@ interface Props {
   noindex?: boolean;
   ogImage?: string | null;
   jsonLd?: boolean;
+  heroNav?: boolean;
 }
 
 const {
@@ -38,6 +41,7 @@ const {
   noindex = false,
   ogImage = null,
   jsonLd = true,
+  heroNav = false,
 }: Props = Astro.props;
 
 const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://motive.example').href;
@@ -107,7 +111,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://motive.exam
 
   <body id="top">
     <SkipLink />
-    <Navbar />
+    <Navbar heroNav={heroNav} />
     <MobileMenu />
 
     <main id="konten-utama">
