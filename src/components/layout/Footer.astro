@@ -1,15 +1,17 @@
 ---
 /**
- * Footer — 4 kolom (BLUEPRINT §8 Section 10).
+ * Footer — REDESIGN 2026-09-06 (permintaan klien: "polish").
  *
- * Kolom 4 (sosial media) HILANG SELURUHNYA saat `site.sosmed === null`
- * — bukan dirender kosong. Saat ini `null`, jadi footer tampil 3 kolom.
- * Sama untuk NIB di baris bawah.
+ * Dua blok: KIRI merek + tagline + CTA WhatsApp; KANAN kolom tautan
+ * (Navigasi, Kontak, dan Sosial Media bila ada). Judul kolom = eyebrow
+ * emas. Baris bawah: copyright + (NIB bila ada) + "Kembali ke atas".
  *
- * Mobile: kolom navigasi & kontak jadi <details> tertutup supaya footer
- * tidak menjadi 900px. Batasnya ≤420px dalam keadaan tertutup (AC T03.3).
+ * Kolom 4 (sosial media) HILANG SELURUHNYA saat `site.sosmed === null`.
+ * NIB di baris bawah juga hanya muncul bila terisi (guardrail 1).
  *
- * Tahun copyright dihitung saat build — bukan hardcode.
+ * Mobile: kolom tautan jadi <details> tertutup supaya footer ringkas.
+ * Tanpa JS tetap bisa dibuka manual (<details> native). Tahun copyright
+ * dihitung saat build.
  */
 import { site } from '../../content/site';
 import { lokasi } from '../../content/lokasi';
@@ -18,15 +20,12 @@ import WhatsAppButton from '../ui/WhatsAppButton.astro';
 
 const tahun = new Date().getFullYear();
 const headOffice = lokasi.find((l) => l.slug === 'head-office') ?? lokasi[0];
-
-// Nomor WA dirender sebagai nomor lokal yang terbaca manusia,
-// diturunkan dari satu sumber di site.ts (bukan string kedua).
 const waTampil = site.whatsapp.replace(/^62/, '0');
 ---
 
 <footer class="mv-footer">
   <div class="mv-footer__inner">
-    <div class="mv-footer__kolom mv-footer__kolom--merek">
+    <div class="mv-footer__brand">
       <img
         class="mv-footer__merek"
         src="/images/logo/LOGO%20MOTIVE%20NEW%20PUTIH.png"
@@ -37,85 +36,79 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
       />
       <p class="mv-footer__official t-body-s">Official brand by {site.namaCV}</p>
       <p class="mv-footer__tagline t-body-s">{site.tagline}</p>
+      <div class="mv-footer__cta">
+        <WhatsAppButton konteks="footer" />
+      </div>
     </div>
 
-    <details class="mv-footer__kolom mv-footer__detail" name="footer">
-      <summary class="mv-footer__judul t-eyebrow">Navigasi</summary>
-      <ul class="mv-footer__list">
-        {
-          navItems.map((item) => (
-            <li>
-              <a class="mv-footer__link t-body-s" href={item.href}>
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-    </details>
-
-    <details class="mv-footer__kolom mv-footer__detail" name="footer">
-      <summary class="mv-footer__judul t-eyebrow">Kontak</summary>
-      <ul class="mv-footer__list">
-        <li>
-          <a class="mv-footer__link t-body-s" href={`https://wa.me/${site.whatsapp}`}>
-            WhatsApp {waTampil}
-          </a>
-        </li>
-        <li>
-          <a class="mv-footer__link t-body-s" href={`mailto:${site.email}`}>{site.email}</a>
-        </li>
-        {
-          headOffice && (
-            <li>
-              <address class="mv-footer__alamat t-body-s">
-                <span class="mv-footer__peran">{headOffice.peran}</span>
-                {headOffice.alamat}
-              </address>
-            </li>
-          )
-        }
-      </ul>
-    </details>
-
-    {
-      /* Kolom 4 hanya ada kalau datanya ada. `null` → kolom dihapus,
-        bukan dirender sebagai judul tanpa isi (guardrail 1). */
-    }
-    {
-      site.sosmed && site.sosmed.length > 0 && (
-        <details class="mv-footer__kolom mv-footer__detail" name="footer">
-          <summary class="mv-footer__judul t-eyebrow">Sosial Media</summary>
-          <ul class="mv-footer__list">
-            {site.sosmed.map((s) => (
+    <nav class="mv-footer__nav" aria-label="Navigasi footer">
+      <details class="mv-footer__detail" open>
+        <summary class="mv-footer__judul t-eyebrow">Navigasi</summary>
+        <ul class="mv-footer__list">
+          {
+            navItems.map((item) => (
               <li>
-                <a
-                  class="mv-footer__link t-body-s"
-                  href={s.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {s.label}
+                <a class="mv-footer__link t-body-s" href={item.href}>
+                  {item.label}
                 </a>
               </li>
-            ))}
-          </ul>
-        </details>
-      )
-    }
-  </div>
+            ))
+          }
+        </ul>
+      </details>
 
-  <div class="mv-footer__cta">
-    <WhatsAppButton konteks="footer" />
+      <details class="mv-footer__detail" open>
+        <summary class="mv-footer__judul t-eyebrow">Kontak</summary>
+        <ul class="mv-footer__list">
+          <li>
+            <a class="mv-footer__link t-body-s" href={`https://wa.me/${site.whatsapp}`}>
+              WhatsApp {waTampil}
+            </a>
+          </li>
+          <li>
+            <a class="mv-footer__link t-body-s" href={`mailto:${site.email}`}>{site.email}</a>
+          </li>
+          {
+            headOffice && (
+              <li>
+                <address class="mv-footer__alamat t-body-s">
+                  <span class="mv-footer__peran">{headOffice.peran}</span>
+                  {headOffice.alamat}
+                </address>
+              </li>
+            )
+          }
+        </ul>
+      </details>
+
+      {
+        site.sosmed && site.sosmed.length > 0 && (
+          <details class="mv-footer__detail" open>
+            <summary class="mv-footer__judul t-eyebrow">Sosial Media</summary>
+            <ul class="mv-footer__list">
+              {site.sosmed.map((s) => (
+                <li>
+                  <a
+                    class="mv-footer__link t-body-s"
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {s.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )
+      }
+    </nav>
   </div>
 
   <div class="mv-footer__bawah">
-    {
-      /* Satu ekspresi utuh: dua ekspresi bersebelahan kehilangan spasi
-        di antaranya saat baris dipisah. */
-    }
     <p class="t-body-s">{`© ${tahun} ${site.namaCV}. Seluruh hak cipta dilindungi.`}</p>
     {site.nib && <p class="t-body-s">NIB: {site.nib}</p>}
+    <a class="mv-footer__totop t-body-s" href="#top">Kembali ke atas &uarr;</a>
   </div>
 </footer>
 
@@ -123,12 +116,11 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
   .mv-footer {
     background-color: var(--color-surface);
     border-block-start: var(--border-width) solid var(--color-border);
-    padding-block: var(--space-7);
+    padding-block: var(--space-8);
     padding-inline: var(--edge-pad);
   }
 
   .mv-footer__inner,
-  .mv-footer__cta,
   .mv-footer__bawah {
     max-inline-size: var(--container-max);
     margin-inline: auto;
@@ -136,17 +128,18 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
 
   .mv-footer__inner {
     display: grid;
-    /* auto-fit: kolom sosmed yang hilang tidak meninggalkan celah. */
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: var(--space-6);
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 2fr);
+    gap: var(--space-8);
+    align-items: start;
   }
 
+  /* ---------- kiri: merek ---------- */
   .mv-footer__merek {
     display: block;
     inline-size: auto;
     block-size: auto;
-    max-block-size: 28px;
-    max-inline-size: 200px;
+    max-block-size: 30px;
+    max-inline-size: 210px;
     object-fit: contain;
   }
 
@@ -154,10 +147,22 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
   .mv-footer__tagline {
     color: var(--color-text-2);
     margin-block: var(--space-2) 0;
+    max-inline-size: 42ch;
+  }
+
+  .mv-footer__cta {
+    margin-block-start: var(--space-5);
+  }
+
+  /* ---------- kanan: kolom tautan ---------- */
+  .mv-footer__nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: var(--space-6);
   }
 
   .mv-footer__judul {
-    color: var(--color-text);
+    color: var(--color-accent);
     list-style: none;
     cursor: default;
     padding-block: var(--space-2);
@@ -178,7 +183,7 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
 
   .mv-footer__list {
     list-style: none;
-    margin: var(--space-2) 0 0;
+    margin: var(--space-3) 0 0;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -208,6 +213,7 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
     font-style: normal;
     color: var(--color-text-2);
     padding-block: var(--space-2);
+    max-inline-size: 30ch;
   }
 
   .mv-footer__peran {
@@ -216,17 +222,15 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
     font-weight: 700;
   }
 
-  .mv-footer__cta {
-    margin-block-start: var(--space-7);
-  }
-
+  /* ---------- baris bawah ---------- */
   .mv-footer__bawah {
-    margin-block-start: var(--space-6);
+    margin-block-start: var(--space-7);
     padding-block-start: var(--space-5);
     border-block-start: var(--border-width) solid var(--color-border);
     color: var(--color-text-2);
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: var(--space-2) var(--space-5);
   }
 
@@ -234,22 +238,43 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
     margin: 0;
   }
 
-  /* ---------- desktop: <details> selalu terbuka, panah tak relevan ---------- */
+  .mv-footer__totop {
+    margin-inline-start: auto;
+    color: var(--color-text-2);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease);
+  }
+
+  .mv-footer__totop:hover {
+    color: var(--color-accent);
+  }
+
+  .mv-footer__totop:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* ---------- desktop: <details> selalu terbuka ---------- */
   @media (min-width: 768px) {
     .mv-footer__detail > .mv-footer__list {
       display: flex !important;
     }
   }
 
-  /* ---------- mobile: navigasi & kontak tertutup ---------- */
+  /* ---------- mobile ---------- */
   @media (max-width: 767.98px) {
     .mv-footer {
-      padding-block: var(--space-6);
+      padding-block: var(--space-7);
     }
 
     .mv-footer__inner {
       grid-template-columns: 1fr;
-      gap: var(--space-3);
+      gap: var(--space-6);
+    }
+
+    .mv-footer__nav {
+      grid-template-columns: 1fr;
+      gap: 0;
     }
 
     .mv-footer__detail {
@@ -279,35 +304,34 @@ const waTampil = site.whatsapp.replace(/^62/, '0');
       transform: rotate(-135deg) translate(-2px, -2px);
     }
 
-    .mv-footer__cta {
-      margin-block-start: var(--space-5);
-    }
-
-    /* Tagline dibuang di mobile: sudah tampil di hero dan meta
-       description, dan tiga barisnya sendirian memakan ~40px dari
-       anggaran 420px (AC T03.3). */
+    /* Tagline dibuang di mobile: sudah tampil di meta description. */
     .mv-footer__tagline {
       display: none;
     }
 
     .mv-footer__bawah {
-      margin-block-start: var(--space-4);
+      margin-block-start: var(--space-5);
       padding-block-start: var(--space-4);
+    }
+
+    .mv-footer__totop {
+      margin-inline-start: 0;
+      inline-size: 100%;
+      padding-block: var(--space-2);
     }
   }
 </style>
 
 <script>
-  /* Di desktop <details> harus selalu terbuka; di mobile tertutup.
-     Atribut `open` tidak bisa diatur media query, jadi disinkronkan di sini.
-     Tanpa JS: kolom tetap dapat dibuka manual — <details> native. */
+  /* Desktop: <details> selalu terbuka; mobile: tertutup. `open` tak bisa
+     diatur media query, jadi disinkronkan di sini. Tanpa JS: kolom tetap
+     bisa dibuka manual (<details> native, dirender `open`). */
   const mq = window.matchMedia('(min-width: 768px)');
   const kolom = document.querySelectorAll<HTMLDetailsElement>('.mv-footer__detail');
 
   const sync = (desktop: boolean): void => {
     kolom.forEach((d) => {
       d.open = desktop;
-      // Di desktop judul bukan kontrol — jangan biarkan masuk urutan Tab.
       const s = d.querySelector('summary');
       if (s) {
         if (desktop) s.setAttribute('tabindex', '-1');

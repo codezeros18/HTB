@@ -1,23 +1,20 @@
 ---
 /**
- * Our Clients — grid STATIS berkategori (S07, BLUEPRINT §8 Section 6).
+ * Portofolio — REDESIGN 2026-09-06 (permintaan klien, referensi dilampirkan).
  *
- * BUKAN marquee, BUKAN carousel, nol animasi, nol hover pada logo
- * (aturan rawan #1 & #2). Untuk audiens yang mengevaluasi risiko vendor,
- * membaca "Kementerian ESDM" dengan tenang > melihatnya lewat.
+ * SATU grid kartu logo — TIDAK dipisah per kategori lagi (Instansi /
+ * Korporat / Event / Komunitas). Layout mengikuti referensi (grid kartu
+ * + sel "+ Banyak lagi"), tema visual tetap milik proyek: chip terang,
+ * sudut KOTAK, glow emas saat hover.
  *
- * Heading dari `site.klienUi.judul` — REDESIGN 2026-09-04 (permintaan
- * klien, 2 iterasi): "Portofolio", di tengah, gaya judul raksasa "Our
- * Services". Lalu deskripsi, disclaimer merek, dan tombol CTA WhatsApp
- * SEMUA DIHAPUS — section = judul + grid nama saja. Risiko framing
- * (nama instansi tanpa disclaimer) diterima klien secara eksplisit.
- * String "Klien Kami" / "Partner" / angka jumlah klien TETAP TIDAK ADA.
+ * Urutan kredibilitas TETAP terjaga tanpa label kategori: `klien.ts`
+ * sudah berurut Instansi/Pendidikan → Korporat → Event → Komunitas, jadi
+ * `klien.slice(0, TAMPIL)` otomatis menaruh logo paling menaikkan
+ * kredibilitas di baris atas (AC T07.1).
  *
- * Semua entri `klien.ts` sekarang `izinTayang: false` → `ClientLogo`
- * merender NAMA TEKS, nol `<img>` (AC T07.3). Mengubah satu entri ke
- * `true` (+ `logo`) langsung merender logonya — nol perubahan di sini.
+ * `ClientLogo` merender <img> untuk entri `izinTayang: true`, teks nama
+ * untuk sisanya — wadah berukuran identik, grid tetap seragam.
  */
-import type { KategoriKlien } from '../../content/types';
 import { site } from '../../content/site';
 import { klien } from '../../content/klien';
 import Container from '../layout/Container.astro';
@@ -32,93 +29,46 @@ const { id }: Props = Astro.props;
 
 const { klienUi } = site;
 
-/* Urutan kategori DIKUNCI — BLUEPRINT §5.2. Instansi & Pendidikan Tinggi
-   PERTAMA (pengangkat kredibilitas tertinggi, AC T07.1). Union type tidak
-   bisa di-iterate saat runtime, jadi urutannya jadi konstanta lokal. */
-const KATEGORI_URUT: KategoriKlien[] = [
-  'instansi-pendidikan',
-  'korporat-properti',
-  'event-olahraga',
-  'komunitas-organisasi',
-];
-
-const kelompok = KATEGORI_URUT.map((kat) => ({
-  kat,
-  label: klienUi.labelKategori[kat],
-  anggota: klien.filter((k) => k.kategori === kat),
-})).filter((g) => g.anggota.length > 0);
+/* Tampilkan 14 teratas + sel "+ Banyak lagi" (referensi) = 3 baris penuh
+   di grid 5 kolom. Sisanya tidak dirender — ini teaser, bukan daftar
+   lengkap; nol angka jumlah klien di mana pun (AC T07.4). */
+const TAMPIL = 14;
+const tampil = klien.slice(0, TAMPIL);
+const adaLagi = klien.length > TAMPIL;
 ---
 
 <Container as="section" spacing="section" id={id}>
   <SectionHeading judul={klienUi.judul} align="center" />
 
-  <div class="mv-klien">
+  <ul class="mv-klien__grid" role="list">
     {
-      kelompok.map((g) => (
-        <div class="mv-klien__kategori">
-          <h3 class="mv-klien__kategori-judul t-eyebrow">{g.label}</h3>
-          <ul class="mv-klien__grid" role="list">
-            {g.anggota.map((k) => (
-              <ClientLogo
-                nama={k.nama}
-                logo={k.logo}
-                izinTayang={k.izinTayang}
-                hero={k.tampilDiHero}
-              />
-            ))}
-          </ul>
-        </div>
+      tampil.map((k) => (
+        <ClientLogo nama={k.nama} logo={k.logo} izinTayang={k.izinTayang} hero={k.tampilDiHero} />
       ))
     }
-  </div>
+    {adaLagi && <ClientLogo more={klienUi.labelLainnya} />}
+  </ul>
 </Container>
 
 <style>
-  .mv-klien {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-8);
-  }
-
-  .mv-klien__kategori {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-  }
-
-  .mv-klien__kategori-judul {
-    /* Eyebrow + garis aksen bawah — konsisten dengan bahasa visual proyek. */
-    color: var(--color-text-2);
-    margin: 0;
-    padding-block-end: var(--space-2);
-    border-block-end: var(--border-width) solid var(--color-border);
-  }
-
   .mv-klien__grid {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    /* 6 / 4 / 3 kolom (AC T07.1). Sel `1fr` — di 360px tidak overflow
-       (tinggi sel tetap dikunci di ClientLogo, keseragaman ±0). */
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: var(--space-3);
-    justify-items: center;
   }
 
   @media (max-width: 900px) {
     .mv-klien__grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
   }
 
   @media (max-width: 560px) {
     .mv-klien__grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    .mv-klien {
-      gap: var(--space-7);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 </style>

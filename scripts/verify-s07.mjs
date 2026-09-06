@@ -40,14 +40,16 @@ const html = () => readFileSync(DIST, 'utf8');
 console.log('\n— BAGIAN 1: dist apa adanya (skenario C) —');
 let h = html();
 
-// T07.1 urutan kategori
+// T07.1 urutan kredibilitas
+// REDESIGN 2026-09-06 (permintaan klien): grid Portofolio digabung jadi satu
+// tanpa label kategori. Urutan kredibilitas kini tersirat dari urutan
+// `klien.ts` (Instansi/Pendidikan dulu) — cek: logo instansi teratas
+// ("Kementerian ESDM") muncul sebelum entri komunitas ("Kammatanha").
 const idx = (s) => h.indexOf(s);
 cek(
-  'T07.1 kategori Instansi & Pendidikan Tinggi PERTAMA di DOM',
-  idx('Instansi Pemerintah') > 0 &&
-    idx('Instansi Pemerintah') < idx('Korporat &amp; Properti') &&
-    idx('Korporat &amp; Properti') < idx('Event &amp; Olahraga') &&
-    idx('Event &amp; Olahraga') < idx('Komunitas &amp; Organisasi')
+  'T07.1 logo instansi teratas mendahului entri komunitas di DOM',
+  idx('Kementerian ESDM') > 0 &&
+    (idx('Kammatanha') === -1 || idx('Kementerian ESDM') < idx('Kammatanha'))
 );
 cek('T07.1 nol marquee', !/\bmarquee\b/i.test(h));
 cek(

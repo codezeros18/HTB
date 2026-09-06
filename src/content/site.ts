@@ -156,12 +156,9 @@ export const site: SiteConfig = {
   klienUi: {
     judul: 'Portofolio',
     subjudul: null,
-    labelKategori: {
-      'instansi-pendidikan': 'Instansi Pemerintah & Pendidikan Tinggi',
-      'korporat-properti': 'Korporat & Properti',
-      'event-olahraga': 'Event & Olahraga',
-      'komunitas-organisasi': 'Komunitas & Organisasi',
-    },
+    // REDESIGN 2026-09-06 (permintaan klien): grid digabung jadi satu tanpa
+    // label kategori; sel penutup memakai teks ini ("+ Banyak lagi →").
+    labelLainnya: 'Banyak lagi',
   },
 
   /* =============================================================
@@ -181,20 +178,6 @@ export const site: SiteConfig = {
     labelPerbesar: 'Perbesar',
     labelSebelumnya: 'Sebelumnya',
     labelBerikutnya: 'Berikutnya',
-  },
-
-  /* =============================================================
-     lokasiIntro — S08. Copy UI section "Location" (BLUEPRINT §8
-     Section 8). `deskripsiPeran` tiap lokasi TETAP null di lokasi.ts
-     sampai klien mengonfirmasi — bukan urusan blok ini.
-     ============================================================= */
-  lokasiIntro: {
-    judul: 'Tiga Lokasi, Satu Rantai Produksi',
-    // REDESIGN 2026-09-04 (permintaan klien): deskripsi di bawah judul
-    // section dihapus di seluruh situs — judul raksasa berdiri sendiri.
-    subjudul: null,
-    labelTampilkanPeta: 'Tampilkan peta',
-    labelBukaMaps: 'Buka di Google Maps',
   },
 
   /* =============================================================

@@ -280,8 +280,12 @@ export interface KlienUiContent {
   judul: string;
   /** Sub opsional. `null` → tidak dirender (deskripsi judul dihapus di semua section). */
   subjudul: string | null;
-  /** Label tampil per kategori — kunci = nilai `KategoriKlien`. */
-  labelKategori: Record<KategoriKlien, string>;
+  /**
+   * REDESIGN 2026-09-06: grid Portofolio digabung jadi satu (tanpa label
+   * kategori). `labelKategori` dibuang; `labelLainnya` mengisi sel penutup
+   * "+ <teks> →" ala referensi. Tanpa angka jumlah klien (AC T07.4).
+   */
+  labelLainnya: string;
 }
 
 /* ---------- gallery (S07) ---------- */
@@ -323,18 +327,6 @@ export interface GaleriContent {
   labelBerikutnya: string;
 }
 
-/* ---------- lokasi intro (S08) ---------- */
-
-export interface LokasiIntroContent {
-  /** H2 SectionHeading — BLUEPRINT §8 Section 8. */
-  judul: string;
-  subjudul: string | null;
-  /** Label tombol facade yang memuat iframe Maps setelah diklik. */
-  labelTampilkanPeta: string;
-  /** Label tautan eksternal yang membuka Google Maps asli di tab baru. */
-  labelBukaMaps: string;
-}
-
 /* ---------- contact (S08) ---------- */
 
 export interface KontakContent {
@@ -374,6 +366,5 @@ export interface SiteConfig {
   prosesIntro: ProsesIntroContent;
   klienUi: KlienUiContent;
   galeri: GaleriContent;
-  lokasiIntro: LokasiIntroContent;
   kontak: KontakContent;
 }

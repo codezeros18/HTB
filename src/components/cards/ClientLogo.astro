@@ -1,40 +1,53 @@
 ---
 /**
- * ClientLogo — satu sel portofolio dalam grid "PERNAH DIPERCAYA OLEH" (S07).
+ * ClientLogo — satu sel kartu dalam grid "PORTOFOLIO" (S07).
  *
- * DUA mode dalam wadah berukuran IDENTIK (BLUEPRINT §5.3 / §8 Section 6):
- *   - `izinTayang: true`  + `logo` → <img> dinormalisasi (contain, max-h 44px)
- *   - selain itu (kondisi SEKARANG: semua entri false) → NAMA TEKS Archivo 600
+ * TIGA mode dalam wadah berukuran IDENTIK:
+ *   - `more` diisi          → sel penutup "+ <teks> →" (referensi klien)
+ *   - `izinTayang: true` + `logo` → <img> dinormalisasi (contain)
+ *   - selain itu            → NAMA TEKS
  *
- * AC T07.3: selama semua `izinTayang: false`, komponen ini merender NOL
- * `<img>`. Kotak tetap sama besar untuk kedua mode → grid seragam.
+ * REDESIGN 2026-09-06 (permintaan klien, referensi dilampirkan): kartu
+ * dibuat lebih tinggi & mengisi penuh kolom grid (dulu chip 160×80 yang
+ * dipusatkan). Tema tetap milik proyek: chip terang, sudut KOTAK, glow
+ * emas lembut saat hover.
  *
- * AC T07.2: tinggi sel dikunci `--logo-box-h` (80px) untuk SEMUA sel di
- * SEMUA viewport — keseragaman ±0px secara konstruksi. Lebar mengecil
- * proporsional di mobile (grid `1fr`), tinggi tidak.
- *
- * Interaksi: TIDAK ADA. Bukan tautan, nol hover, nol filter grayscale
- * (BLUEPRINT §8 Section 6 — grayscale menghapus identitas warna & mati
- * di mobile). `alt` = nama organisasi, bukan "logo klien N" (AC T07.4).
+ * `alt` = nama organisasi, bukan "logo klien N".
  */
 interface Props {
-  nama: string;
-  logo: string | null;
-  izinTayang: boolean;
-  /** 5 logo hero dimuat eager; sisanya lazy (BLUEPRINT §8 Section 6). */
+  nama?: string;
+  logo?: string | null;
+  izinTayang?: boolean;
+  /** 5 logo hero dimuat eager; sisanya lazy. */
   hero?: boolean;
+  /** Sel penutup "+ Banyak lagi" — mengganti isi chip dengan teks aksi. */
+  more?: string | null;
   class?: string;
 }
 
-const { nama, logo, izinTayang, hero = false, class: className }: Props = Astro.props;
+const {
+  nama = '',
+  logo = null,
+  izinTayang = false,
+  hero = false,
+  more = null,
+  class: className,
+}: Props = Astro.props;
 
 const tampilLogo = izinTayang && logo !== null;
 ---
 
-<li class:list={['mv-client', className]}>
+<li class:list={['mv-client', more && 'mv-client--more', className]}>
   <div class="mv-client__chip">
     {
-      tampilLogo ? (
+      more ? (
+        <span class="mv-client__more">
+          <span>+ {more}</span>
+          <span class="mv-client__arrow" aria-hidden="true">
+            &rarr;
+          </span>
+        </span>
+      ) : tampilLogo ? (
         <img
           class="mv-client__img"
           src={logo}
@@ -55,16 +68,12 @@ const tampilLogo = izinTayang && logo !== null;
   .mv-client {
     list-style: none;
     display: flex;
-    justify-content: center;
   }
 
-  /* REDESIGN 2026-08-31 — border putih dibuang. Tiap logo di CHIP TERANG
-     rounded: logo berlatar putih (mayoritas aset) menyatu mulus, logo PNG
-     transparan dapat alas bersih. Glow emas lembut saat hover. */
+  /* Chip terang penuh-kolom, sudut KOTAK (tema proyek). Glow emas saat hover. */
   .mv-client__chip {
     inline-size: 100%;
-    max-inline-size: var(--logo-box-w);
-    block-size: var(--logo-box-h);
+    block-size: clamp(96px, 11vw, 124px);
     padding: var(--space-4);
     display: flex;
     align-items: center;
@@ -90,7 +99,7 @@ const tampilLogo = izinTayang && logo !== null;
 
   .mv-client__img {
     max-inline-size: 100%;
-    max-block-size: 46px;
+    max-block-size: 56px;
     inline-size: auto;
     block-size: auto;
     object-fit: contain;
@@ -99,11 +108,32 @@ const tampilLogo = izinTayang && logo !== null;
   .mv-client__nama {
     font-family: var(--font-body);
     font-weight: 600;
-    font-size: 12px;
-    line-height: 1.2;
+    font-size: 13px;
+    line-height: 1.25;
     text-align: center;
-    color: var(--color-chip-ink); /* teks gelap di atas chip terang */
+    color: var(--color-chip-ink);
     overflow-wrap: anywhere;
     hyphens: auto;
+  }
+
+  /* Sel penutup */
+  .mv-client__more {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--color-chip-ink);
+  }
+
+  .mv-client__arrow {
+    transition: transform var(--dur-base) var(--ease);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .mv-client--more:hover .mv-client__arrow {
+      transform: translateX(4px);
+    }
   }
 </style>

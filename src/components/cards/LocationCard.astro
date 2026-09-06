@@ -1,26 +1,19 @@
 ---
 /**
- * LocationCard — satu tahap dalam rantai produksi bernomor (S08).
- * REDESIGN 2026-08-31 (permintaan klien, iterasi 2):
- *   - Peta TIDAK LAGI di balik tombol "Tampilkan peta" — otomatis dimuat
- *     begitu kartu mendekati layar (IntersectionObserver, lihat
- *     `src/scripts/location-maps.ts`), jadi sudah siap saat pengunjung
- *     sampai di section ini. Tombol "Buka di Google Maps" DIHAPUS —
- *     rute keluar sekarang ada di POPUP pin peta ("Rute di Google Maps →").
- *   - Ketiga kartu tinggi & lebar identik: `height:100%` (grid induk
- *     men-stretch baris) + alamat dikunci 2 baris (`-webkit-line-clamp`)
- *     + area peta `flex:1` menyerap sisa ruang.
- *   - Begitu peta hidup, blok alamat teks disembunyikan VISUAL (tetap ada
- *     di DOM untuk screen reader) — visual-driven.
+ * LocationCard — satu kartu lokasi KOTAK (S08).
+ * REDESIGN 2026-09-06 (permintaan klien):
+ *   - Kartu `aspect-ratio: 1/1` — lebar = tinggi, ketiganya identik.
+ *   - Isi: label peran ("Head Office"/"Workshop"/"Factory") di bar atas,
+ *     lalu peta Leaflet PENUH mengisi sisa kartu (edge-to-edge).
+ *   - Nomor rantai + blok alamat terlihat DIBUANG dari tampilan. `<address>`
+ *     tetap di DOM (visually-hidden) demi schema `LocalBusiness` + SEO.
  *
- * `deskripsiPeran`/`telepon` — [GAP], selalu null saat ini → tidak
- * dirender, jaga struktur kartu tetap ringkas & seragam.
+ * Peta dimuat otomatis saat mendekati layar (IntersectionObserver, lihat
+ * `src/scripts/location-maps.ts`). `deskripsiPeran`/`telepon` — [GAP], null.
  *
- * Markup alamat pakai `<address>` + `itemprop` (AC T08.3); `id={slug}`
- * cocok fragmen `@id` blok `LocalBusiness` di StructuredData.astro.
+ * `id={slug}` cocok fragmen `@id` blok `LocalBusiness` di StructuredData.astro.
  */
 interface Props {
-  nomor: string;
   peran: string;
   alamat: string;
   slug: string;
@@ -30,7 +23,7 @@ interface Props {
   class?: string;
 }
 
-const { nomor, peran, alamat, slug, lat, lng, mapsUrl, class: className }: Props = Astro.props;
+const { peran, alamat, slug, lat, lng, mapsUrl, class: className }: Props = Astro.props;
 ---
 
 <article
@@ -40,12 +33,11 @@ const { nomor, peran, alamat, slug, lat, lng, mapsUrl, class: className }: Props
   itemtype="https://schema.org/LocalBusiness"
 >
   <div class="mv-loc__head">
-    <span class="mv-loc__num t-tnum" aria-hidden="true">{nomor}</span>
-    <h3 class="mv-loc__peran t-h3" itemprop="name">{peran}</h3>
+    <h3 class="mv-loc__peran" itemprop="name">{peran}</h3>
   </div>
 
   <address
-    class="mv-loc__addr t-body-s"
+    class="mv-loc__addr"
     itemprop="address"
     itemscope
     itemtype="https://schema.org/PostalAddress"
@@ -89,54 +81,39 @@ const { nomor, peran, alamat, slug, lat, lng, mapsUrl, class: className }: Props
 
 <style>
   .mv-loc {
+    inline-size: 100%;
+    /* KOTAK — lebar = tinggi, ketiga kartu identik oleh konstruksi
+       (grid `1fr` → lebar sama → tinggi sama). */
+    aspect-ratio: 1 / 1;
+    min-block-size: 16rem;
+
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-    /* Tinggi PENUH baris grid (Location.astro men-stretch) — ketiga kartu
-       selalu identik terlepas dari panjang alamat. */
-    block-size: 100%;
-    padding: var(--space-5);
+    overflow: hidden;
     border: var(--border-width) solid var(--color-border);
     background-color: var(--color-surface);
   }
 
   .mv-loc__head {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-3);
     flex: 0 0 auto;
-  }
-
-  .mv-loc__num {
-    color: var(--color-accent);
-    font-family: var(--font-display);
-    font-size: 28px;
-    font-weight: var(--fw-display);
-    line-height: 1;
-    flex: 0 0 auto;
+    padding: var(--space-3) var(--space-4);
+    border-block-end: var(--border-width) solid var(--color-border);
   }
 
   .mv-loc__peran {
-    color: var(--color-text);
     margin: 0;
+    color: var(--color-text);
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    line-height: 1.2;
   }
 
-  /* Dikunci 2 baris — panjang alamat beda-beda tidak lagi membuat
-     tinggi kartu berbeda. */
+  /* Alamat: TIDAK terlihat (peta = infonya), tapi tetap di DOM untuk
+     screen reader + schema — visually-hidden, bukan display:none. */
   .mv-loc__addr {
-    flex: 0 0 auto;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    color: var(--color-text-2);
-    font-style: normal;
-  }
-
-  /* Begitu peta hidup, teks alamat tak lagi diperlukan (visual-driven) —
-     tapi TETAP ada di DOM untuk screen reader & SEO, hanya disembunyikan
-     secara visual (bukan `display:none`, supaya tetap terumumkan). */
-  .mv-loc[data-map-live] .mv-loc__addr {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
@@ -145,14 +122,13 @@ const { nomor, peran, alamat, slug, lat, lng, mapsUrl, class: className }: Props
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+    font-style: normal;
   }
 
   .mv-loc__map {
     position: relative;
     flex: 1 1 auto;
-    min-block-size: 200px;
     overflow: hidden;
-    border: var(--border-width) solid var(--color-border);
   }
 
   .mv-loc__placeholder {
