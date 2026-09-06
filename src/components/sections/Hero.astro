@@ -16,9 +16,9 @@
  * "tinta gelap" di atas latar terang, bukan hex baru).
  *
  * Guardrail 9 tetap: hero TIDAK dianimasikan masuk — foto LCP dimuat
- * eager + fetchpriority high + di-preload. Chevron isyarat scroll +
- * perilaku "scroll pertama = lompat halus melewati hero" ditangani
- * `hero-scroll.ts` (JS non-blocking) & CSS — LCP tidak menunggu apa pun.
+ * eager + fetchpriority high + di-preload. Chevron isyarat scroll murni
+ * CSS; `hero-scroll.ts` cuma memudarkannya saat digeser (listener pasif,
+ * nol jank). Scroll halaman 100% native — hijack scroll lama dibuang.
  */
 import { site } from '../../content/site';
 
