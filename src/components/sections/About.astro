@@ -1,20 +1,21 @@
 ---
 /**
- * About — REDESIGN 2026-09-06 (permintaan klien, 2 iterasi).
+ * About — REDESIGN 2026-09-06 (permintaan klien, iterasi 3).
  *
- * Iterasi 1 membuat section ini visual-driven dengan satu foto besar.
- * DIBATALKAN: foto "tentang kami" milik klien belum tersedia, dan
- * memakai foto galeri sebagai pengganti bukan yang dimaksud. Section
- * kembali BERBASIS TEKS — tapi dengan layout BARU, bukan dua kolom
- * eyebrow+H2 / paragraf seperti versi paling awal.
+ * Riwayat: 2 kolom eyebrow+H2 → visual-driven berbasis foto (dibatalkan,
+ * foto klien belum ada) → paragraf asimetris (DIBATALKAN: paragraf kedua
+ * yang digeser ke kanan meninggalkan lubang kosong besar di kiri, dan
+ * di container 1600px baris teksnya melar >1100px — jauh dari lebar baca
+ * yang nyaman).
  *
- * Layout sekarang editorial & asimetris:
- *   1. paragraf pertama sebagai PERNYATAAN besar (lebar, tipe besar)
- *   2. paragraf kedua lebih kecil & digeser ke kanan → ritme berjenjang
- *   3. 4 janji nilai sebagai baris bergaris emas
- *   4. baris fakta perusahaan sebagai meta kecil di bawah
- * Tidak ada unsur penting yang hilang; hanya susunannya yang berbeda.
+ * Sekarang: layout majalah dengan RAIL KIRI.
+ *   kiri  (3/12) : identitas perusahaan sebagai rail meta bergaris emas
+ *   kanan (7/12) : dua paragraf mengalir dalam SATU kolom, dibatasi 62ch
+ *                  supaya panjang barisnya tetap nyaman dibaca
+ *   bawah        : 4 janji nilai sebagai baris bergaris emas
+ * Rail kiri mengisi ruang yang dulu kosong — nol lubang, nol baris melar.
  *
+ * Section ini BERBASIS TEKS: foto "tentang kami" milik klien belum ada.
  * Semua konten dari `site.about` (guardrail 5). Fade-in: `.mv-reveal`.
  */
 import { site } from '../../content/site';
@@ -28,16 +29,28 @@ interface Props {
 const { id }: Props = Astro.props;
 
 const { about } = site;
-const [lead, lanjutan] = about.paragraf;
 const barisTerisi = about.baris.filter((b): b is string => b !== null);
 ---
 
 <Container as="section" spacing="section" id={id}>
   <SectionHeading judul={about.judul} align="start" />
 
-  <div class="mv-about__teks mv-reveal">
-    <p class="mv-about__lead">{lead}</p>
-    <p class="mv-about__lanjutan">{lanjutan}</p>
+  <div class="mv-about__grid mv-reveal">
+    {
+      barisTerisi.length > 0 && (
+        <aside class="mv-about__rail">
+          <ul class="mv-about__fakta">
+            {barisTerisi.map((f) => (
+              <li>{f}</li>
+            ))}
+          </ul>
+        </aside>
+      )
+    }
+
+    <div class="mv-about__teks">
+      {about.paragraf.map((p) => <p class="mv-about__p">{p}</p>)}
+    </div>
   </div>
 
   <ul class="mv-about__nilai mv-reveal">
@@ -50,39 +63,57 @@ const barisTerisi = about.baris.filter((b): b is string => b !== null);
       ))
     }
   </ul>
-
-  {
-    barisTerisi.length > 0 && (
-      <ul class="mv-about__fakta">
-        {barisTerisi.map((f) => (
-          <li>{f}</li>
-        ))}
-      </ul>
-    )
-  }
 </Container>
 
 <style>
-  /* Blok teks asimetris: pernyataan besar di kiri, paragraf lanjutan
-     lebih kecil dan digeser ke kanan. */
-  .mv-about__teks {
+  .mv-about__grid {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: var(--space-6) var(--space-5);
+    gap: var(--space-6);
+    align-items: start;
   }
 
-  .mv-about__lead {
-    grid-column: 1 / span 8;
+  /* ---------- rail kiri: identitas perusahaan ---------- */
+  .mv-about__rail {
+    grid-column: 1 / span 3;
+    padding-block-start: var(--space-3);
+    border-block-start: 2px solid var(--color-accent);
+  }
+
+  .mv-about__fakta {
+    list-style: none;
     margin: 0;
-    color: var(--color-text);
-    font-size: clamp(1.15rem, 1.1vw + 0.85rem, 1.75rem);
-    line-height: 1.4;
-    letter-spacing: -0.01em;
-    text-wrap: pretty;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
   }
 
-  .mv-about__lanjutan {
-    grid-column: 6 / span 7;
+  .mv-about__fakta li {
+    color: var(--color-text-2);
+    font-size: var(--fs-body-s);
+    line-height: 1.4;
+  }
+
+  /* Nama badan usaha = baris pertama, dibuat paling tegas. */
+  .mv-about__fakta li:first-child {
+    color: var(--color-text);
+    font-weight: 700;
+    font-size: var(--fs-body-m);
+  }
+
+  /* ---------- kanan: dua paragraf, satu kolom terbaca ---------- */
+  .mv-about__teks {
+    grid-column: 5 / span 7;
+    /* Kunci perbaikan: batasi lebar baca. Tanpa ini baris melar >1100px
+       di container 1600px dan paragraf jadi tembok teks. */
+    max-inline-size: 62ch;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+
+  .mv-about__p {
     margin: 0;
     color: var(--color-text-2);
     font-size: var(--fs-body-l);
@@ -90,6 +121,15 @@ const barisTerisi = about.baris.filter((b): b is string => b !== null);
     text-wrap: pretty;
   }
 
+  /* Paragraf pembuka sedikit lebih besar & terang — hierarki tanpa
+     memisahkannya ke blok sendiri. */
+  .mv-about__p:first-child {
+    color: var(--color-text);
+    font-size: clamp(1.05rem, 0.35vw + 0.95rem, 1.3rem);
+    line-height: 1.5;
+  }
+
+  /* ---------- janji nilai ---------- */
   .mv-about__nilai {
     list-style: none;
     margin: var(--space-8) 0 0;
@@ -121,23 +161,19 @@ const barisTerisi = about.baris.filter((b): b is string => b !== null);
     color: var(--color-text-2);
   }
 
-  /* Baris fakta perusahaan — meta kecil penutup section. */
-  .mv-about__fakta {
-    list-style: none;
-    margin: var(--space-7) 0 0;
-    padding-block-start: var(--space-4);
-    border-block-start: var(--border-width) solid var(--color-border);
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-5);
-    color: var(--color-text-2);
-    font-size: var(--fs-body-s);
-  }
-
   @media (max-width: 900px) {
-    .mv-about__lead,
-    .mv-about__lanjutan {
+    .mv-about__grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+
+    .mv-about__rail,
+    .mv-about__teks {
       grid-column: 1 / -1;
+    }
+
+    .mv-about__teks {
+      max-inline-size: none;
     }
 
     .mv-about__nilai {
