@@ -2,52 +2,38 @@
 /**
  * ClientLogo — satu sel kartu dalam grid "PORTOFOLIO" (S07).
  *
- * TIGA mode dalam wadah berukuran IDENTIK:
- *   - `more` diisi          → sel penutup "+ <teks> →" (referensi klien)
+ * DUA mode dalam wadah berukuran IDENTIK:
  *   - `izinTayang: true` + `logo` → <img> dinormalisasi (contain)
- *   - selain itu            → NAMA TEKS
+ *   - selain itu                  → NAMA TEKS
  *
- * REDESIGN 2026-09-06 (permintaan klien, referensi dilampirkan): kartu
- * dibuat lebih tinggi & mengisi penuh kolom grid (dulu chip 160×80 yang
- * dipusatkan). Tema tetap milik proyek: chip terang, sudut KOTAK, glow
- * emas lembut saat hover.
- *
- * `alt` = nama organisasi, bukan "logo klien N".
+ * REDESIGN 2026-09-06 (permintaan klien): kartu lebih tinggi & mengisi
+ * penuh kolom grid. Tema milik proyek: chip terang, sudut KOTAK, glow
+ * emas lembut saat hover. `alt` = nama organisasi, bukan "logo klien N".
  */
 interface Props {
-  nama?: string;
+  nama: string;
   logo?: string | null;
   izinTayang?: boolean;
   /** 5 logo hero dimuat eager; sisanya lazy. */
   hero?: boolean;
-  /** Sel penutup "+ Banyak lagi" — mengganti isi chip dengan teks aksi. */
-  more?: string | null;
   class?: string;
 }
 
 const {
-  nama = '',
+  nama,
   logo = null,
   izinTayang = false,
   hero = false,
-  more = null,
   class: className,
 }: Props = Astro.props;
 
 const tampilLogo = izinTayang && logo !== null;
 ---
 
-<li class:list={['mv-client', more && 'mv-client--more', className]}>
+<li class:list={['mv-client', className]}>
   <div class="mv-client__chip">
     {
-      more ? (
-        <span class="mv-client__more">
-          <span>+ {more}</span>
-          <span class="mv-client__arrow" aria-hidden="true">
-            &rarr;
-          </span>
-        </span>
-      ) : tampilLogo ? (
+      tampilLogo ? (
         <img
           class="mv-client__img"
           src={logo}
@@ -114,26 +100,5 @@ const tampilLogo = izinTayang && logo !== null;
     color: var(--color-chip-ink);
     overflow-wrap: anywhere;
     hyphens: auto;
-  }
-
-  /* Sel penutup */
-  .mv-client__more {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-2);
-    font-family: var(--font-body);
-    font-weight: 700;
-    font-size: 13px;
-    color: var(--color-chip-ink);
-  }
-
-  .mv-client__arrow {
-    transition: transform var(--dur-base) var(--ease);
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .mv-client--more:hover .mv-client__arrow {
-      transform: translateX(4px);
-    }
   }
 </style>

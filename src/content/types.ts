@@ -270,22 +270,15 @@ export interface ProsesIntroContent {
 
 export interface KlienUiContent {
   /**
-   * H2 SectionHeading. REDESIGN 2026-09-04 (permintaan klien): dipendekkan
-   * jadi "Portofolio" + ditaruh di tengah, gaya judul raksasa "Our Services".
-   * Iterasi berikutnya (permintaan klien): disclaimer merek DI BAWAH grid
-   * DIHAPUS, tombol CTA WhatsApp DIHAPUS — section jadi judul + grid nama
-   * saja. Risiko framing (menampilkan nama instansi tanpa disclaimer)
-   * diterima klien secara eksplisit.
+   * H2 SectionHeading. REDESIGN 2026-09 (permintaan klien, beberapa iterasi):
+   * "Portofolio", di tengah, gaya judul raksasa. Disclaimer merek + CTA WA
+   * dihapus. Grid digabung jadi SATU tanpa label kategori dan menampilkan
+   * SELURUH klien (tanpa sel "+ Banyak lagi"). `labelKategori`/`labelLainnya`
+   * ikut dibuang. Risiko framing diterima klien secara eksplisit.
    */
   judul: string;
   /** Sub opsional. `null` → tidak dirender (deskripsi judul dihapus di semua section). */
   subjudul: string | null;
-  /**
-   * REDESIGN 2026-09-06: grid Portofolio digabung jadi satu (tanpa label
-   * kategori). `labelKategori` dibuang; `labelLainnya` mengisi sel penutup
-   * "+ <teks> →" ala referensi. Tanpa angka jumlah klien (AC T07.4).
-   */
-  labelLainnya: string;
 }
 
 /* ---------- gallery (S07) ---------- */

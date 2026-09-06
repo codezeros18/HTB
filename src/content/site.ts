@@ -156,9 +156,6 @@ export const site: SiteConfig = {
   klienUi: {
     judul: 'Portofolio',
     subjudul: null,
-    // REDESIGN 2026-09-06 (permintaan klien): grid digabung jadi satu tanpa
-    // label kategori; sel penutup memakai teks ini ("+ Banyak lagi →").
-    labelLainnya: 'Banyak lagi',
   },
 
   /* =============================================================

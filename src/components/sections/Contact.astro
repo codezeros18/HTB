@@ -1,14 +1,13 @@
 ---
 /**
- * Contact — REDESIGN 2026-09-05 (permintaan klien).
+ * Contact — REDESIGN 2026-09-06 (permintaan klien).
  *
- * Form 5-field + Web3Forms + honeypot DIHAPUS TOTAL: client semua closing
- * lewat WhatsApp, form tertulis tidak diperlukan. Section jadi HANYA judul
- * (raksasa, di tengah) + satu tombol WhatsApp di bawahnya — nol
- * kartu/kotak, nol grid 2 kolom. `src/scripts/contact-form.ts` dihapus
- * (satu-satunya pemakainya section ini).
+ * Form dihapus total (client semua closing lewat WhatsApp). Section jadi
+ * SATU LAYAR PENUH (min 100vh) berisi judul raksasa "How Can We Help" +
+ * satu tombol WhatsApp, dipusatkan vertikal & horizontal — penutup situs
+ * yang tegas. Nol kartu/kotak.
  *
- * Section TERAKHIR sebelum Footer → `Container` memakai `last`.
+ * Section TERAKHIR sebelum Footer.
  */
 import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
@@ -24,8 +23,8 @@ const { id }: Props = Astro.props;
 const { kontak } = site;
 ---
 
-<Container as="section" spacing="section" id={id} last>
-  <div class="mv-kontak mv-reveal">
+<Container as="section" id={id} class="mv-kontak">
+  <div class="mv-kontak__inner mv-reveal">
     <SectionHeading judul={kontak.judul} align="center" />
     <WhatsAppButton konteks="kontak" size="lg" />
   </div>
@@ -33,6 +32,21 @@ const { kontak } = site;
 
 <style>
   .mv-kontak {
+    /* Satu layar penuh — penutup situs. */
+    min-block-size: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-block: var(--space-8);
+  }
+
+  @media (max-width: 767.98px) {
+    .mv-kontak {
+      min-block-size: 100svh;
+    }
+  }
+
+  .mv-kontak__inner {
     display: flex;
     flex-direction: column;
     align-items: center;

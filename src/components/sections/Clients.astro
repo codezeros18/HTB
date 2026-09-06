@@ -1,22 +1,19 @@
 ---
 /**
- * Portofolio — REDESIGN 2026-09-06 (permintaan klien, referensi dilampirkan).
+ * Portofolio — REDESIGN 2026-09-06 (permintaan klien).
  *
- * SATU grid kartu logo — TIDAK dipisah per kategori lagi (Instansi /
- * Korporat / Event / Komunitas). Layout mengikuti referensi (grid kartu
- * + sel "+ Banyak lagi"), tema visual tetap milik proyek: chip terang,
- * sudut KOTAK, glow emas saat hover.
+ * SATU grid kartu logo berisi SELURUH klien — tidak dipisah per kategori,
+ * tidak dipotong (sel "+ Banyak lagi" dibuang, semua ditampilkan).
+ * Tema visual milik proyek: chip terang, sudut KOTAK, glow emas saat hover.
  *
- * Urutan kredibilitas TETAP terjaga tanpa label kategori: `klien.ts`
- * sudah berurut Instansi/Pendidikan → Korporat → Event → Komunitas, jadi
- * `klien.slice(0, TAMPIL)` otomatis menaruh logo paling menaikkan
- * kredibilitas di baris atas (AC T07.1).
+ * Urutan kredibilitas tetap terjaga: `klien.ts` sudah berurut
+ * Instansi/Pendidikan → Korporat → Event → Komunitas (AC T07.1).
  *
  * `ClientLogo` merender <img> untuk entri `izinTayang: true`, teks nama
  * untuk sisanya — wadah berukuran identik, grid tetap seragam.
  */
-import { site } from '../../content/site';
 import { klien } from '../../content/klien';
+import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
 import SectionHeading from '../layout/SectionHeading.astro';
 import ClientLogo from '../cards/ClientLogo.astro';
@@ -28,13 +25,6 @@ interface Props {
 const { id }: Props = Astro.props;
 
 const { klienUi } = site;
-
-/* Tampilkan 14 teratas + sel "+ Banyak lagi" (referensi) = 3 baris penuh
-   di grid 5 kolom. Sisanya tidak dirender — ini teaser, bukan daftar
-   lengkap; nol angka jumlah klien di mana pun (AC T07.4). */
-const TAMPIL = 14;
-const tampil = klien.slice(0, TAMPIL);
-const adaLagi = klien.length > TAMPIL;
 ---
 
 <Container as="section" spacing="section" id={id}>
@@ -42,11 +32,10 @@ const adaLagi = klien.length > TAMPIL;
 
   <ul class="mv-klien__grid" role="list">
     {
-      tampil.map((k) => (
+      klien.map((k) => (
         <ClientLogo nama={k.nama} logo={k.logo} izinTayang={k.izinTayang} hero={k.tampilDiHero} />
       ))
     }
-    {adaLagi && <ClientLogo more={klienUi.labelLainnya} />}
   </ul>
 </Container>
 
