@@ -1,18 +1,30 @@
 ---
 /**
- * Gallery — REDESIGN 2026-08-30 (permintaan klien).
+ * Gallery — REDESIGN 2026-09-06 (permintaan klien, referensi kolase
+ * "Ring true to you").
  *
- * Bento 9 sel dengan ukuran BEDA-BEDA (2 kotak besar, 1 lebar, sisanya
- * kecil) — bukan grid persegi seragam. Gambar di-SHUFFLE saat load dan
- * (bila pengguna tidak minta reduced-motion) berganti pelan tiap beberapa
- * detik — `src/scripts/gallery-shuffle.ts`.
+ * Bento grid lama DIGANTI KOLASE: 9 foto ditempatkan absolut di atas
+ * panggung ber-aspect-ratio tetap, ukuran & rasio berbeda-beda, saling
+ * TUMPANG TINDIH dan digeser naik-turun — bukan grid seragam.
  *
- * Daftar foto: `src/content/galeri.ts` (placeholder sampai foto hasil
- * produksi nyata dikirim). Tanpa JS: 9 sel tampil statis, tanpa shuffle.
+ * Interaksi:
+ *   hover → foto naik + membesar halus dan maju ke depan (z-index)
+ *   klik  → lightbox: foto melompat ke TENGAH layar & membesar
+ *           (<dialog> + showModal), bisa digeser ke seluruh 26 foto
+ *           lewat panah / keyboard.
+ *
+ * Rotasi otomatis (gallery-shuffle) DIBUANG — bertabrakan dengan hover
+ * & klik: foto bisa berganti tepat saat kursor di atasnya.
+ *
+ * Di bawah 768px kolase runtuh jadi grid 2 kolom biasa — tumpang tindih
+ * tidak terbaca di layar sempit.
+ *
+ * Foto: `src/content/galeri.ts` (sudah dikompres ke GALLERY-OPT).
  */
 import { galeriFoto } from '../../content/galeri';
 import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
+import SectionHeading from '../layout/SectionHeading.astro';
 
 interface Props {
   id?: string;
@@ -20,22 +32,37 @@ interface Props {
 
 const { id }: Props = Astro.props;
 
-const AREA = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i'] as const;
-const sel = AREA.map((area, i) => ({ area, foto: galeriFoto[i % galeriFoto.length]! }));
+/* Sembilan slot kolase — koordinat dalam PERSEN terhadap panggung.
+   Ditulis eksplisit (bukan dihitung) supaya komposisinya bisa ditata
+   seperti kolase cetak: ada yang mepet tepi, ada yang menimpa. */
+const SLOT = [
+  { x: 2, y: 33, w: 15, ar: '3 / 4', z: 3 },
+  { x: 13, y: 3, w: 15, ar: '3 / 4', z: 2 },
+  { x: 26, y: 18, w: 24, ar: '4 / 3', z: 4 },
+  { x: 47, y: 7, w: 18, ar: '3 / 4', z: 3 },
+  { x: 68, y: 2, w: 17, ar: '1 / 1', z: 2 },
+  { x: 72, y: 46, w: 20, ar: '4 / 3', z: 3 },
+  { x: 37, y: 55, w: 17, ar: '1 / 1', z: 5 },
+  { x: 6, y: 62, w: 14, ar: '3 / 4', z: 2 },
+  { x: 86, y: 24, w: 12, ar: '3 / 4', z: 1 },
+];
 
-// Kolam foto untuk shuffle — diserahkan ke skrip lewat atribut data.
-const pool = JSON.stringify(galeriFoto);
+const sel = SLOT.map((s, i) => ({ s, foto: galeriFoto[i % galeriFoto.length]!, i }));
+const semua = JSON.stringify(galeriFoto);
 ---
 
 <Container as="section" spacing="section" id={id}>
-  <header class="g__head">
-    <h2 class="g__title">{site.galeri.judul}</h2>
-  </header>
+  <SectionHeading judul={site.galeri.judul} align="start" />
 
-  <div class="g__grid" data-gallery data-gallery-pool={pool}>
+  <div class="g__stage" data-gallery data-gallery-pool={semua}>
     {
-      sel.map(({ area, foto }) => (
-        <figure class={`g__cell g__cell--${area}`} data-gallery-cell>
+      sel.map(({ s, foto, i }) => (
+        <button
+          type="button"
+          class="g__item"
+          data-gallery-item={i}
+          style={`--x:${s.x}%;--y:${s.y}%;--w:${s.w}%;--ar:${s.ar};--z:${s.z}`}
+        >
           <img
             src={foto.src}
             alt={foto.alt}
@@ -44,101 +71,242 @@ const pool = JSON.stringify(galeriFoto);
             loading="lazy"
             decoding="async"
           />
-        </figure>
+        </button>
       ))
     }
   </div>
 </Container>
 
+{
+  /* Lightbox — di luar <Container> supaya tidak terpengaruh max-width
+    section. <dialog> modal: focus trap, Esc, dan inert latar dari browser. */
+}
+<dialog class="g__box" aria-label="Pratinjau foto" data-gallery-box>
+  <button type="button" class="g__box-tutup" data-gallery-close>
+    <span class="sr-only">Tutup pratinjau</span>
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+      <path d="M18 6 6 18"></path>
+      <path d="m6 6 12 12"></path>
+    </svg>
+  </button>
+
+  <button type="button" class="g__box-nav g__box-nav--prev" data-gallery-prev>
+    <span class="sr-only">Foto sebelumnya</span>
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
+      <path d="m15 18-6-6 6-6"></path>
+    </svg>
+  </button>
+
+  <figure class="g__box-figure">
+    <img data-gallery-box-img src="" alt="" />
+  </figure>
+
+  <button type="button" class="g__box-nav g__box-nav--next" data-gallery-next>
+    <span class="sr-only">Foto berikutnya</span>
+    <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true" focusable="false">
+      <path d="m9 18 6-6-6-6"></path>
+    </svg>
+  </button>
+</dialog>
+
 <style>
-  .g__head {
-    margin-block-end: var(--space-7);
+  /* ---------- panggung kolase ---------- */
+  .g__stage {
+    position: relative;
+    inline-size: 100%;
+    aspect-ratio: 1360 / 780;
   }
 
-  /* REDESIGN 2026-09-04 — gaya judul raksasa yang sama dengan "Our
-     Services" & SectionHeading: emas, --font-display 800, clamp besar. */
-  .g__title {
-    font-family: var(--font-display);
-    font-weight: 800;
-    text-transform: uppercase;
-    color: var(--color-accent);
-    font-size: clamp(2.25rem, 9.5vw, 7rem);
-    line-height: 0.9;
-    letter-spacing: -0.03em;
-    margin: 0;
-    overflow-wrap: break-word;
+  .g__item {
+    -webkit-appearance: none;
+    appearance: none;
+    position: absolute;
+    inset-inline-start: var(--x);
+    inset-block-start: var(--y);
+    inline-size: var(--w);
+    aspect-ratio: var(--ar);
+    z-index: var(--z);
+
+    padding: 0;
+    border: 0;
+    background: none;
     overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 18px 46px -22px rgba(0, 0, 0, 0.85);
+    transition:
+      transform var(--dur-base) var(--ease),
+      box-shadow var(--dur-base) var(--ease);
   }
 
-  .g__grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    grid-auto-rows: clamp(120px, 15vw, 200px);
-    grid-template-areas:
-      'a a b c'
-      'a a d d'
-      'e f f g'
-      'h f f i';
-    gap: var(--space-3);
-  }
-
-  .g__cell {
-    margin: 0;
-    overflow: hidden;
-    background-color: var(--color-surface);
-    border: var(--border-width) solid var(--color-border);
-  }
-
-  .g__cell img {
+  .g__item img {
     inline-size: 100%;
     block-size: 100%;
     object-fit: cover;
     display: block;
-    transition: opacity var(--dur-slow) var(--ease);
   }
 
-  .g__cell--a {
-    grid-area: a;
-  }
-  .g__cell--b {
-    grid-area: b;
-  }
-  .g__cell--c {
-    grid-area: c;
-  }
-  .g__cell--d {
-    grid-area: d;
-  }
-  .g__cell--e {
-    grid-area: e;
-  }
-  .g__cell--f {
-    grid-area: f;
-  }
-  .g__cell--g {
-    grid-area: g;
-  }
-  .g__cell--h {
-    grid-area: h;
-  }
-  .g__cell--i {
-    grid-area: i;
+  .g__item:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
   }
 
-  @media (max-width: 767.98px) {
-    .g__grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-template-areas: none;
-      grid-auto-rows: 42vw;
+  /* Hover: maju ke depan, naik sedikit, membesar halus. */
+  @media (prefers-reduced-motion: no-preference) {
+    .g__item:hover,
+    .g__item:focus-visible {
+      transform: translateY(-10px) scale(1.05);
+      box-shadow: 0 30px 70px -24px rgba(0, 0, 0, 0.9);
+      z-index: 20;
+    }
+  }
+
+  /* ---------- lightbox ---------- */
+  .g__box {
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-inline-size: min(1100px, 92vw);
+    max-block-size: 90vh;
+    inline-size: min(1100px, 92vw);
+    overflow: visible;
+  }
+
+  .g__box::backdrop {
+    background-color: color-mix(in srgb, var(--color-bg) 88%, transparent);
+    /* Urutan sengaja: prefix dulu, standar terakhir (catatan minifier). */
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+
+  /* "Melompat ke tengah & mendekat": skala naik dari 0,9 → 1 sambil
+     memudar masuk. @starting-style + allow-discrete supaya <dialog>
+     yang berpindah display/top-layer tetap bisa ditransisikan. */
+  @media (prefers-reduced-motion: no-preference) {
+    .g__box {
+      opacity: 0;
+      transform: scale(0.9);
+      transition:
+        opacity var(--dur-base) var(--ease),
+        transform var(--dur-base) var(--ease),
+        overlay var(--dur-base) var(--ease) allow-discrete,
+        display var(--dur-base) var(--ease) allow-discrete;
     }
 
-    .g__cell {
-      grid-area: auto !important;
+    .g__box[open] {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    @starting-style {
+      .g__box[open] {
+        opacity: 0;
+        transform: scale(0.9);
+      }
+    }
+  }
+
+  .g__box-figure {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .g__box-figure img {
+    max-inline-size: 100%;
+    max-block-size: 90vh;
+    inline-size: auto;
+    block-size: auto;
+    object-fit: contain;
+    display: block;
+    box-shadow: 0 40px 90px -30px rgba(0, 0, 0, 0.9);
+  }
+
+  .g__box-tutup,
+  .g__box-nav {
+    -webkit-appearance: none;
+    appearance: none;
+    position: fixed;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 46px;
+    block-size: 46px;
+    padding: 0;
+    background-color: color-mix(in srgb, var(--color-bg) 70%, transparent);
+    border: var(--border-width) solid var(--color-border);
+    color: var(--color-text);
+    cursor: pointer;
+    transition:
+      background-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease);
+  }
+
+  .g__box-tutup svg,
+  .g__box-nav svg {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .g__box-tutup:hover,
+  .g__box-nav:hover {
+    background-color: var(--color-accent);
+    color: var(--color-accent-ink);
+  }
+
+  .g__box-tutup:focus-visible,
+  .g__box-nav:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .g__box-tutup {
+    inset-block-start: var(--space-5);
+    inset-inline-end: var(--space-5);
+  }
+
+  .g__box-nav--prev {
+    inset-inline-start: var(--space-4);
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+  }
+
+  .g__box-nav--next {
+    inset-inline-end: var(--space-4);
+    inset-block-start: 50%;
+    transform: translateY(-50%);
+  }
+
+  /* ---------- mobile: kolase runtuh jadi grid ---------- */
+  @media (max-width: 767.98px) {
+    .g__stage {
+      aspect-ratio: auto;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-3);
+    }
+
+    .g__item {
+      position: static;
+      inline-size: auto;
+      aspect-ratio: 1 / 1;
+      z-index: auto;
+      box-shadow: none;
+    }
+
+    .g__box-nav {
+      inline-size: 40px;
+      block-size: 40px;
     }
   }
 </style>
 
 <script>
-  import { initGalleryShuffle } from '../../scripts/gallery-shuffle';
-  initGalleryShuffle();
+  import { initGalleryLightbox } from '../../scripts/gallery-lightbox';
+  initGalleryLightbox();
 </script>

@@ -64,7 +64,10 @@ const { hero } = site;
     <p class="mv-hero__tagline">{hero.h1}</p>
   </div>
 
-  <div class="mv-hero__cue" aria-hidden="true"></div>
+  <div class="mv-hero__cue" aria-hidden="true">
+    <span class="mv-hero__cue-label">Scroll</span>
+    <span class="mv-hero__cue-arrow"></span>
+  </div>
 </section>
 
 <script>
@@ -147,27 +150,49 @@ const { hero } = site;
     margin: 0;
   }
 
-  /* Isyarat "scroll ke bawah" — chevron di tepi bawah hero. Murni CSS.
+  /* Panduan "scroll ke bawah" — REDESIGN 2026-09-06 (permintaan klien:
+     dibuat lebih kelihatan). Dulu cuma chevron 24px tipis; sekarang
+     label "SCROLL" + chevron, kontras lebih tinggi. Label diam supaya
+     terbaca; hanya chevron yang memantul. Murni CSS.
      Memudar begitu `hero-scroll.ts` menandai [data-scrolled]. */
   .mv-hero__cue {
     position: absolute;
-    inset-block-end: clamp(16px, 4vh, 40px);
+    inset-block-end: clamp(20px, 4vh, 44px);
     inset-inline: 0;
     z-index: 2;
-    inline-size: 24px;
-    block-size: 24px;
-    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
     color: var(--hero-ink);
-    opacity: 0.7;
+    opacity: 0.92;
     pointer-events: none;
     transition: opacity var(--dur-base) var(--ease);
   }
 
-  .mv-hero__cue::before {
+  .mv-hero__cue-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    /* Huruf terakhir ikut ter-tracking → geser balik supaya benar-benar
+       center terhadap chevron di bawahnya. */
+    text-indent: 0.28em;
+  }
+
+  .mv-hero__cue-arrow {
+    position: relative;
+    display: block;
+    inline-size: 22px;
+    block-size: 22px;
+  }
+
+  .mv-hero__cue-arrow::before {
     content: '';
     position: absolute;
-    inset-block-start: 3px;
-    inset-inline: 5px;
+    inset-block-start: 2px;
+    inset-inline: 4px;
     block-size: 12px;
     border-inline-end: 2px solid currentColor;
     border-block-end: 2px solid currentColor;
@@ -176,11 +201,14 @@ const { hero } = site;
 
   .mv-hero[data-scrolled] .mv-hero__cue {
     opacity: 0;
+  }
+
+  .mv-hero[data-scrolled] .mv-hero__cue-arrow {
     animation: none;
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .mv-hero__cue {
+    .mv-hero__cue-arrow {
       animation: mv-hero-cue 1.9s var(--ease) infinite;
     }
   }

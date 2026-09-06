@@ -4,7 +4,7 @@
    (`public/images/GALLERY/`), menggantikan placeholder sebelumnya.
 
    Bento menampilkan 9 sel; seluruh 26 foto ikut dipakai lewat
-   acak-awal + rotasi berkala (`src/scripts/gallery-shuffle.ts`),
+   lightbox kolase (`src/scripts/gallery-lightbox.ts`),
    jadi tidak ada berkas yang menganggur.
 
    `alt` ditulis netral-deskriptif: menyebut JENIS pekerjaan yang
@@ -22,7 +22,7 @@ export interface GaleriFotoBento {
   height: number;
 }
 
-const G = '/images/GALLERY';
+const G = '/images/GALLERY-OPT';
 
 export const galeriFoto: GaleriFotoBento[] = [
   {
@@ -46,8 +46,8 @@ export const galeriFoto: GaleriFotoBento[] = [
   {
     src: `${G}/IMG-20260805-WA0043.jpg`,
     alt: 'Detail hasil jahitan produk MOTIVE',
-    width: 3060,
-    height: 4080,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG-20260805-WA0088.jpg`,
@@ -76,8 +76,8 @@ export const galeriFoto: GaleriFotoBento[] = [
   {
     src: `${G}/IMG-20260814-WA0003.jpg`,
     alt: 'Detail produk apparel MOTIVE',
-    width: 3060,
-    height: 4080,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG-20260814-WA0021.jpg`,
@@ -118,67 +118,67 @@ export const galeriFoto: GaleriFotoBento[] = [
   {
     src: `${G}/IMG_20260613_153741_580.jpg`,
     alt: 'Suasana workshop MOTIVE dengan tumpukan bahan dan pesanan',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260613_153753_457.jpg`,
     alt: 'Bahan kain tersusun di workshop MOTIVE',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260613_153759_308.jpg`,
     alt: 'Proses penyortiran pesanan di workshop MOTIVE',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260722_193455_257.jpg`,
     alt: 'Kegiatan produksi di workshop MOTIVE',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260804_213234_835.jpg`,
     alt: 'Pesanan apparel MOTIVE dalam tahap penyelesaian',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260804_214222_375.jpg`,
     alt: 'Produk MOTIVE menjelang pengemasan',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260804_214603_173.jpg`,
     alt: 'Hasil produksi MOTIVE tertata sebelum dikirim',
-    width: 4064,
-    height: 3048,
+    width: 1600,
+    height: 1200,
   },
   {
     src: `${G}/IMG_20260814_100257_422.jpg`,
     alt: 'Pesanan MOTIVE siap dikirim ke pelanggan',
-    width: 4064,
-    height: 3048,
+    width: 1600,
+    height: 1200,
   },
   {
     src: `${G}/IMG_20260818_144447_502.jpg`,
     alt: 'Kegiatan produksi apparel di workshop MOTIVE',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260818_144706_935.jpg`,
     alt: 'Proses pengerjaan pesanan di workshop MOTIVE',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
   {
     src: `${G}/IMG_20260818_144732_927.jpg`,
     alt: 'Detail pengerjaan produk di workshop MOTIVE',
-    width: 3048,
-    height: 4064,
+    width: 1200,
+    height: 1600,
   },
 ];
