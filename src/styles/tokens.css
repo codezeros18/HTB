@@ -96,17 +96,17 @@
 
 /* ===== 3. TIPOGRAFI — identik di kedua arah (BLUEPRINT.md §6.5) ===== */
 :root {
-  /* REDESIGN (2026-09-04, permintaan klien) — SATU font untuk SEMUANYA:
-     Plus Jakarta Sans (SIL OFL, gratis komersial). Space Grotesk / Inter /
-     Switzer / fallback LocomotiveNew semuanya dilepas. Variable font
-     (weight 200–800) di-SELF-HOST di public/fonts/ — nol request pihak
-     ketiga (guardrail 6). display & body memakai family yang sama;
-     bedanya cuma weight/size lewat token type-scale di bawah. */
-  --font-display: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
-  --font-body: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif;
+  /* REDESIGN (2026-09-06, permintaan klien — PERCOBAAN): SATU font untuk
+     SEMUANYA: Poppins (SIL OFL, gratis komersial), menggantikan Plus
+     Jakarta Sans. Self-host subset latin, 5 berat statis (lihat @font-face
+     di global.css) — nol request pihak ketiga (guardrail 6). display &
+     body memakai family yang sama; bedanya cuma weight/size lewat token
+     type-scale di bawah. */
+  --font-display: 'Poppins', 'Segoe UI', Arial, sans-serif;
+  --font-body: 'Poppins', 'Segoe UI', Arial, sans-serif;
 
   /* Type scale — DESKTOP (≥768px). fs / lh / tracking / weight.
-     Berat display maks 800 (batas Plus Jakarta Sans) — di ukuran besar +
+     Berat display maks 800 (berat Poppins terberat yang dimuat) — di ukuran besar +
      tracking rapat tetap terbaca sangat tegas. */
   --fs-display: 64px;
   --lh-display: 0.96;

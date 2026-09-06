@@ -1,18 +1,19 @@
 ---
 /**
- * About — REDESIGN 2026-08-30: section SETENGAH LAYAR (± min-height 60vh),
- * konten dipadatkan. Tujuan: menjelaskan "apa itu MOTIVE" dalam sekali lihat.
+ * About — REDESIGN 2026-09-06 (permintaan klien): MINIMALIS &
+ * VISUAL-DRIVEN.
  *
- * Layout: 2 kolom desktop —
- *   kiri  : eyebrow + H2 besar
- *   kanan : 2 paragraf ringkas + 4 janji nilai sebagai baris chip + baris fakta
+ * Dibuang total: headline "KONVEKSI CUSTOM APPAREL & RACEPACK" (sudah
+ * ada di hero), eyebrow, dua paragraf panjang, dan baris fakta. Yang
+ * tersisa: judul section bergaya sama dengan section lain, SATU foto
+ * besar sebagai elemen utama, dan 4 janji nilai yang memang sudah
+ * ringkas — cukup untuk "siapa MOTIVE" tanpa dinding teks.
  *
- * Semua konten dari `site.about` (guardrail 5). Elemen `null` di `baris`
- * disembunyikan sendiri-sendiri; kalau semua null, blok fakta tidak dirender.
- * Fade-in: `.mv-reveal` (S02).
+ * Semua konten dari `site.about` (guardrail 5). Fade-in: `.mv-reveal`.
  */
 import { site } from '../../content/site';
 import Container from '../layout/Container.astro';
+import SectionHeading from '../layout/SectionHeading.astro';
 
 interface Props {
   id?: string;
@@ -21,138 +22,90 @@ interface Props {
 const { id }: Props = Astro.props;
 
 const { about } = site;
-const barisTerisi = about.baris.filter((b): b is string => b !== null);
 ---
 
-<Container as="section" spacing="section" id={id} class="mv-about">
-  <div class="mv-about__grid">
-    <div class="mv-about__head mv-reveal">
-      <p class="t-eyebrow mv-about__eyebrow">Tentang Kami</p>
-      <h2 class="t-h1 mv-about__judul">{about.judul}</h2>
-    </div>
+<Container as="section" spacing="section" id={id}>
+  <SectionHeading judul={about.judul} align="start" />
 
-    <div class="mv-about__body mv-reveal">
-      {about.paragraf.map((p) => <p class="t-body-l mv-about__p">{p}</p>)}
+  <figure class="mv-about__media mv-reveal">
+    <img
+      src={about.foto.src}
+      alt={about.foto.alt}
+      width={about.foto.width}
+      height={about.foto.height}
+      loading="lazy"
+      decoding="async"
+    />
+  </figure>
 
-      <ul class="mv-about__nilai">
-        {
-          about.janjiNilai.map((n) => (
-            <li class="mv-about__nilai-item">
-              <span class="mv-about__nilai-judul t-label">{n.judul}</span>
-              <span class="mv-about__nilai-desc t-body-s">{n.deskripsi}</span>
-            </li>
-          ))
-        }
-      </ul>
-
-      {
-        barisTerisi.length > 0 && (
-          <ul class="mv-about__fakta">
-            {barisTerisi.map((f) => (
-              <li class="mv-about__fakta-item t-body-s">{f}</li>
-            ))}
-          </ul>
-        )
-      }
-    </div>
-  </div>
+  <ul class="mv-about__nilai mv-reveal">
+    {
+      about.janjiNilai.map((n) => (
+        <li class="mv-about__nilai-item">
+          <span class="mv-about__nilai-judul">{n.judul}</span>
+          <span class="mv-about__nilai-desc">{n.deskripsi}</span>
+        </li>
+      ))
+    }
+  </ul>
 </Container>
 
 <style>
-  .mv-about {
-    /* SETENGAH LAYAR — konten dikunci pendek, dipusatkan vertikal. */
-    min-block-size: 60vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-
-  .mv-about__grid {
-    display: grid;
-    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-    gap: var(--space-8);
-    align-items: start;
-  }
-
-  .mv-about__eyebrow {
-    color: var(--color-accent);
-    margin: 0 0 var(--space-3);
-  }
-
-  .mv-about__judul {
-    color: var(--color-text);
+  .mv-about__media {
     margin: 0;
+    overflow: hidden;
+    border: var(--border-width) solid var(--color-border);
   }
 
-  .mv-about__p {
-    color: var(--color-text-2);
-    margin: 0;
+  .mv-about__media img {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
   }
 
-  .mv-about__p + .mv-about__p {
-    margin-block-start: var(--space-3);
-  }
-
-  /* 4 janji nilai sebagai baris chip padat — bukan kartu besar. */
   .mv-about__nilai {
     list-style: none;
-    margin: var(--space-5) 0 0;
+    margin: var(--space-6) 0 0;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-3);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-5);
   }
 
   .mv-about__nilai-item {
     display: flex;
     flex-direction: column;
-    gap: 2px;
-    padding: var(--space-3) var(--space-4);
-    border-inline-start: 2px solid var(--color-accent);
-    background-color: var(--color-surface);
+    gap: var(--space-2);
+    padding-block-start: var(--space-4);
+    border-block-start: 2px solid var(--color-accent);
   }
 
   .mv-about__nilai-judul {
+    font-family: var(--font-body);
+    font-weight: 700;
+    font-size: var(--fs-body-m);
+    line-height: 1.3;
     color: var(--color-text);
   }
 
   .mv-about__nilai-desc {
+    font-size: var(--fs-body-s);
+    line-height: var(--lh-body-s);
     color: var(--color-text-2);
   }
 
-  .mv-about__fakta {
-    display: flex;
-    flex-wrap: wrap;
-    list-style: none;
-    margin: var(--space-5) 0 0;
-    padding: 0;
-    gap: var(--space-2) var(--space-3);
-  }
-
-  .mv-about__fakta-item {
-    color: var(--color-text-2);
-  }
-
-  .mv-about__fakta-item:not(:last-child)::after {
-    content: '·';
-    color: var(--color-border-strong);
-    margin-inline-start: var(--space-3);
-  }
-
-  @media (max-width: 1023.98px) {
-    .mv-about__grid {
-      grid-template-columns: 1fr;
-      gap: var(--space-5);
-    }
-
-    .mv-about {
-      min-block-size: 0;
+  @media (max-width: 900px) {
+    .mv-about__nilai {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  @media (max-width: 559.98px) {
+  @media (max-width: 480px) {
     .mv-about__nilai {
       grid-template-columns: 1fr;
+      gap: var(--space-4);
     }
   }
 </style>

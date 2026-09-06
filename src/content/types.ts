@@ -218,17 +218,25 @@ export interface JanjiNilai {
   deskripsi: string;
 }
 
+export interface FotoStatis {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+}
+
 export interface AboutContent {
-  judul: string;
-  /** Tepat 2 paragraf, adaptasi PDF. */
-  paragraf: [string, string];
-  janjiNilai: JanjiNilai[];
   /**
-   * Baris fakta perusahaan. Setiap elemen `null` disembunyikan sendiri-
-   * sendiri; bila SELURUH elemen `null`, seluruh baris tidak dirender
-   * (guardrail 1 — nol label kosong, nol tanda hubung menggantung).
+   * H2 SectionHeading. REDESIGN 2026-09-06 (permintaan klien): section
+   * dipangkas jadi visual-driven — judul jadi "Tentang Kami" (headline
+   * "KONVEKSI CUSTOM APPAREL & RACEPACK" dilepas, sudah ada di hero),
+   * dua paragraf `paragraf` dan baris fakta `baris` DIBUANG.
    */
-  baris: (string | null)[];
+  judul: string;
+  /** Foto pengiring — elemen utama section setelah dibuat visual-driven. */
+  foto: FotoStatis;
+  /** 4 janji nilai — satu-satunya teks yang tersisa, sengaja ringkas. */
+  janjiNilai: JanjiNilai[];
 }
 
 /* ---------- services (S05) ---------- */

@@ -1,45 +1,30 @@
 ---
 /**
- * Navbar — REDESIGN: transparan, tinggi tetap 64px (nol susut), grid 3 kolom
- * (kiri logo · tengah navlist · kanan CTA), seluruh elemen putih.
+ * Navbar — REDESIGN 2026-09-06 (permintaan klien, referensi bisasinema.id).
+ *
+ * SISTEM BARU: bar transparan tipis berisi TIGA hal saja —
+ *   kiri   : tombol hamburger + label "Menu" → membuka sidebar kiri
+ *   tengah : logo MOTIVE, TIDAK tampil selagi hero terlihat; memudar
+ *            masuk begitu hero tergeser lewat (`data-logo-hidden`)
+ *   kanan  : tautan "Let's Talk" (WhatsApp) dengan underline saat hover
+ *
+ * Daftar navigasi + mega menu DIPINDAH ke sidebar (`MobileMenu.astro`,
+ * kini dipakai di SEMUA lebar layar, bukan cuma mobile).
  *
  * ── KENAPA CLS = 0 ─────────────────────────────────────────────
- * Perubahan tinggi navbar adalah sumber CLS paling umum. Di sini
- * TIDAK ADA satu pun properti layout yang berubah:
- *
- *   .mv-nav          fixed, block-size 76px — KONSTAN selamanya
- *   .mv-nav__surface absolute 76px — hanya `transform: translateY(-16px)`
- *   .mv-nav__inner   absolute 100% — hanya `transform: translateY(8px)`
- *   .mv-nav-spacer   76px di alur — KONSTAN, tidak pernah dianimasikan
- *
- * Efek visual "menyusut": permukaan bergeser naik 16px sehingga tepi
- * bawahnya (beserta border) mendarat di y=60. Isi digeser turun 8px
- * agar tetap di tengah pita 60px. Keduanya murni `transform`, yang
- * dikecualikan dari perhitungan layout shift — dan sekaligus mematuhi
- * §6.7 "hanya transform dan opacity".
- *
- * Pita 60–76px dibiarkan transparan dan `pointer-events: none`,
- * sehingga konten yang lewat di bawahnya terlihat & tetap bisa diklik.
+ *   .mv-nav          fixed, block-size --nav-h — KONSTAN selamanya
+ *   .mv-nav__surface absolute, hanya warna/blur yang berubah
+ *   .mv-nav-spacer   block-size 0 — navbar menumpang di atas hero
+ * Nol properti layout yang dianimasikan; hanya opacity/visibility.
  *
  * ── NOL scroll listener ────────────────────────────────────────
- * State "sudah discroll" dideteksi lewat sentinel 120px + Intersection-
- * Observer bersama dari S02, bukan `addEventListener('scroll')`.
- * Section aktif memakai observer yang sama dengan threshold 0.35.
- *
- * ── Navbar tersembunyi di atas hero (REDESIGN 2026-09-06) ──────
- * Di homepage (`heroNav`), navbar mulai TERSEMBUNYI (`data-nav-hidden`
- * di markup, jadi nol flash) dan baru muncul setelah `.mv-hero`
- * benar-benar tergeser lewat — observer di <script>. Sembunyi pakai
- * opacity + visibility saja (NOL transform: transform di sini/di
- * .mv-nav__inner memutus posisi .mv-mega yang `position: fixed`).
- * <noscript> mengembalikan navbar bila JS mati.
+ * "Sudah discroll" (permukaan jadi kaca) = sentinel 120px + observer
+ * bersama S02. "Logo boleh tampil" = observer pada `.mv-hero`.
  *
  * Props:
- *   heroNav  homepage — navbar mulai tersembunyi & di-reveal setelah hero.
+ *   heroNav  homepage — logo mulai tersembunyi, muncul setelah hero.
  */
 import { site, waLink } from '../../content/site';
-import { navItems } from './nav-items';
-import { layanan, layananHref, layananQuickLinks } from '../../content/layanan';
 
 interface Props {
   heroNav?: boolean;
@@ -51,11 +36,22 @@ const { heroNav = false }: Props = Astro.props;
 <header
   class="mv-nav"
   data-mv-nav
-  data-nav-hidden={heroNav ? '' : undefined}
-  data-mv-nav-herohide={heroNav ? '' : undefined}
+  data-logo-hidden={heroNav ? '' : undefined}
+  data-mv-logo-herohide={heroNav ? '' : undefined}
 >
   <div class="mv-nav__surface">
     <div class="mv-nav__inner">
+      <button
+        type="button"
+        class="mv-nav__menu"
+        data-mv-menu-open
+        aria-expanded="false"
+        aria-controls="menu-mobile"
+      >
+        <span class="mv-nav__bars" aria-hidden="true"></span>
+        <span class="mv-nav__menu-label">Menu</span>
+      </button>
+
       <a class="mv-nav__logo" href="/#top" aria-label={`${site.brand} — kembali ke atas`}>
         <img
           class="mv-nav__logo-img"
@@ -66,105 +62,31 @@ const { heroNav = false }: Props = Astro.props;
         />
       </a>
 
-      <nav class="mv-nav__links" aria-label="Navigasi utama">
-        <ul class="mv-nav__list">
-          {
-            navItems.map((item) => (
-              <li
-                class:list={['mv-nav__item', item.sectionId === 'produk' && 'mv-nav__item--mega']}
-              >
-                <a class="mv-nav__link" href={item.href} data-nav-link={item.sectionId}>
-                  <span class="mv-nav__linklabel">{item.label}</span>
-                </a>
-
-                {/* Mega menu "fast track" — REDESIGN 2026-08-30. HANYA di item
-                    Produk: banyak kategori sejak drill-down `/layanan/**` ada,
-                    jadi ditawarkan jalan pintas langsung dari navbar. CSS-only
-                    (buka via :hover/:focus-within pada <li>, deteksi nol JS). */}
-                {item.sectionId === 'produk' && (
-                  <div class="mv-mega">
-                    <div class="mv-mega__inner">
-                      {layanan.map((l) => (
-                        <div class="mv-mega__col">
-                          <a class="mv-mega__col-title t-label" href={layananHref(l)}>
-                            {l.nama}
-                          </a>
-                          <ul class="mv-mega__list">
-                            {layananQuickLinks(l).map((q) => (
-                              <li>
-                                <a class="mv-mega__link" href={q.href}>
-                                  {q.label}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
-
-      <div class="mv-nav__aksi">
-        {
-          /* REDESIGN 2026-08-31 (iterasi 2) — CTA WA kembali, tapi BUKAN
-            tombol kotak: tautan teks polos "Let's Talk" memakai kelas link
-            nav yang sama (`.mv-nav__link`/`.mv-nav__linklabel`) supaya
-            animasi underline saat hover didapat GRATIS, tanpa duplikasi
-            CSS. Disembunyikan <1024px — di mobile WA tetap lewat hamburger
-            → WhatsAppButton di dalam MobileMenu. */
-        }
-        <a
-          class="mv-nav__link mv-nav__cta-link"
-          href={waLink('navbar')}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <span class="mv-nav__linklabel">Let's Talk</span>
-        </a>
-
-        <button
-          type="button"
-          class="mv-nav__hamburger"
-          data-mv-menu-open
-          aria-expanded="false"
-          aria-controls="menu-mobile"
-        >
-          <span class="sr-only">Buka menu navigasi</span>
-          <span class="mv-nav__bars" aria-hidden="true"></span>
-        </button>
-      </div>
+      <a class="mv-nav__cta" href={waLink('navbar')} target="_blank" rel="noopener noreferrer">
+        <span class="mv-nav__ctalabel">Let's Talk</span>
+      </a>
     </div>
   </div>
 </header>
 
 {
-  /* Penahan tinggi di alur dokumen. Nilainya tidak pernah berubah,
-    jadi konten di bawahnya tidak pernah bergeser. Sentinel 120px
-    menumpang di sini untuk mendeteksi "sudah discroll" tanpa
-    scroll listener. */
+  /* Penahan tinggi di alur dokumen (0px — navbar menumpang di atas hero).
+    Sentinel 120px menumpang di sini untuk mendeteksi "sudah discroll"
+    tanpa scroll listener. */
 }
 <div class="mv-nav-spacer" aria-hidden="true">
   <span class="mv-nav__sentinel" data-mv-nav-sentinel></span>
 </div>
 
 {
-  /* JS mati → observer hero tak pernah jalan → navbar akan macet
-    tersembunyi di homepage. Kembalikan visibilitasnya. */
+  /* JS mati → observer hero tak pernah jalan → logo macet tersembunyi
+    di homepage. Kembalikan visibilitasnya. */
 }
 <noscript>
   <style>
-    .mv-nav[data-nav-hidden] .mv-nav__surface,
-    .mv-nav[data-nav-hidden] .mv-nav__inner {
+    .mv-nav[data-logo-hidden] .mv-nav__logo {
       opacity: 1;
       visibility: visible;
-    }
-    .mv-nav[data-nav-hidden] .mv-nav__surface {
-      pointer-events: auto;
     }
   </style>
 </noscript>
@@ -172,8 +94,6 @@ const { heroNav = false }: Props = Astro.props;
 <style>
   .mv-nav,
   .mv-nav-spacer {
-    /* REDESIGN 2026-08-31 (perombakan navbar, referensi layout+font baru) —
-       tinggi 64→60px, nol susut. */
     --nav-h: 60px;
   }
 
@@ -184,19 +104,14 @@ const { heroNav = false }: Props = Astro.props;
     inset-inline: 0;
     z-index: 50;
     block-size: var(--nav-h); /* KONSTAN — jangan pernah dianimasikan */
-    /* Pita bawah yang tidak tertutup permukaan tetap bisa diklik tembus. */
     pointer-events: none;
   }
 
   .mv-nav-spacer {
     position: relative;
-    /* REDESIGN — navbar transparan menumpang di atas konten (hero full-bleed),
-       jadi penahan tinggi = 0. Elemen dipertahankan hanya sebagai wadah sentinel. */
     block-size: 0;
   }
 
-  /* Sentinel setinggi 120px: selama sebagian masih terlihat, halaman
-     dianggap "belum discroll". Menggantikan scroll listener. */
   .mv-nav__sentinel {
     position: absolute;
     inset-block-start: 0;
@@ -206,68 +121,40 @@ const { heroNav = false }: Props = Astro.props;
     pointer-events: none;
   }
 
-  /* ---------- permukaan (latar + border) ---------- */
+  /* ---------- permukaan ---------- */
   .mv-nav__surface {
     position: absolute;
     inset-block-start: 0;
     inset-inline: 0;
     block-size: var(--nav-h);
-    overflow: hidden;
     pointer-events: auto;
 
-    /* Transparan di puncak halaman (di atas hero). REDESIGN — begitu discroll
-       (`[data-scrolled]`), permukaan jadi kaca gelap tipis (glassmorphism)
-       supaya navbar tetap terbaca di atas konten putih/terang di bawahnya.
-       SENGAJA tidak memakai `transform` di sini (atau di .mv-nav__inner) —
-       transform apa pun membuat elemen ini jadi containing block baru untuk
-       descendant `position: fixed`, yang akan mematahkan posisi & memotong
-       mega menu (.mv-mega) yang bersarang di dalam navlist. */
     background-color: transparent;
     border-block-end: var(--border-width) solid transparent;
 
     transition:
       background-color var(--dur-base) var(--ease),
       backdrop-filter var(--dur-base) var(--ease),
-      border-block-end-color var(--dur-base) var(--ease),
-      opacity var(--dur-base) var(--ease);
-  }
-
-  /* Homepage: navbar mulai tersembunyi (data-nav-hidden di markup), di-reveal
-     oleh observer hero di <script>. Sembunyi = opacity + visibility saja
-     (NOL transform — lihat catatan .mv-mega). visibility instan supaya
-     tautan tidak fokusabel selagi tak terlihat; opacity yang di-fade. */
-  .mv-nav__inner {
-    transition: opacity var(--dur-base) var(--ease);
-  }
-
-  .mv-nav[data-nav-hidden] .mv-nav__surface,
-  .mv-nav[data-nav-hidden] .mv-nav__inner {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
+      border-block-end-color var(--dur-base) var(--ease);
   }
 
   .mv-nav[data-scrolled] .mv-nav__surface {
     background-color: color-mix(in srgb, var(--color-bg) 72%, transparent);
-    /* Urutan SENGAJA: prefix dulu, properti standar terakhir. Build tool
-       (esbuild CSS minifier) mem-fold pasangan prefixed+standar bernilai
-       identik jadi satu deklarasi — yang selamat adalah yang ditulis
-       PALING BELAKANG. Standar di baris terakhir memastikan browser modern
-       (yang membaca `backdrop-filter` tanpa prefix) tetap dapat nilainya. */
+    /* Urutan SENGAJA: prefix dulu, standar terakhir — minifier CSS
+       mem-fold pasangan bernilai identik dan yang selamat adalah yang
+       ditulis PALING BELAKANG. */
     -webkit-backdrop-filter: blur(14px) saturate(140%);
     backdrop-filter: blur(14px) saturate(140%);
     border-block-end-color: color-mix(in srgb, var(--color-text) 12%, transparent);
   }
 
-  /* ---------- isi ---------- */
+  /* ---------- isi: kiri · tengah · kanan ---------- */
   .mv-nav__inner {
     position: absolute;
     inset-block-start: 0;
     inset-inline: 0;
     block-size: var(--nav-h);
 
-    /* REDESIGN — 3 kolom: kiri logo · tengah navlist · kanan CTA.
-       Kolom tepi 1fr sama lebar → navlist benar-benar di tengah. */
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
@@ -275,266 +162,43 @@ const { heroNav = false }: Props = Astro.props;
 
     max-inline-size: var(--container-max);
     margin-inline: auto;
-    /* REDESIGN 2026-09-01 — dulu di-hardcode 40px lokal di sini; sekarang
-       --edge-pad global sudah 40px (lihat tokens.css), jadi navbar dan
-       section lain otomatis sejajar tepat di edge yang sama. */
     padding-inline: var(--edge-pad);
   }
 
-  /* ---------- logo (kolom kiri) ---------- */
-  .mv-nav__logo {
+  /* ---------- kiri: hamburger + label ---------- */
+  .mv-nav__menu {
+    -webkit-appearance: none;
+    appearance: none;
     justify-self: start;
     display: inline-flex;
     align-items: center;
-    min-block-size: var(--tap-min);
-    text-decoration: none;
-  }
-
-  .mv-nav__logo-img {
-    display: block;
-    /* Logo lockup horizontal 1700×215 — skala turun, jaga rasio via kedua max. */
-    inline-size: auto;
-    block-size: auto;
-    max-block-size: 28px;
-    max-inline-size: 200px;
-    object-fit: contain;
-  }
-
-  @media (max-width: 767.98px) {
-    .mv-nav__logo-img {
-      max-block-size: 22px;
-      max-inline-size: 150px;
-    }
-  }
-
-  .mv-nav__logo:focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-focus);
-    outline-offset: var(--focus-ring-offset);
-  }
-
-  /* ---------- link (kolom tengah) ---------- */
-  .mv-nav__links {
-    justify-self: center;
-    display: flex;
-    justify-content: center;
-  }
-
-  .mv-nav__list {
-    display: flex;
-    align-items: center;
-    gap: var(--space-6);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .mv-nav__link {
-    display: inline-flex;
-    align-items: center;
-    min-block-size: var(--tap-min);
-    padding-inline: 12px;
-    color: #ffffff;
-    text-decoration: none;
-    /* REDESIGN 2026-09-04 — navbar ikut satu font situs (Plus Jakarta Sans).
-       Ukuran 20px, weight 600. */
-    font-family: var(--font-body);
-    font-size: 20px;
-    font-weight: 600;
-    line-height: normal;
-    transition: color var(--dur-fast) var(--ease);
-  }
-
-  .mv-nav__cta-link {
-    /* Tautan "Let's Talk" — sama persis dengan link nav lain (termasuk
-       animasi underline saat hover), hanya disembunyikan di mobile karena
-       WA sudah terjangkau lewat hamburger → MobileMenu. */
-    display: none;
-  }
-
-  @media (min-width: 1024px) {
-    .mv-nav__cta-link {
-      display: inline-flex;
-    }
-  }
-
-  .mv-nav__linklabel {
-    position: relative;
-    display: inline-block;
-    padding-block: var(--space-1);
-  }
-
-  /* Underline 2px aksen — dianimasikan dengan scaleX (transform saja). */
-  .mv-nav__linklabel::after {
-    content: '';
-    position: absolute;
-    inset-inline: 0;
-    inset-block-end: 0;
-    block-size: 2px;
-    background-color: #ffffff; /* REDESIGN — underline putih */
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform var(--dur-fast) var(--ease);
-  }
-
-  .mv-nav__link:hover {
-    color: #ffffff;
-  }
-
-  .mv-nav__link:hover .mv-nav__linklabel::after,
-  .mv-nav__link[aria-current='true'] .mv-nav__linklabel::after {
-    transform: scaleX(1);
-  }
-
-  /* Section aktif: putih + weight 700 + underline putih — penanda non-warna
-     tetap ada (weight + garis), memenuhi §7.8. */
-  .mv-nav__link[aria-current='true'] {
-    color: #ffffff;
-    font-weight: 700;
-  }
-
-  .mv-nav__link:focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-focus);
-    outline-offset: var(--focus-ring-offset);
-  }
-
-  /* ---------- mega menu "Produk" (REDESIGN 2026-08-30) ----------
-     Buka via :hover / :focus-within pada <li> — NOL JavaScript. .mv-mega
-     posisinya `fixed` (bukan absolute): lebar penuh viewport & tidak
-     dibatasi lebar link pemicunya, meniru pola mega-menu Uniqlo. Karena ia
-     tetap anak DOM dari <li>, mengarahkan pointer ke panel tetap dianggap
-     "menghover <li>" walau posisinya di layar terpisah dari link — jembatan
-     hover tanpa celah (li tinggi 44px, panel mulai persis di y=64px). */
-  .mv-nav__item {
-    position: relative;
-  }
-
-  .mv-mega {
-    position: fixed;
-    inset-block-start: var(--nav-h);
-    inset-inline: 0;
-    z-index: 49;
-
-    background-color: color-mix(in srgb, var(--color-bg) 94%, transparent);
-    /* Urutan sengaja — lihat catatan di .mv-nav__surface[data-scrolled]. */
-    -webkit-backdrop-filter: blur(18px) saturate(140%);
-    backdrop-filter: blur(18px) saturate(140%);
-    border-block-end: var(--border-width) solid var(--color-border);
-
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-6px);
-    transition:
-      opacity var(--dur-base) var(--ease),
-      transform var(--dur-base) var(--ease),
-      visibility 0s linear var(--dur-base);
-  }
-
-  .mv-nav__item--mega:hover .mv-mega,
-  .mv-nav__item--mega:focus-within .mv-mega {
-    opacity: 1;
-    visibility: visible;
-    transform: translateY(0);
-    transition-delay: 0s;
-  }
-
-  .mv-mega__inner {
-    max-inline-size: var(--container-max);
-    margin-inline: auto;
-    padding-inline: var(--edge-pad);
-    padding-block: var(--space-7);
-
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-6);
-  }
-
-  .mv-mega__col {
-    display: flex;
-    flex-direction: column;
     gap: var(--space-3);
-  }
-
-  .mv-mega__col-title {
-    color: var(--color-accent);
-    text-decoration: none;
-  }
-
-  .mv-mega__col-title:hover {
-    text-decoration: underline;
-  }
-
-  .mv-mega__col-title:focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-focus);
-    outline-offset: var(--focus-ring-offset);
-  }
-
-  .mv-mega__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-  }
-
-  .mv-mega__link {
-    display: flex;
-    align-items: center;
-    color: var(--color-text-2);
-    text-decoration: none;
-    font-size: var(--fs-body-s);
     min-block-size: var(--tap-min);
-  }
-
-  .mv-mega__link:hover {
-    color: var(--color-text);
-  }
-
-  .mv-mega__link:focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-focus);
-    outline-offset: var(--focus-ring-offset);
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .mv-mega {
-      transition-duration: 0ms;
-    }
-  }
-
-  /* ---------- aksi (kolom kanan) ---------- */
-  .mv-nav__aksi {
-    justify-self: end;
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-  }
-
-  .mv-nav__hamburger {
-    -webkit-appearance: none;
-    appearance: none;
-    display: none; /* hanya tampil di bawah 1024px */
-    align-items: center;
-    justify-content: center;
-    inline-size: var(--tap-min);
-    block-size: var(--tap-min);
+    padding: 0;
     background: transparent;
-    border: var(--border-width) solid #ffffff; /* REDESIGN — putih */
-    border-radius: var(--radius-control);
-    color: #ffffff; /* bar hamburger pakai currentColor → ikut putih */
+    border: 0;
+    color: #ffffff;
     cursor: pointer;
   }
 
-  .mv-nav__hamburger:focus-visible {
+  .mv-nav__menu-label {
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .mv-nav__menu:focus-visible {
     outline: var(--focus-ring-width) solid var(--color-focus);
     outline-offset: var(--focus-ring-offset);
   }
 
-  /* Tiga garis dari satu elemen + dua pseudo — nol <svg>, nol request. */
   .mv-nav__bars,
   .mv-nav__bars::before,
   .mv-nav__bars::after {
     display: block;
-    inline-size: 18px;
+    inline-size: 22px;
     block-size: 2px;
     background-color: currentColor;
   }
@@ -551,29 +215,102 @@ const { heroNav = false }: Props = Astro.props;
   }
 
   .mv-nav__bars::before {
-    inset-block-start: -6px;
+    inset-block-start: -7px;
   }
 
   .mv-nav__bars::after {
-    inset-block-start: 6px;
+    inset-block-start: 7px;
   }
 
-  /* ---------- di bawah 1024px ---------- */
-  @media (max-width: 1023.98px) {
-    .mv-nav__links {
+  /* ---------- tengah: logo (sembunyi selagi hero) ---------- */
+  .mv-nav__logo {
+    justify-self: center;
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+    text-decoration: none;
+    transition: opacity var(--dur-base) var(--ease);
+  }
+
+  .mv-nav[data-logo-hidden] .mv-nav__logo {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .mv-nav__logo:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mv-nav__logo-img {
+    display: block;
+    inline-size: auto;
+    block-size: auto;
+    max-block-size: 26px;
+    max-inline-size: 190px;
+    object-fit: contain;
+  }
+
+  /* ---------- kanan: Let's Talk ---------- */
+  .mv-nav__cta {
+    justify-self: end;
+    display: inline-flex;
+    align-items: center;
+    min-block-size: var(--tap-min);
+    color: #ffffff;
+    text-decoration: none;
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    line-height: normal;
+  }
+
+  .mv-nav__cta:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  /* Underline animasi saat hover. */
+  .mv-nav__ctalabel {
+    position: relative;
+    display: inline-block;
+    padding-block: var(--space-1);
+  }
+
+  .mv-nav__ctalabel::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    block-size: 2px;
+    background-color: #ffffff;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  .mv-nav__cta:hover .mv-nav__ctalabel::after {
+    transform: scaleX(1);
+  }
+
+  /* ---------- responsif ---------- */
+  @media (max-width: 767.98px) {
+    .mv-nav__logo-img {
+      max-block-size: 22px;
+      max-inline-size: 150px;
+    }
+  }
+
+  @media (max-width: 639.98px) {
+    /* Label "Menu" dibuang — ikon hamburger sudah cukup, dan ruang
+       dibutuhkan logo + CTA. */
+    .mv-nav__menu-label {
       display: none;
     }
 
-    .mv-nav__hamburger {
-      display: inline-flex;
-    }
-  }
-
-  /* Di 360px label CTA dipendekkan lewat CSS agar tetap muat
-     bersama logo + hamburger tanpa membuang tombolnya. */
-  @media (max-width: 400px) {
-    .mv-nav__inner {
-      gap: var(--space-3);
+    .mv-nav__cta {
+      font-size: 14px;
     }
   }
 </style>
@@ -585,7 +322,7 @@ const { heroNav = false }: Props = Astro.props;
   const nav = document.querySelector<HTMLElement>('[data-mv-nav]');
   const sentinel = document.querySelector<HTMLElement>('[data-mv-nav-sentinel]');
 
-  /* --- state "sudah discroll": sentinel 120px, bukan scroll listener --- */
+  /* --- permukaan kaca saat sudah discroll: sentinel 120px --- */
   if (nav && sentinel) {
     observeElement(
       sentinel,
@@ -597,26 +334,25 @@ const { heroNav = false }: Props = Astro.props;
     );
   }
 
-  /* --- homepage: navbar tersembunyi di atas hero, muncul setelah lewat ---
-     `data-nav-hidden` sudah ada di markup (nol flash). Selagi .mv-hero
-     memotong viewport → tetap sembunyi; begitu tergeser lewat → tampil.
-     Tanpa IntersectionObserver (browser lawas) → langsung tampilkan. */
-  if (nav?.hasAttribute('data-mv-nav-herohide')) {
+  /* --- homepage: logo tengah baru muncul setelah hero tergeser lewat ---
+     `data-logo-hidden` sudah ada di markup (nol flash). Tanpa
+     IntersectionObserver (browser lawas) → langsung tampilkan. */
+  if (nav?.hasAttribute('data-mv-logo-herohide')) {
     const hero = document.querySelector<HTMLElement>('.mv-hero');
     if (hero && typeof IntersectionObserver === 'function') {
       observeElement(
         hero,
         (entry) => {
-          nav.toggleAttribute('data-nav-hidden', entry.isIntersecting);
+          nav.toggleAttribute('data-logo-hidden', entry.isIntersecting);
         },
         { threshold: 0, rootMargin: '0px', once: false }
       );
     } else {
-      nav.removeAttribute('data-nav-hidden');
+      nav.removeAttribute('data-logo-hidden');
     }
   }
 
-  /* --- underline section aktif (threshold 0.35, observer bersama S02) --- */
+  /* --- penanda section aktif untuk tautan di sidebar --- */
   const links = new Map<string, HTMLAnchorElement>();
   document.querySelectorAll<HTMLAnchorElement>('[data-nav-link]').forEach((a) => {
     const id = a.dataset.navLink;
@@ -627,7 +363,6 @@ const { heroNav = false }: Props = Astro.props;
   const urutan = navItems.map((i) => i.sectionId);
 
   const perbarui = (): void => {
-    // Bila beberapa section terlihat sekaligus, yang teratas di dokumen menang.
     const aktif = urutan.find((id) => terlihat.has(id)) ?? null;
     for (const [id, a] of links) {
       if (id === aktif) a.setAttribute('aria-current', 'true');
@@ -637,7 +372,7 @@ const { heroNav = false }: Props = Astro.props;
 
   for (const id of urutan) {
     const section = document.getElementById(id);
-    if (!section) continue; // section belum dibangun (stub S04–S08)
+    if (!section) continue;
     observeElement(
       section,
       (entry) => {

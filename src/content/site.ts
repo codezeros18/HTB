@@ -1,5 +1,4 @@
 import type { KonteksCTA, SiteConfig } from './types';
-import { lokasi } from './lokasi';
 
 /* =============================================================
    site.ts — identitas, kontak, meta, dan generator pesan WA.
@@ -71,33 +70,32 @@ export const site: SiteConfig = {
   },
 
   /* =============================================================
-     about — S04. 2 paragraf adaptasi PDF (hlm. 3, [FAKTA-PDF]),
-     4 janji nilai dari §1.1, baris fakta dengan penyembunyian null.
+     about — S04. REDESIGN 2026-09-06 (permintaan klien): section
+     dipangkas jadi MINIMALIS & VISUAL-DRIVEN. Dibuang: headline
+     "KONVEKSI CUSTOM APPAREL & RACEPACK" (duplikat hero), 2 paragraf
+     adaptasi PDF, dan baris fakta. Sisa: judul section, satu foto
+     besar, dan 4 janji nilai (§1.1) yang memang sudah ringkas.
      ============================================================= */
   about: {
-    // BLUEPRINT §7.7 — H2 target section About.
-    // REDESIGN 2026-09-04 (permintaan klien): headline hero "KONVEKSI CUSTOM
-    // APPAREL & RACEPACK" dipindah ke sini (hero jadi nol teks). Nilai lama
-    // "Vendor Apparel dengan Produksi Sendiri" dilepas — 2 paragraf di
-    // bawah sudah menjelaskan MOTIVE.
-    judul: 'KONVEKSI CUSTOM APPAREL & RACEPACK',
-    paragraf: [
-      'Bergerak di industri apparel, kami memahami bahwa setiap event dan organisasi membutuhkan identitas visual yang berkualitas. Itulah mengapa kami hadir untuk memenuhi kebutuhan vendor pakaian Anda dengan standar profesionalisme tinggi.',
-      'Kami berkomitmen memberikan solusi produksi yang efisien tanpa mengesampingkan detail. Dengan jaminan ketepatan waktu dan garansi kualitas hasil produksi, kami memastikan material yang Anda terima selalu sesuai dengan kesepakatan awal.',
-    ],
+    judul: 'Tentang Kami',
+    // Dikompres dari `GALLERY/IMG_20260804_214603_173.jpg` (4064×3048,
+    // 3,6 MB) → 1760×990 / 64 KB via sharp. Sumbernya foto klien asli.
+    // ⚠️ `alt` ditulis dari ISI gambar yang sebenarnya (meja potong +
+    // potongan pola), BUKAN menyalin alt di galeri.ts yang keliru
+    // menyebutnya "hasil produksi siap kirim" — lihat catatan di README
+    // pekerjaan; alt di galeri.ts untuk berkas yang sama perlu dikoreksi.
+    foto: {
+      src: '/images/about/about-produksi.jpg',
+      alt: 'Meja potong workshop MOTIVE — potongan pola dan bahan sebelum dijahit',
+      width: 1760,
+      height: 990,
+    },
     // Judul kartu dari BLUEPRINT §8 Section 3; deskripsi = frasa asli §1.1 apa adanya.
     janjiNilai: [
       { judul: 'Kontrol Kualitas Berlapis', deskripsi: 'Quality Control sebagai perhatian utama.' },
       { judul: 'Ketepatan Waktu', deskripsi: 'On-time delivery.' },
       { judul: 'Garansi Hasil Produksi', deskripsi: 'Garansi kualitas hasil produksi.' },
       { judul: 'Material Sesuai Kesepakatan', deskripsi: 'Material sesuai kesepakatan awal.' },
-    ],
-    // Setiap elemen null disembunyikan sendiri oleh komponen (T04.6).
-    baris: [
-      'CV. Huimora Talenta Berkarya',
-      null, // NIB — [GAP] data legal belum diberikan
-      null, // Berdiri sejak — [GAP] belum diberikan
-      `${lokasi.length} lokasi operasional`,
     ],
   },
 

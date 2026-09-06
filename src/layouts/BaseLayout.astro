@@ -3,7 +3,7 @@
  * BaseLayout — kerangka <html> untuk seluruh halaman.
  *
  * Isi <head> berasal dari `site.ts` (guardrail 5). SATU font untuk
- * seluruh situs — Plus Jakarta Sans (self-host, subset latin di-preload).
+ * seluruh situs — Poppins (self-host, subset latin, berat 400–800).
  * Nol request pihak ketiga (guardrail 6).
  *
  * Props:
@@ -70,18 +70,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://motive.exam
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     {
-      /* REDESIGN (2026-09-04) — SATU font: Plus Jakarta Sans, SELF-HOST.
-        Subset latin di-preload (paling umum); latin-ext dimuat on-demand
+      /* REDESIGN (2026-09-06) — SATU font: Poppins, SELF-HOST.
+        Berat 400 di-preload (paling umum); berat lain dimuat on-demand
         oleh @font-face di global.css. Nol Google Fonts, nol preconnect
         pihak ketiga. */
     }
-    <link
-      rel="preload"
-      href="/fonts/plus-jakarta-sans-var-latin.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
+    <link rel="preload" href="/fonts/poppins-400.woff2" as="font" type="font/woff2" crossorigin />
 
     {/* Open Graph */}
     <meta property="og:type" content="website" />
