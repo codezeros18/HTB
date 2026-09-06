@@ -1,0 +1,144 @@
+---
+/**
+ * LayananTile — kartu drill-down layanan.
+ *
+ * REDESIGN 2026-09-06 (permintaan klien): mengikuti kartu "Our Services"
+ * di homepage — nama produk DITUMPUK DI TENGAH foto (+ scrim tipis +
+ * pil CTA), bukan panel teks terpisah di bawah gambar.
+ *
+ * Dipakai bersama oleh `/layanan/[layanan]/` dan `/layanan/[layanan]/[sub]/`
+ * supaya keduanya tidak pernah berbeda (dulu CSS-nya diduplikasi di kedua
+ * halaman). Kelas root sengaja tetap `.lyn__tile` — global.css memasang
+ * transisi/box-shadow "kaca" lewat selector itu.
+ */
+interface Props {
+  href: string;
+  foto: string;
+  nama: string;
+  width: number;
+  height: number;
+  /** Baris kecil di bawah nama (mis. "6 produk"). `null` → tidak dirender. */
+  meta?: string | null;
+  /** Label pil CTA. */
+  cta: string;
+}
+
+const { href, foto, nama, width, height, meta = null, cta }: Props = Astro.props;
+---
+
+<a class="lyn__tile" href={href}>
+  <span class="lyn__tile-media">
+    <img src={foto} alt={nama} width={width} height={height} loading="lazy" decoding="async" />
+    <span class="lyn__tile-scrim" aria-hidden="true"></span>
+  </span>
+
+  <span class="lyn__tile-body">
+    <span class="lyn__tile-nama">{nama}</span>
+    {meta && <span class="lyn__tile-meta">{meta}</span>}
+    <span class="lyn__tile-cta" aria-hidden="true">{cta}</span>
+  </span>
+</a>
+
+<style>
+  .lyn__tile {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    overflow: hidden;
+    transition: transform var(--dur-fast) var(--ease);
+  }
+
+  .lyn__tile:hover {
+    transform: translateY(-2px);
+  }
+
+  .lyn__tile:focus-visible {
+    outline: var(--focus-ring-width) solid var(--color-focus);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .lyn__tile-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+  }
+
+  .lyn__tile-media img {
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Scrim DUA lapis. Berbeda dari kartu Our Services di homepage: foto
+     produk di halaman ini kebanyakan studio berlatar putih terang, jadi
+     gradien vertikal saja membuat teks putih di TENGAH nyaris hilang.
+     Lapisan radial memberi peredupan terfokus tepat di belakang teks,
+     tepi frame tetap terang sehingga produknya tidak tertutup. */
+  .lyn__tile-scrim {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(
+        115% 75% at 50% 50%,
+        rgba(6, 5, 4, 0.62) 0%,
+        rgba(6, 5, 4, 0.34) 45%,
+        rgba(6, 5, 4, 0.06) 78%
+      ),
+      linear-gradient(
+        180deg,
+        rgba(6, 5, 4, 0.18) 0%,
+        rgba(6, 5, 4, 0.08) 40%,
+        rgba(6, 5, 4, 0.4) 100%
+      );
+  }
+
+  .lyn__tile-body {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: var(--space-2);
+    padding: var(--space-5);
+  }
+
+  .lyn__tile-nama {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(1.15rem, 1.4vw + 0.75rem, 1.75rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--color-text);
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .lyn__tile-meta {
+    color: var(--color-text);
+    font-size: var(--fs-body-s);
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  /* Pil CTA — pengecualian sengaja dari aturan "nol rounded" situs, sama
+     seperti kartu Our Services di homepage. */
+  .lyn__tile-cta {
+    margin-block-start: var(--space-2);
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-text);
+    color: var(--color-accent-ink);
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding-block: 9px;
+    padding-inline: 20px;
+    border-radius: 999px;
+  }
+</style>

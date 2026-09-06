@@ -48,7 +48,23 @@ const { heroNav = false }: Props = Astro.props;
         aria-expanded="false"
         aria-controls="menu-mobile"
       >
-        <span class="mv-nav__bars" aria-hidden="true"></span>
+        {
+          /* Ikon 3-garis bergaya Lucide (ISC) — di-INLINE, nol dependensi &
+            nol request. Stroke tipis + ujung membulat + garis bawah lebih
+            pendek: jauh lebih rapi daripada 3 balok CSS bersudut siku. */
+        }
+        <svg
+          class="mv-nav__ikon"
+          viewBox="0 0 24 24"
+          width="24"
+          height="24"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M3 6h18"></path>
+          <path d="M3 12h18"></path>
+          <path d="M3 18h11"></path>
+        </svg>
         <span class="mv-nav__menu-label">Menu</span>
       </button>
 
@@ -179,6 +195,7 @@ const { heroNav = false }: Props = Astro.props;
     border: 0;
     color: #ffffff;
     cursor: pointer;
+    transition: opacity var(--dur-fast) var(--ease);
   }
 
   .mv-nav__menu-label {
@@ -194,32 +211,17 @@ const { heroNav = false }: Props = Astro.props;
     outline-offset: var(--focus-ring-offset);
   }
 
-  .mv-nav__bars,
-  .mv-nav__bars::before,
-  .mv-nav__bars::after {
+  .mv-nav__ikon {
     display: block;
-    inline-size: 22px;
-    block-size: 2px;
-    background-color: currentColor;
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
   }
 
-  .mv-nav__bars {
-    position: relative;
-  }
-
-  .mv-nav__bars::before,
-  .mv-nav__bars::after {
-    content: '';
-    position: absolute;
-    inset-inline-start: 0;
-  }
-
-  .mv-nav__bars::before {
-    inset-block-start: -7px;
-  }
-
-  .mv-nav__bars::after {
-    inset-block-start: 7px;
+  .mv-nav__menu:hover {
+    opacity: 0.75;
   }
 
   /* ---------- tengah: logo (sembunyi selagi hero) ---------- */

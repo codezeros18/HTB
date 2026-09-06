@@ -56,10 +56,16 @@ const tampilLogo = izinTayang && logo !== null;
     display: flex;
   }
 
-  /* Chip terang penuh-kolom, sudut KOTAK (tema proyek). Glow emas saat hover. */
+  /* Chip terang penuh-kolom, sudut KOTAK (tema proyek).
+     REDESIGN 2026-09-06 (referensi bisasinema.id): bayangan istirahat
+     DIBUANG — grid jadi terbaca sebagai deretan logo yang tenang, bukan
+     tumpukan kartu. Bayangan + glow emas hanya muncul saat hover.
+     Chip terang tetap dipertahankan: mayoritas logo klien berwarna dan
+     dirancang untuk latar putih; ditaruh langsung di latar near-black
+     (seperti referensi) sebagian besar jadi tidak terbaca. */
   .mv-client__chip {
     inline-size: 100%;
-    block-size: clamp(96px, 11vw, 124px);
+    block-size: clamp(92px, 10vw, 116px);
     padding: var(--space-4);
     display: flex;
     align-items: center;
@@ -68,7 +74,6 @@ const tampilLogo = izinTayang && logo !== null;
     background-color: var(--color-chip);
     border: 0;
     border-radius: var(--radius-card);
-    box-shadow: 0 8px 24px -10px rgba(0, 0, 0, 0.6);
     transition:
       transform var(--dur-base) var(--ease),
       box-shadow var(--dur-base) var(--ease);
@@ -85,7 +90,7 @@ const tampilLogo = izinTayang && logo !== null;
 
   .mv-client__img {
     max-inline-size: 100%;
-    max-block-size: 56px;
+    max-block-size: 60px;
     inline-size: auto;
     block-size: auto;
     object-fit: contain;

@@ -9,6 +9,7 @@ import { site } from '../../../../content/site';
 import BaseLayout from '../../../../layouts/BaseLayout.astro';
 import Container from '../../../../components/layout/Container.astro';
 import LayananCrumb from '../../../../components/layanan/LayananCrumb.astro';
+import LayananTile from '../../../../components/layanan/LayananTile.astro';
 import type { Crumb } from '../../../../components/layanan/LayananCrumb.astro';
 
 interface StaticProps {
@@ -51,21 +52,14 @@ const trail: Crumb[] = [
     <div class="lyn__grid">
       {
         s.items.map((it) => (
-          <a class="lyn__tile" href={`/layanan/${l.slug}/${s.slug}/${it.slug}`}>
-            <span class="lyn__tile-media">
-              <img
-                src={it.foto}
-                alt={it.nama}
-                width={it.width}
-                height={it.height}
-                loading="lazy"
-                decoding="async"
-              />
-            </span>
-            <span class="lyn__tile-teks">
-              <span class="lyn__tile-nama t-h3">{it.nama}</span>
-            </span>
-          </a>
+          <LayananTile
+            href={`/layanan/${l.slug}/${s.slug}/${it.slug}`}
+            foto={it.foto}
+            nama={it.nama}
+            width={it.width}
+            height={it.height}
+            cta="Lihat Detail"
+          />
         ))
       }
     </div>
@@ -87,53 +81,6 @@ const trail: Crumb[] = [
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: var(--space-3);
-  }
-
-  .lyn__tile {
-    display: flex;
-    flex-direction: column;
-    text-decoration: none;
-    border: var(--border-width) solid var(--color-border);
-    background-color: var(--color-surface);
-    color: var(--color-text);
-    overflow: hidden;
-    transition:
-      border-color var(--dur-fast) var(--ease),
-      transform var(--dur-fast) var(--ease);
-  }
-
-  .lyn__tile:hover {
-    border-color: var(--color-accent);
-    transform: translateY(-2px);
-  }
-
-  .lyn__tile:focus-visible {
-    outline: var(--focus-ring-width) solid var(--color-focus);
-    outline-offset: var(--focus-ring-offset);
-  }
-
-  .lyn__tile-media {
-    display: block;
-    aspect-ratio: 4 / 5;
-    overflow: hidden;
-  }
-
-  .lyn__tile-media img {
-    inline-size: 100%;
-    block-size: 100%;
-    object-fit: cover;
-    display: block;
-  }
-
-  .lyn__tile-teks {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-4);
-  }
-
-  .lyn__tile-nama {
-    color: var(--color-text);
   }
 
   @media (max-width: 1023.98px) {
