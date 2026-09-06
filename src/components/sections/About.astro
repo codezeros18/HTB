@@ -1,13 +1,19 @@
 ---
 /**
- * About — REDESIGN 2026-09-06 (permintaan klien): MINIMALIS &
- * VISUAL-DRIVEN.
+ * About — REDESIGN 2026-09-06 (permintaan klien, 2 iterasi).
  *
- * Dibuang total: headline "KONVEKSI CUSTOM APPAREL & RACEPACK" (sudah
- * ada di hero), eyebrow, dua paragraf panjang, dan baris fakta. Yang
- * tersisa: judul section bergaya sama dengan section lain, SATU foto
- * besar sebagai elemen utama, dan 4 janji nilai yang memang sudah
- * ringkas — cukup untuk "siapa MOTIVE" tanpa dinding teks.
+ * Iterasi 1 membuat section ini visual-driven dengan satu foto besar.
+ * DIBATALKAN: foto "tentang kami" milik klien belum tersedia, dan
+ * memakai foto galeri sebagai pengganti bukan yang dimaksud. Section
+ * kembali BERBASIS TEKS — tapi dengan layout BARU, bukan dua kolom
+ * eyebrow+H2 / paragraf seperti versi paling awal.
+ *
+ * Layout sekarang editorial & asimetris:
+ *   1. paragraf pertama sebagai PERNYATAAN besar (lebar, tipe besar)
+ *   2. paragraf kedua lebih kecil & digeser ke kanan → ritme berjenjang
+ *   3. 4 janji nilai sebagai baris bergaris emas
+ *   4. baris fakta perusahaan sebagai meta kecil di bawah
+ * Tidak ada unsur penting yang hilang; hanya susunannya yang berbeda.
  *
  * Semua konten dari `site.about` (guardrail 5). Fade-in: `.mv-reveal`.
  */
@@ -22,21 +28,17 @@ interface Props {
 const { id }: Props = Astro.props;
 
 const { about } = site;
+const [lead, lanjutan] = about.paragraf;
+const barisTerisi = about.baris.filter((b): b is string => b !== null);
 ---
 
 <Container as="section" spacing="section" id={id}>
   <SectionHeading judul={about.judul} align="start" />
 
-  <figure class="mv-about__media mv-reveal">
-    <img
-      src={about.foto.src}
-      alt={about.foto.alt}
-      width={about.foto.width}
-      height={about.foto.height}
-      loading="lazy"
-      decoding="async"
-    />
-  </figure>
+  <div class="mv-about__teks mv-reveal">
+    <p class="mv-about__lead">{lead}</p>
+    <p class="mv-about__lanjutan">{lanjutan}</p>
+  </div>
 
   <ul class="mv-about__nilai mv-reveal">
     {
@@ -48,26 +50,49 @@ const { about } = site;
       ))
     }
   </ul>
+
+  {
+    barisTerisi.length > 0 && (
+      <ul class="mv-about__fakta">
+        {barisTerisi.map((f) => (
+          <li>{f}</li>
+        ))}
+      </ul>
+    )
+  }
 </Container>
 
 <style>
-  .mv-about__media {
-    margin: 0;
-    overflow: hidden;
-    border: var(--border-width) solid var(--color-border);
+  /* Blok teks asimetris: pernyataan besar di kiri, paragraf lanjutan
+     lebih kecil dan digeser ke kanan. */
+  .mv-about__teks {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: var(--space-6) var(--space-5);
   }
 
-  .mv-about__media img {
-    display: block;
-    inline-size: 100%;
-    block-size: auto;
-    aspect-ratio: 16 / 9;
-    object-fit: cover;
+  .mv-about__lead {
+    grid-column: 1 / span 8;
+    margin: 0;
+    color: var(--color-text);
+    font-size: clamp(1.15rem, 1.1vw + 0.85rem, 1.75rem);
+    line-height: 1.4;
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+  }
+
+  .mv-about__lanjutan {
+    grid-column: 6 / span 7;
+    margin: 0;
+    color: var(--color-text-2);
+    font-size: var(--fs-body-l);
+    line-height: var(--lh-body-l);
+    text-wrap: pretty;
   }
 
   .mv-about__nilai {
     list-style: none;
-    margin: var(--space-6) 0 0;
+    margin: var(--space-8) 0 0;
     padding: 0;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -96,9 +121,28 @@ const { about } = site;
     color: var(--color-text-2);
   }
 
+  /* Baris fakta perusahaan — meta kecil penutup section. */
+  .mv-about__fakta {
+    list-style: none;
+    margin: var(--space-7) 0 0;
+    padding-block-start: var(--space-4);
+    border-block-start: var(--border-width) solid var(--color-border);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-5);
+    color: var(--color-text-2);
+    font-size: var(--fs-body-s);
+  }
+
   @media (max-width: 900px) {
+    .mv-about__lead,
+    .mv-about__lanjutan {
+      grid-column: 1 / -1;
+    }
+
     .mv-about__nilai {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-block-start: var(--space-7);
     }
   }
 

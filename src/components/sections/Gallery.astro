@@ -34,17 +34,24 @@ const { id }: Props = Astro.props;
 
 /* Sembilan slot kolase — koordinat dalam PERSEN terhadap panggung.
    Ditulis eksplisit (bukan dihitung) supaya komposisinya bisa ditata
-   seperti kolase cetak: ada yang mepet tepi, ada yang menimpa. */
+   seperti kolase cetak.
+
+   REVISI 2026-09-06: versi pertama terlalu renggang — foto kecil-kecil
+   dan berjauhan, terbaca sebagai sembilan gambar terpisah, bukan satu
+   kolase. Sekarang tiap foto DILEBARKAN dan rentang x-nya sengaja
+   dibuat saling menyambung (4→21, 17→36, 32→54, …) sehingga setiap
+   foto pasti menimpa tetangganya dan seluruhnya membentuk satu gugus
+   padat yang mengisi panggung. */
 const SLOT = [
-  { x: 2, y: 33, w: 15, ar: '3 / 4', z: 3 },
-  { x: 13, y: 3, w: 15, ar: '3 / 4', z: 2 },
-  { x: 26, y: 18, w: 24, ar: '4 / 3', z: 4 },
-  { x: 47, y: 7, w: 18, ar: '3 / 4', z: 3 },
-  { x: 68, y: 2, w: 17, ar: '1 / 1', z: 2 },
-  { x: 72, y: 46, w: 20, ar: '4 / 3', z: 3 },
-  { x: 37, y: 55, w: 17, ar: '1 / 1', z: 5 },
-  { x: 6, y: 62, w: 14, ar: '3 / 4', z: 2 },
-  { x: 86, y: 24, w: 12, ar: '3 / 4', z: 1 },
+  { x: 4, y: 26, w: 17, ar: '3 / 4', z: 2 },
+  { x: 17, y: 8, w: 19, ar: '4 / 5', z: 3 },
+  { x: 32, y: 30, w: 22, ar: '4 / 3', z: 5 },
+  { x: 50, y: 6, w: 20, ar: '3 / 4', z: 4 },
+  { x: 66, y: 24, w: 18, ar: '1 / 1', z: 3 },
+  { x: 80, y: 4, w: 17, ar: '4 / 5', z: 2 },
+  { x: 22, y: 52, w: 20, ar: '4 / 3', z: 6 },
+  { x: 55, y: 52, w: 19, ar: '4 / 3', z: 6 },
+  { x: 76, y: 48, w: 16, ar: '3 / 4', z: 4 },
 ];
 
 const sel = SLOT.map((s, i) => ({ s, foto: galeriFoto[i % galeriFoto.length]!, i }));
@@ -114,7 +121,9 @@ const semua = JSON.stringify(galeriFoto);
   .g__stage {
     position: relative;
     inline-size: 100%;
-    aspect-ratio: 1360 / 780;
+    /* Lebih rendah dari versi pertama (1360/780): panggung yang terlalu
+       tinggi menyisakan ruang kosong di atas & bawah gugus foto. */
+    aspect-ratio: 1360 / 700;
   }
 
   .g__item {
