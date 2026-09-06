@@ -1,8 +1,11 @@
 import type { Klien } from './types';
 
 /* =============================================================
-   klien.ts — 26 organisasi teridentifikasi. Nama & kategori
+   klien.ts — organisasi teridentifikasi. Nama & kategori
    persis BLUEPRINT §5.2.
+
+   REDESIGN 2026-09-06 (permintaan klien): 4 entri DIHAPUS dari
+   Portofolio — Indoclean, Koyasai, Hitsuji, CV Sayur Mayur Nyayur.
 
    Aturan sprint S01 (blocker B5 / §5.3):
    - Entri TANPA `logo` tetap dirender sebagai NAMA TEKS.
@@ -134,35 +137,7 @@ export const klien: Klien[] = [
     tampilDiHero: false,
   },
   {
-    nama: 'Indoclean',
-    kategori: 'korporat-properti',
-    logo: null,
-    izinTayang: false,
-    tampilDiHero: false,
-  },
-  {
-    nama: 'Koyasai',
-    kategori: 'korporat-properti',
-    logo: null,
-    izinTayang: false,
-    tampilDiHero: false,
-  },
-  {
-    nama: 'Hitsuji',
-    kategori: 'korporat-properti',
-    logo: null,
-    izinTayang: false,
-    tampilDiHero: false,
-  },
-  {
     nama: 'Ruma & Co',
-    kategori: 'korporat-properti',
-    logo: null,
-    izinTayang: false,
-    tampilDiHero: false,
-  },
-  {
-    nama: 'CV Sayur Mayur Nyayur',
     kategori: 'korporat-properti',
     logo: null,
     izinTayang: false,

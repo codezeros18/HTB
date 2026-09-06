@@ -402,7 +402,7 @@ try {
   });
   cek(
     'T02.3 · WA deep link ter-encode + target/rel aman',
-    Boolean(wa.href?.startsWith('https://wa.me/6282168912769?text=')) &&
+    Boolean(wa.href?.startsWith('https://wa.me/6285111420089?text=')) &&
       wa.href.includes('Regular%20T-shirt') &&
       wa.target === '_blank' &&
       wa.rel === 'noopener noreferrer',

@@ -348,7 +348,7 @@ export interface SiteConfig {
   brand: string;
   tagline: string;
   pic: { nama: string; jabatan: string };
-  /** Format internasional tanpa tanda: "6282168912769". Blocker B7. */
+  /** Format internasional tanpa tanda: "6285111420089". Blocker B7. */
   whatsapp: string;
   email: string;
   meta: { title: string; description: string };

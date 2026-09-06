@@ -151,7 +151,7 @@ try {
 
   const gagalTampil = await page.$eval('[data-gagal]', (el) => !el.hidden);
   const waJalanKeluar = await page.$eval('[data-gagal]', (el) =>
-    Boolean(el.querySelector('a[href*="wa.me/6282168912769"]'))
+    Boolean(el.querySelector('a[href*="wa.me/6285111420089"]'))
   );
   const formMasihAda = await page.$eval('[data-contact-form]', (el) => !el.hidden);
   const tombolReset = await page.$eval('[data-submit]', (el) => ({

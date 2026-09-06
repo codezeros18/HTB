@@ -104,8 +104,8 @@ cek(
   /mv-wa[^"]*"[^>]*mv-btn--lg|mv-btn--lg[^>]*mv-wa/.test(h) || h.includes('mv-btn--lg')
 );
 cek(
-  'T08.4 nomor WA hanya dari site.ts (wa.me/6282168912769)',
-  h.includes('wa.me/6282168912769') && !/href="https:\/\/wa\.me\/(?!6282168912769)/.test(h)
+  'T08.4 nomor WA hanya dari site.ts (wa.me/6285111420089)',
+  h.includes('wa.me/6285111420089') && !/href="https:\/\/wa\.me\/(?!6285111420089)/.test(h)
 );
 
 /* ---------- T08.6 state + error non-warna ---------- */
@@ -113,7 +113,7 @@ cek('T08.6 blok sukses ada (hidden)', /data-sukses[^>]*hidden|hidden[^>]*data-su
 cek('T08.6 blok gagal ada (hidden)', /data-gagal[^>]*hidden|hidden[^>]*data-gagal/.test(h));
 cek(
   'T08.6 gagal berisi tombol WhatsApp (jalan keluar)',
-  /data-gagal[\s\S]{0,1500}wa\.me\/6282168912769/.test(h)
+  /data-gagal[\s\S]{0,1500}wa\.me\/6285111420089/.test(h)
 );
 cek(
   'T08.6 label submitting "MENGIRIM…" tersedia untuk skrip',

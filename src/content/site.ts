@@ -13,8 +13,11 @@ export const site: SiteConfig = {
   // BLUEPRINT §1.1 [FAKTA-PDF] — tagline company profile apa adanya.
   tagline: 'Custom Apparel Specialist | Racepack | Running | Uniform | T-Shirt | Etc.',
   pic: { nama: 'Simon Bramesto S. P', jabatan: 'Direktur Utama' },
-  // Blocker B7. Nomor PDF "0821-6891-2769" dinormalkan ke format wa.me.
-  whatsapp: '6282168912769',
+  // REDESIGN 2026-09-06 (permintaan klien): ganti ke nomor WA UTAMA
+  // "0851-1142-0089" (dulu "0821-6891-2769"), dinormalkan ke format wa.me
+  // (buang 0 di depan, tambah 62) — SATU sumber untuk seluruh tombol
+  // WhatsApp di situs (navbar, hero, footer, kartu, dst).
+  whatsapp: '6285111420089',
   email: 'simonbramesto@gmail.com',
   meta: {
     // BLUEPRINT §7.7 — 63 karakter, jangan diubah tanpa menghitung ulang.
@@ -92,8 +95,12 @@ export const site: SiteConfig = {
       { judul: 'Material Sesuai Kesepakatan', deskripsi: 'Material sesuai kesepakatan awal.' },
     ],
     // Setiap elemen null disembunyikan sendiri oleh komponen (T04.6).
+    // REDESIGN 2026-09-06 (permintaan klien): baris pertama diganti jadi
+    // "MOTIVE PROJECT" — HANYA di sini (baris fakta bawah Tentang Kami).
+    // `site.namaCV` ("CV. Huimora Talenta Berkarya") di footer/JSON-LD
+    // TIDAK ikut berubah, klien tidak memintanya.
     baris: [
-      'CV. Huimora Talenta Berkarya',
+      'MOTIVE PROJECT',
       null, // NIB — [GAP] data legal belum diberikan
       null, // Berdiri sejak — [GAP] belum diberikan
       `${lokasi.length} lokasi operasional`,
@@ -217,7 +224,7 @@ const TEMPLATE_PESAN: Record<KonteksCTA, string> = {
 /**
  * URL WhatsApp deep-link dengan pesan pre-fill ter-encode.
  * Contoh: waLink('produk', { produk: 'Regular T-shirt' })
- *   → https://wa.me/6282168912769?text=Halo%20MOTIVE%2C%20saya%20tertarik%20...
+ *   → https://wa.me/6285111420089?text=Halo%20MOTIVE%2C%20saya%20tertarik%20...
  */
 export function waLink(konteks: KonteksCTA, params: WaParams = {}): string {
   const teks = TEMPLATE_PESAN[konteks]
