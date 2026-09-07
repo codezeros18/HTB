@@ -1,18 +1,19 @@
 ---
 /**
- * About — REDESIGN 2026-09-07 (permintaan klien, iterasi 4).
+ * About — REDESIGN 2026-09-07 (permintaan klien, iterasi 5).
  *
  * Riwayat: 2 kolom eyebrow+H2 → visual-driven berbasis foto (dibatalkan,
  * foto klien belum ada) → paragraf asimetris (lubang kosong) → rail kiri
- * (masih terasa berat sebelah).
+ * (berat sebelah) → kolom lurus + strip nilai 4-kolom di bawah teks
+ * (klien: "masih berantakan").
  *
- * Sekarang: layout editorial LURUS, tanpa kolom samping.
- *   1. judul "ABOUT US" (English, sinkron section lain)
- *   2. byline meta di bawah judul — identitas perusahaan sebagai satu
- *      baris kecil beraksen emas (dulu rail kiri yang meninggalkan void)
- *   3. dua paragraf dalam SATU kolom terbaca (maks 64ch), paragraf
- *      pertama sebagai lead (lebih besar & terang)
- *   4. 4 janji nilai BERNOMOR (01–04) sebagai strip lebar bergaris emas
+ * Sekarang: DUA KOLOM sejajar.
+ *   - KIRI: byline meta beraksen emas + dua paragraf (lead lebih besar &
+ *     terang, body meredup), lebar baca dikunci ~60ch.
+ *   - KANAN: 4 janji nilai BERNOMOR (01–04) ditumpuk vertikal, tiap item
+ *     bergaris emas di atas — jadi daftar ringkas, bukan strip melintang.
+ *   Di ≤900px kolom runtuh: teks dulu, lalu nilai jadi grid 2 kolom
+ *   (1 kolom di ≤480px).
  *
  * Nol lubang kosong, nol baris melar. Section BERBASIS TEKS — foto
  * "tentang kami" milik klien belum tersedia.
@@ -39,27 +40,29 @@ const nomor = (i: number): string => String(i + 1).padStart(2, '0');
   <SectionHeading judul={about.judul} align="start" />
 
   <div class="mv-about mv-reveal">
-    {
-      meta.length > 0 && (
-        <p class="mv-about__meta">
-          {meta.map((m, i) => (
-            <>
-              {i > 0 && (
-                <span class="mv-about__meta-sep" aria-hidden="true">
-                  {' '}
-                  ·{' '}
-                </span>
-              )}
-              <span>{m}</span>
-            </>
-          ))}
-        </p>
-      )
-    }
+    <div class="mv-about__utama">
+      {
+        meta.length > 0 && (
+          <p class="mv-about__meta">
+            {meta.map((m, i) => (
+              <>
+                {i > 0 && (
+                  <span class="mv-about__meta-sep" aria-hidden="true">
+                    {' '}
+                    ·{' '}
+                  </span>
+                )}
+                <span>{m}</span>
+              </>
+            ))}
+          </p>
+        )
+      }
 
-    <div class="mv-about__teks">
-      <p class="mv-about__lead">{lead}</p>
-      <p class="mv-about__body">{lanjutan}</p>
+      <div class="mv-about__teks">
+        <p class="mv-about__lead">{lead}</p>
+        <p class="mv-about__body">{lanjutan}</p>
+      </div>
     </div>
 
     <ul class="mv-about__nilai">
@@ -79,10 +82,18 @@ const nomor = (i: number): string => String(i + 1).padStart(2, '0');
 </Container>
 
 <style>
+  /* Dua kolom sejajar: teks (kiri) + daftar nilai bernomor (kanan). */
   .mv-about {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+    gap: var(--space-7) var(--space-8);
+    align-items: start;
+  }
+
+  .mv-about__utama {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
 
   /* Byline identitas — kecil, huruf renggang, beraksen emas. */
@@ -105,7 +116,7 @@ const nomor = (i: number): string => String(i + 1).padStart(2, '0');
   /* Kolom teks — lebar baca terkunci supaya paragraf tidak melebar
      jadi tembok teks di container besar. */
   .mv-about__teks {
-    max-inline-size: 64ch;
+    max-inline-size: 60ch;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -127,14 +138,15 @@ const nomor = (i: number): string => String(i + 1).padStart(2, '0');
     text-wrap: pretty;
   }
 
-  /* Strip janji nilai bernomor — lebar penuh, garis emas di atas. */
+  /* Daftar janji nilai bernomor — kolom KANAN, ditumpuk vertikal,
+     tiap item bergaris emas di atas. */
   .mv-about__nilai {
     list-style: none;
-    margin: var(--space-6) 0 0;
+    margin: 0;
     padding: 0;
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-6) var(--space-5);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
   }
 
   .mv-about__nilai-item {
@@ -169,12 +181,20 @@ const nomor = (i: number): string => String(i + 1).padStart(2, '0');
   }
 
   @media (max-width: 900px) {
+    .mv-about {
+      grid-template-columns: 1fr;
+      gap: var(--space-7);
+    }
+
     .mv-about__teks {
       max-inline-size: none;
     }
 
+    /* Kolom runtuh → nilai jadi grid 2 kolom di bawah teks. */
     .mv-about__nilai {
+      display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-5);
     }
   }
 
