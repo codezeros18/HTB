@@ -71,7 +71,7 @@ cek(
 // (di tengah, judul raksasa). Lalu disclaimer merek di bawah grid + tombol CTA
 // WhatsApp DIHAPUS atas permintaan eksplisit klien — section = judul + grid
 // nama saja. Assertion "disclaimer persis" sengaja dilepas.
-cek('T07.4 heading section Clients ada ("Portofolio")', h.includes('Portofolio'));
+cek('T07.4 heading section Clients ada ("Portfolio")', h.includes('Portfolio'));
 cek('T07.4 string "Klien Kami" TIDAK ADA', !/Klien Kami/i.test(h));
 cek('T07.4 string "Partner" TIDAK ADA', !/Partner/i.test(h));
 cek(

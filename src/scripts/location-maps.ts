@@ -11,13 +11,19 @@
    Cara kerja: setiap kartu lokasi merender SVG statis (nol request)
    sebagai placeholder. `observeElement` (IntersectionObserver bersama,
    lihat observer.ts) memicu pemuatan Leaflet (JS+CSS dari cdnjs) +
-   tile CARTO gelap begitu kartu mendekati layar (rootMargin besar =
+   tile OpenStreetMap begitu kartu mendekati layar (rootMargin besar =
    preload sebelum benar-benar terlihat, biar tidak ada jeda kosong
    saat discroll). Peta TIDAK lagi menunggu interaksi klik — trade-off
    yang disetujui klien demi visual-first, guardrail 6 (nol request
    pihak ketiga sebelum interaksi) sengaja dilonggarkan di sini atas
    instruksi eksplisit. `leafletPromise` di-cache supaya 3 kartu
    berbagi SATU unduhan Leaflet, bukan tiga.
+
+   REDESIGN 2026-09-07: dulu tile CARTO Dark Matter — CARTO kini WAJIB
+   API key (peta jadi "API KEY REQUIRED"). Pindah ke tile OSM standar:
+   gratis, nol key, nol allowlist domain. OSM terang & berwarna; digelapkan
+   via CSS filter di LocationCard.astro (`.leaflet-tile-pane`), bukan di
+   sini. Pemakaian ringan (3 kartu peta) masuk kebijakan wajar OSM.
    ============================================================= */
 
 import { observeElement } from './observer';
@@ -26,11 +32,11 @@ const LEAFLET_VERSION = '1.9.4';
 const LEAFLET_CSS = `https://cdnjs.cloudflare.com/ajax/libs/leaflet/${LEAFLET_VERSION}/leaflet.min.css`;
 const LEAFLET_JS = `https://cdnjs.cloudflare.com/ajax/libs/leaflet/${LEAFLET_VERSION}/leaflet.min.js`;
 
-// CARTO Dark Matter — gratis, nol API key, cocok tema gelap situs.
-const TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+// OpenStreetMap standar — gratis, nol API key. Host tunggal (OSM sudah
+// pensiun subdomain a/b/c), nol tile retina (`{r}`).
+const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const TILE_ATTRIBUTION =
-  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> ' +
-  '&copy; <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+  '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors';
 
 /** Subset API Leaflet yang benar-benar dipakai — nol `any` (guardrail proyek). */
 interface LeafletMap {
@@ -109,7 +115,6 @@ function muatPeta(wrapper: HTMLElement): void {
       L.tileLayer(TILE_URL, {
         attribution: TILE_ATTRIBUTION,
         maxZoom: 19,
-        subdomains: 'abcd',
       }).addTo(map);
 
       const pin = L.divIcon({

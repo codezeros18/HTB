@@ -189,6 +189,16 @@ const { peran, alamat, slug, lat, lng, mapsUrl, class: className }: Props = Astr
     inset: 0;
   }
 
+  /* REDESIGN 2026-09-07 (permintaan klien: peta "belum bisa") — CARTO
+     kini wajib API key, jadi tile pindah ke OpenStreetMap standar (gratis,
+     nol key). OSM aslinya TERANG & berwarna; filter di bawah membalik &
+     meredamnya jadi gelap-abu agar cocok tema. Filter HANYA di
+     `.leaflet-tile-pane` — marker, popup, dan kontrol zoom (pane lain)
+     TIDAK ikut terbalik warnanya. */
+  .mv-loc__map :global(.leaflet-tile-pane) {
+    filter: grayscale(1) invert(1) contrast(0.92) brightness(0.86);
+  }
+
   /* ---------- override minimal tema Leaflet supaya cocok kaca gelap ---------- */
   .mv-loc__map :global(.leaflet-popup-content-wrapper),
   .mv-loc__map :global(.leaflet-popup-tip) {

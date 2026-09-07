@@ -18,7 +18,10 @@ export const site: SiteConfig = {
   // (buang 0 di depan, tambah 62) — SATU sumber untuk seluruh tombol
   // WhatsApp di situs (navbar, hero, footer, kartu, dst).
   whatsapp: '6285111420089',
-  email: 'simonbramesto@gmail.com',
+  // REDESIGN 2026-09-07 (permintaan klien): footer pakai email KANTOR,
+  // bukan gmail pribadi PIC (dulu "simonbramesto@gmail.com"). Dipakai di
+  // Footer (kolom Kontak) + JSON-LD Organization.
+  email: 'ourmotiveproject@gmail.com',
   meta: {
     // BLUEPRINT §7.7 — 63 karakter, jangan diubah tanpa menghitung ulang.
     title: 'MOTIVE — Konveksi Custom Apparel & Racepack | Tangerang, Jakarta, Bogor',
@@ -74,15 +77,13 @@ export const site: SiteConfig = {
   },
 
   /* =============================================================
-     about — S04. REDESIGN 2026-09-06 (permintaan klien, 2 iterasi):
-     judul jadi "Tentang Kami" (headline lama duplikat hero, dilepas).
-     Sempat dipangkas jadi visual-driven berbasis FOTO; foto itu
-     DIBATALKAN karena foto "tentang kami" milik klien belum tersedia —
-     section kembali berbasis TEKS dengan layout editorial baru.
+     about — S04. Judul section English "About Us" (REDESIGN 2026-09-07,
+     permintaan klien: semua judul section English + sinkron sidebar).
+     Section BERBASIS TEKS (foto "tentang kami" milik klien belum ada).
      Isi penting dipertahankan: 2 paragraf, 4 janji nilai, baris fakta.
      ============================================================= */
   about: {
-    judul: 'Tentang Kami',
+    judul: 'About Us',
     paragraf: [
       'Bergerak di industri apparel, kami memahami bahwa setiap event dan organisasi membutuhkan identitas visual yang berkualitas. Itulah mengapa kami hadir untuk memenuhi kebutuhan vendor pakaian Anda dengan standar profesionalisme tinggi.',
       'Kami berkomitmen memberikan solusi produksi yang efisien tanpa mengesampingkan detail. Dengan jaminan ketepatan waktu dan garansi kualitas hasil produksi, kami memastikan material yang Anda terima selalu sesuai dengan kesepakatan awal.',
@@ -145,7 +146,7 @@ export const site: SiteConfig = {
      <ol aria-label> + nomor kartu 01..11, tak perlu di judul.
      ============================================================= */
   prosesIntro: {
-    judul: 'Proses Produksi',
+    judul: 'Our Process',
     subjudul: null,
   },
 
@@ -160,7 +161,7 @@ export const site: SiteConfig = {
           secara eksplisit.
      ============================================================= */
   klienUi: {
-    judul: 'Portofolio',
+    judul: 'Portfolio',
     subjudul: null,
   },
 
@@ -175,7 +176,7 @@ export const site: SiteConfig = {
     foto: [],
     // REDESIGN 2026-09-04 (permintaan klien): 1 kata, gaya judul raksasa
     // "Our Services", diposisikan di KIRI. Dulu "Hasil Produksi".
-    judul: 'Produksi',
+    judul: 'Our Work',
     subjudul: null,
     blokTeksB: null,
     labelPerbesar: 'Perbesar',

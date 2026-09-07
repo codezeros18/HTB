@@ -37,11 +37,14 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { label: 'Tentang', href: '/#tentang', sectionId: 'tentang' },
-  { label: 'Produk', href: '/#produk', sectionId: 'produk' },
-  { label: 'Proses', href: '/#proses', sectionId: 'proses' },
-  { label: 'Klien', href: '/#klien', sectionId: 'klien' },
-  { label: 'Lokasi', href: '/#lokasi', sectionId: 'lokasi' },
+  // REDESIGN 2026-09-07 (permintaan klien): label sidebar disamakan dengan
+  // judul section-nya yang kini semua English ("Our Services" dst.) —
+  // dulu "Klien" padahal section-nya sudah "Portofolio" (tidak sinkron).
+  { label: 'About', href: '/#tentang', sectionId: 'tentang' },
+  { label: 'Services', href: '/#produk', sectionId: 'produk' },
+  { label: 'Process', href: '/#proses', sectionId: 'proses' },
+  { label: 'Portfolio', href: '/#klien', sectionId: 'klien' },
+  { label: 'Location', href: '/#lokasi', sectionId: 'lokasi' },
 ];
 
 /**
