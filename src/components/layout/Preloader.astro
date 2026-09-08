@@ -1,0 +1,170 @@
+---
+/**
+ * Preloader — layar muat yang tampil saat halaman dibuka.
+ * BARU 2026-09-08 (permintaan klien: "buatkan loading screen saat masuk
+ * ke website ... yang elegant dan minimalis, logo terus di circle loading").
+ *
+ * Bentuk: latar penuh warna brand, wordmark MOTIVE putih, cincin progres
+ * tipis beraksen emas dengan angka persen di tengahnya. Nol gambar baru
+ * (cincin = SVG inline), nol library.
+ *
+ * KEPUTUSAN PENTING — kenapa ini tidak menyandera halaman:
+ *   1. Progres dihitung dari aset yang BENAR-BENAR kritis saja (gambar
+ *      non-lazy: foto hero, logo hero, logo navbar). Gambar `loading=lazy`
+ *      sengaja TIDAK dihitung — kalau ikut dihitung, progres akan macet
+ *      selamanya karena memang belum diminta browser.
+ *   2. Ada batas keras `MAKS_MS`: apa pun yang terjadi (aset gagal, koneksi
+ *      putus), overlay dibuang. Layar muat tidak boleh jadi layar mati.
+ *   3. Tanpa JavaScript overlay disembunyikan lewat <noscript> — situs ini
+ *      statis dan tetap terbaca penuh tanpa JS, jadi jangan ditutupi.
+ *   4. `position: fixed` + kunci scroll dengan `scrollbar-gutter: stable`
+ *      → CLS tetap 0 (guardrail 8). Hero di belakangnya TIDAK dianimasikan
+ *      masuk (guardrail 9) — overlay hanya memudar di atasnya.
+ *
+ * Aksesibilitas: seluruh overlay `aria-hidden` — murni dekoratif. Konten
+ * asli sudah ada di DOM sejak awal dan bisa dibaca screen reader; sebuah
+ * spinner tidak menambah informasi, dan `role="progressbar"` palsu justru
+ * mengotori pembacaan. Fokus tidak pernah dipindah ke sini.
+ */
+---
+
+<div class="mv-preload" data-preloader aria-hidden="true">
+  <div class="mv-preload__inner">
+    <img
+      class="mv-preload__logo"
+      src="/images/logo/LOGO%20MOTIVE%20NEW%20PUTIH.png"
+      alt=""
+      width="1721"
+      height="223"
+      fetchpriority="high"
+      decoding="async"
+    />
+
+    <div class="mv-preload__ring">
+      <svg viewBox="0 0 56 56" focusable="false" aria-hidden="true">
+        <circle class="mv-preload__trek" cx="28" cy="28" r="25"></circle>
+        <circle class="mv-preload__arc" cx="28" cy="28" r="25" data-preloader-arc></circle>
+      </svg>
+      <span class="mv-preload__persen" data-preloader-persen>0</span>
+    </div>
+  </div>
+</div>
+
+<noscript>
+  <style>
+    .mv-preload {
+      display: none !important;
+    }
+  </style>
+</noscript>
+
+<script>
+  import { initPreloader } from '../../scripts/preloader';
+  initPreloader();
+</script>
+
+<style>
+  .mv-preload {
+    position: fixed;
+    inset: 0;
+    /* Di atas segalanya — z-index tertinggi lain di proyek ini 100 (navbar). */
+    z-index: 1000;
+    display: grid;
+    place-items: center;
+    background: var(--color-bg);
+    /* Dibuang lewat [hidden] setelah transisi selesai. */
+    transition:
+      opacity var(--dur-slow) var(--ease),
+      visibility var(--dur-slow) var(--ease);
+  }
+
+  .mv-preload[data-selesai] {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .mv-preload[hidden] {
+    display: none;
+  }
+
+  .mv-preload__inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-7);
+    padding-inline: var(--edge-pad);
+    transition: transform var(--dur-slow) var(--ease);
+  }
+
+  .mv-preload[data-selesai] .mv-preload__inner {
+    transform: scale(1.03);
+  }
+
+  .mv-preload__logo {
+    inline-size: clamp(150px, 22vw, 240px);
+    block-size: auto;
+  }
+
+  .mv-preload__ring {
+    position: relative;
+    inline-size: 56px;
+    block-size: 56px;
+    display: grid;
+    place-items: center;
+  }
+
+  .mv-preload__ring svg {
+    position: absolute;
+    inset: 0;
+    inline-size: 100%;
+    block-size: 100%;
+    /* Mulai dari jam 12, bukan jam 3. */
+    transform: rotate(-90deg);
+  }
+
+  .mv-preload__trek,
+  .mv-preload__arc {
+    fill: none;
+    stroke-width: 2;
+  }
+
+  .mv-preload__trek {
+    stroke: var(--color-border);
+  }
+
+  .mv-preload__arc {
+    stroke: var(--color-accent);
+    stroke-linecap: round;
+    /* Keliling r=25 -> 2*pi*25 = 157.08. Diisi oleh preloader.ts. */
+    stroke-dasharray: 157.08;
+    stroke-dashoffset: 157.08;
+  }
+
+  .mv-preload__persen {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--color-text-2);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Kunci scroll selama overlay tampil. `scrollbar-gutter: stable` di
+     global.css menahan lebar scrollbar supaya penguncian ini tidak
+     menggeser layout (CLS 0, guardrail 8). */
+  :global(html[data-memuat]) {
+    overflow: hidden;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mv-preload,
+    .mv-preload__inner {
+      transition: none;
+    }
+
+    .mv-preload[data-selesai] .mv-preload__inner {
+      transform: none;
+    }
+  }
+</style>

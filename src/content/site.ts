@@ -64,14 +64,14 @@ export const site: SiteConfig = {
     // REDESIGN 2026-09-05 (permintaan klien, iterasi 5) — balik pakai foto
     // asli `HERO SECTION/Hero Section.png` (lantai produksi, 1536×1024),
     // tapi diputihkan (grayscale + overlay putih 55%) meniru tampilan
-    // `motive.png` (iterasi sebelumnya) via script sharp satu-kali — lihat
-    // `public/images/hero/hero-section-whitened.png`. Logo MOTIVE ("item"/
+    // `motive.webp` (iterasi sebelumnya) via script sharp satu-kali — lihat
+    // `public/images/hero/hero-section-whitened.webp`. Logo MOTIVE ("item"/
     // hitam, `LOGO MOTIVE NEW.png`) ditumpuk di tengah sebagai elemen
     // terpisah oleh Hero.astro, bukan dibakar ke dalam foto.
     // ⚠️ PNG ~1,3 MB belum dioptimasi. WAJIB dikompres (AVIF/WebP, target
     // ≤180 KB) + `srcset` sebelum produksi — kalau tidak LCP jebol.
     fotoTersedia: true,
-    fotoSrc: '/images/hero/hero-section-whitened.png',
+    fotoSrc: '/images/hero/hero-section-whitened.webp',
     fotoAlt: 'Lantai produksi MOTIVE — deretan operator menjahit pesanan apparel',
     statusApproval: 'draft',
   },

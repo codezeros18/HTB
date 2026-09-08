@@ -99,6 +99,11 @@
        balik navbar 60px yang muncul setelah hero. */
     scroll-behavior: smooth;
     scroll-padding-top: 72px;
+    /* Sisakan lorong scrollbar permanen. Preloader (2026-09-08) mengunci
+       `overflow: hidden` selama layar muat tampil; tanpa ini scrollbar
+       hilang lalu muncul lagi dan seluruh halaman bergeser horizontal
+       saat overlay dibuang — CLS harus tetap 0 (guardrail 8). */
+    scrollbar-gutter: stable;
   }
 
   body {

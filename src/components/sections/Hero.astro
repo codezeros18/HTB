@@ -3,15 +3,17 @@
  * Hero — REDESIGN 2026-09-05 (permintaan klien, iterasi 5).
  *
  * Riwayat singkat: mulai dari h1 raksasa + eyebrow + sub + CTA → dipangkas
- * jadi h1 saja di pojok kiri-bawah → dipangkas lagi jadi NOL teks (cuma
- * foto `motive.png`, headline pindah ke About) → SEKARANG: foto asli
- * "Hero Section.png" (lantai produksi) diputihkan (lihat catatan di
- * `site.hero.fotoSrc`), logo MOTIVE hitam ditumpuk di tengah, dan tagline
- * singkat ditaruh di bawah logo — "simple, to the point", bukan display
- * raksasa lagi.
+ * jadi h1 saja di pojok kiri-bawah → dipangkas lagi jadi NOL teks → foto
+ * lantai produksi diputihkan + logo MOTIVE + tagline di bawahnya.
  *
- * Kenapa teks gelap (bukan putih seperti iterasi foto-gelap sebelumnya):
- * latar sekarang terang (foto diputihkan), jadi logo/tagline pakai warna
+ * REVISI 2026-09-08 (permintaan klien: "di hero pure logo aja hilangin
+ * tulisan konveksi"): tagline DIBUANG. Hero kini foto + LOGO SAJA, nol
+ * teks. `site.hero.h1` sengaja DIPERTAHANKAN di data — masih dipakai
+ * sebagai sumber `<title>`/deskripsi meta lewat site.ts dan biar mudah
+ * dikembalikan kalau klien berubah pikiran.
+ *
+ * Kenapa tinta gelap (bukan putih seperti iterasi foto-gelap sebelumnya):
+ * latar sekarang terang (foto diputihkan), jadi isyarat scroll pakai warna
  * gelap (`--color-bg`, token near-black situs — dipakai terbalik sebagai
  * "tinta gelap" di atas latar terang, bukan hex baru).
  *
@@ -29,16 +31,39 @@ interface Props {
 const { id }: Props = Astro.props;
 
 const { hero } = site;
+
+/**
+ * `srcset` foto hero. Foto ini adalah elemen LCP, dan sumber 1536px
+ * (148 KB) adalah penyumbang LCP terbesar di 4G lambat — ponsel 400px
+ * tidak perlu mengunduhnya. Varian dibuat oleh `scripts/optimize-images.mjs`
+ * (lebar 400/800/1200, WebP q82) di samping berkas aslinya.
+ * Diukur di 4G lambat + CPU 4x: LCP turun dari 2,4 s.
+ */
+const heroSrcset = hero.fotoSrc
+  ? [400, 800, 1200]
+      .map((w) => `${hero.fotoSrc?.replace('.webp', `-${w}.webp`)} ${w}w`)
+      .concat(`${hero.fotoSrc} 1536w`)
+      .join(', ')
+  : undefined;
 ---
 
 <section id={id} class="mv-hero">
   {
     hero.fotoSrc && (
       <>
-        <link rel="preload" as="image" href={hero.fotoSrc} fetchpriority="high" />
+        <link
+          rel="preload"
+          as="image"
+          href={hero.fotoSrc}
+          imagesrcset={heroSrcset}
+          imagesizes="100vw"
+          fetchpriority="high"
+        />
         <img
           class="mv-hero__foto"
           src={hero.fotoSrc}
+          srcset={heroSrcset}
+          sizes="100vw"
           alt={hero.fotoAlt ?? ''}
           width="1536"
           height="1024"
@@ -61,7 +86,6 @@ const { hero } = site;
       loading="eager"
       decoding="async"
     />
-    <p class="mv-hero__tagline">{hero.h1}</p>
   </div>
 
   <div class="mv-hero__cue" aria-hidden="true">
@@ -128,7 +152,6 @@ const { hero } = site;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: var(--space-4);
     text-align: center;
     padding-inline: var(--edge-pad);
   }
@@ -136,18 +159,6 @@ const { hero } = site;
   .mv-hero__logo {
     inline-size: clamp(220px, 26vw, 420px);
     block-size: auto;
-  }
-
-  /* Tagline "simple, to the point" — bukan display raksasa seperti
-     iterasi sebelumnya, cukup satu baris tenang di bawah logo. */
-  .mv-hero__tagline {
-    font-family: var(--font-body);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: clamp(0.8rem, 1.3vw, 1.05rem);
-    color: var(--hero-ink);
-    margin: 0;
   }
 
   /* Panduan "scroll ke bawah" — REDESIGN 2026-09-06 (permintaan klien:

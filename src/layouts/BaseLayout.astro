@@ -19,6 +19,7 @@
  *                tergeser lewat (REDESIGN 2026-09-06). Default false.
  */
 import { site } from '../content/site';
+import Preloader from '../components/layout/Preloader.astro';
 import SkipLink from '../components/layout/SkipLink.astro';
 import Navbar from '../components/layout/Navbar.astro';
 import MobileMenu from '../components/layout/MobileMenu.astro';
@@ -104,6 +105,12 @@ const canonical = new URL(Astro.url.pathname, Astro.site ?? 'https://motive.exam
   </head>
 
   <body id="top">
+    {
+      /* Layar muat — elemen pertama di <body> supaya sudah terlihat di
+       cat pertama, sebelum apa pun sempat tampil setengah jadi. */
+    }
+    <Preloader />
+
     <SkipLink />
     <Navbar heroNav={heroNav} />
     <MobileMenu />
