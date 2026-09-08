@@ -26,8 +26,23 @@ import type { Klien } from './types';
      • Logo Solvensea.png (bola karang)  → Solvensea (entri BARU, menutup A21)
      • logo kammatanha … .png (vihara)   → Kammatanha (entri BARU, menutup A21)
 
-   Perlu konfirmasi klien: ejaan "Kammatanha", dan apakah berkas
-   "IPEKA GRAND WISATA.webp" memang untuk entri IPEKA RUN.
+   REVISI 2026-09-08 — daftar portofolio resmi klien diterapkan:
+   14 entri BARU ditambahkan (lihat blok di akhir berkas) dan 3 nama
+   dikoreksi mengikuti ejaan dokumen:
+     • "Bangor"             -> "Burger Bangor"
+     • "Sunan Bonang Tuban" -> "Universitas Sunan Bonang"
+     • "Phoenix Event"      -> "Phoenix EO"
+
+   MASIH perlu konfirmasi klien (SENGAJA tidak diubah sepihak):
+   - "Kammatanha" (situs) vs "KAMMATTHANASANUTTHAPAKA NIKAYA" (dokumen)
+     — kemungkinan organisasi yang sama, tapi bedanya terlalu jauh untuk
+     ditebak; nama pihak ketiga tidak boleh dikarang.
+   - "GKLKI" (situs) vs "GKLKD" (dokumen) — beda satu huruf terakhir.
+   - 6 entri yang ADA di situs tapi TIDAK ada di daftar dokumen:
+     SMA Assisi, Intelecta Cup, HPKSI DPW Kalimantan Timur,
+     KMK Keuskupan Larantuka, Naksatra Dharma, KMB Viriya Dhamma.
+     Dipertahankan — dokumen tidak meminta penghapusan.
+   - Apakah berkas "IPEKA GRAND WISATA.webp" memang untuk entri IPEKA RUN.
 
    ⚠️ Berkas logo masih mentah (STAN 1 MB, UAD 828 KB, Kammatanha 1,7 MB).
    `ClientLogo` sudah `object-fit: contain`, tapi berat unduh WAJIB
@@ -82,7 +97,7 @@ export const klien: Klien[] = [
   },
   {
     // Tebakan: file "USB.png" = Universitas Sunan Bonang (Tuban). Konfirmasi.
-    nama: 'Sunan Bonang Tuban',
+    nama: 'Universitas Sunan Bonang',
     kategori: 'instansi-pendidikan',
     logo: '/images/OUR%20CLIENT/CLIENT%20LOGO/USB.png',
     izinTayang: true,
@@ -161,7 +176,7 @@ export const klien: Klien[] = [
     tampilDiHero: false,
   },
   {
-    nama: 'Bangor',
+    nama: 'Burger Bangor',
     kategori: 'korporat-properti',
     logo: '/images/OUR%20CLIENT/CLIENT%20LOGO/BURGER%20BANGOR.jpg',
     izinTayang: true,
@@ -192,7 +207,7 @@ export const klien: Klien[] = [
     tampilDiHero: false,
   },
   {
-    nama: 'Phoenix Event',
+    nama: 'Phoenix EO',
     kategori: 'event-olahraga',
     logo: '/images/OUR%20CLIENT/CLIENT%20LOGO/LOGO%20PHOENIX%20EO.png',
     izinTayang: true,
@@ -250,6 +265,119 @@ export const klien: Klien[] = [
     kategori: 'komunitas-organisasi',
     logo: '/images/OUR%20CLIENT/CLIENT%20LOGO/logo%20kammatanha%20polos%20tanpa%20teks.png',
     izinTayang: true,
+    tampilDiHero: false,
+  },
+
+  /* -----------------------------------------------------------
+     BARU 2026-09-08 — daftar portofolio resmi dari dokumen
+     "COPYWRITING WEBSITE MOTIVE PROJECT". Semua entri di bawah
+     BELUM punya berkas logo, jadi `logo: null` + `izinTayang: false`
+     -> dirender sebagai NAMA TEKS di kotak berukuran sama.
+     Klien sudah tahu dan menulis di dokumennya: "masukin dlu logo
+     yang lu ada, nanti yg kurang gw update di drive". Begitu berkas
+     turun: isi `logo` + set `izinTayang: true`, nol perubahan kode.
+
+     Kategori dipetakan ke 4 kategori internal yang sudah ada.
+     Dokumen klien memakai 3 kelompok (COMPANY / EVENT / BRAND) yang
+     TIDAK sama persis — pemetaan ini perlu dikonfirmasi. Kategori
+     hanya memengaruhi URUTAN render; grid tidak menampilkan labelnya.
+     ----------------------------------------------------------- */
+  {
+    nama: 'MAN Cendekia Serpong',
+    kategori: 'instansi-pendidikan',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Kementerian Agama Lembata',
+    kategori: 'instansi-pendidikan',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'PT. Ananta Kreasi Indonesia',
+    kategori: 'korporat-properti',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'PT. Energi Kreatif Dinamika',
+    kategori: 'korporat-properti',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Mikhayla Fashion',
+    kategori: 'korporat-properti',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'YCLC',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Pradita Fun Run',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Ahmad Dahlan Culture Run',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'STAN Fun Run',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Solar Run',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Geothermal Run',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Avia Fun Run',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'Belitong Go Fest',
+    kategori: 'event-olahraga',
+    logo: null,
+    izinTayang: false,
+    tampilDiHero: false,
+  },
+  {
+    nama: 'HKBP Gading Serpong',
+    kategori: 'komunitas-organisasi',
+    logo: null,
+    izinTayang: false,
     tampilDiHero: false,
   },
 ];

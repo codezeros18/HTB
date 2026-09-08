@@ -15,6 +15,12 @@
  *   Di ≤900px kolom runtuh: teks dulu, lalu nilai jadi grid 2 kolom
  *   (1 kolom di ≤480px).
  *
+ * REVISI 2026-09-08 — copywriting resmi klien masuk: headline
+ * "Produksi Lebih Mudah. Hasil Lebih Terjaga." ditaruh di puncak kolom
+ * kiri (di atas byline), dan 4 janji nilai kini memakai judul English
+ * + kalimat penjelas dari dokumen. Dua paragraf TIDAK diubah — klien
+ * menulis "untuk deskripsi about us nya sudah cocok".
+ *
  * Nol lubang kosong, nol baris melar. Section BERBASIS TEKS — foto
  * "tentang kami" milik klien belum tersedia.
  *
@@ -41,6 +47,8 @@ const nomor = (i: number): string => String(i + 1).padStart(2, '0');
 
   <div class="mv-about mv-reveal">
     <div class="mv-about__utama">
+      {about.headline !== null && <p class="mv-about__headline">{about.headline}</p>}
+
       {
         meta.length > 0 && (
           <p class="mv-about__meta">
@@ -94,6 +102,19 @@ const nomor = (i: number): string => String(i + 1).padStart(2, '0');
     display: flex;
     flex-direction: column;
     gap: var(--space-5);
+  }
+
+  /* Headline copywriting klien — kalimat pembuka, bukan label section
+     (label "ABOUT US" sudah dipegang SectionHeading di atasnya). */
+  .mv-about__headline {
+    margin: 0;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.35rem, 1.1vw + 1.05rem, 2rem);
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    color: var(--color-text);
+    text-wrap: balance;
   }
 
   /* Byline identitas — kecil, huruf renggang, beraksen emas. */

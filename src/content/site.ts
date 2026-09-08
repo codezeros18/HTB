@@ -84,16 +84,34 @@ export const site: SiteConfig = {
      ============================================================= */
   about: {
     judul: 'About Us',
+    // REVISI 2026-09-08 — headline resmi dari dokumen copywriting klien.
+    headline: 'Produksi Lebih Mudah. Hasil Lebih Terjaga.',
     paragraf: [
       'Bergerak di industri apparel, kami memahami bahwa setiap event dan organisasi membutuhkan identitas visual yang berkualitas. Itulah mengapa kami hadir untuk memenuhi kebutuhan vendor pakaian Anda dengan standar profesionalisme tinggi.',
       'Kami berkomitmen memberikan solusi produksi yang efisien tanpa mengesampingkan detail. Dengan jaminan ketepatan waktu dan garansi kualitas hasil produksi, kami memastikan material yang Anda terima selalu sesuai dengan kesepakatan awal.',
     ],
-    // Judul kartu dari BLUEPRINT §8 Section 3; deskripsi = frasa asli §1.1 apa adanya.
+    // REVISI 2026-09-08 — DIGANTI TOTAL oleh dokumen copywriting klien.
+    // Dulu: judul Indonesia + frasa pendek PDF ("On-time delivery." dst.).
+    // Sekarang: judul English + satu kalimat penjelas per poin, apa adanya
+    // dari dokumen. Nomor 01–04 dirender komponen, bukan disimpan di sini.
     janjiNilai: [
-      { judul: 'Kontrol Kualitas Berlapis', deskripsi: 'Quality Control sebagai perhatian utama.' },
-      { judul: 'Ketepatan Waktu', deskripsi: 'On-time delivery.' },
-      { judul: 'Garansi Hasil Produksi', deskripsi: 'Garansi kualitas hasil produksi.' },
-      { judul: 'Material Sesuai Kesepakatan', deskripsi: 'Material sesuai kesepakatan awal.' },
+      {
+        judul: 'Quality Control',
+        deskripsi: 'Setiap produk melalui proses pemeriksaan sebelum dikemas dan dikirim.',
+      },
+      {
+        judul: 'Reliable Timeline',
+        deskripsi: 'Timeline produksi disepakati sejak awal agar project berjalan lebih terencana.',
+      },
+      {
+        judul: 'Production Guarantee',
+        deskripsi:
+          'Kami bertanggung jawab terhadap hasil produksi sesuai spesifikasi yang telah disepakati.',
+      },
+      {
+        judul: 'Material Transparency',
+        deskripsi: 'Jenis dan spesifikasi material dikonfirmasi sebelum produksi dimulai.',
+      },
     ],
     // Setiap elemen null disembunyikan sendiri oleh komponen (T04.6).
     // REDESIGN 2026-09-06 (permintaan klien): baris pertama diganti jadi
@@ -194,9 +212,34 @@ export const site: SiteConfig = {
      DAN dari `KontakContent` (types.ts) — bukan cuma disembunyikan,
      karena tidak ada rencana form ditampilkan lagi.
      ============================================================= */
+
+  /* =============================================================
+     produkUi — blok "STANDARD CTA UNTUK SEMUA PRODUCT PAGE" dari
+     dokumen copywriting klien (2026-09-08). Dirender di bawah size
+     chart pada SETIAP halaman detail produk. Berbeda dari
+     `LayananDetail.ctaLabel` yang berganti per produk.
+     ============================================================= */
+  produkUi: {
+    ctaJudul: 'Punya Kebutuhan Khusus?',
+    ctaTeks:
+      'Ceritakan kebutuhan produk, jumlah, desain, dan deadline Anda. Tim Motive akan membantu merekomendasikan spesifikasi produksi yang sesuai.',
+    ctaLabel: 'Konsultasikan via WhatsApp',
+  },
+
   kontak: {
-    judul: 'How Can We Help',
+    // REVISI 2026-09-08 — dokumen klien memakai ejaan "How We Can Help"
+    // (dulu "How Can We Help") dan mengisi seluruh blok yang tadinya kosong.
+    judul: 'How We Can Help',
     subjudul: null,
+    eyebrow: 'HAVE A PROJECT IN MIND?',
+    headline: 'Ceritakan Kebutuhan Anda. Kami Bantu Produksinya.',
+    paragraf: [
+      'Sudah memiliki desain, jumlah kebutuhan, atau deadline?',
+      'Kirim detail project Anda kepada tim Motive. Kami akan membantu merekomendasikan produk, material, dan proses produksi yang sesuai dengan kebutuhan Anda.',
+    ],
+    ctaLabel: 'Konsultasi via WhatsApp',
+    teksSekunder:
+      'Belum punya spesifikasi lengkap? Tidak masalah. Mulai dari kebutuhan Anda terlebih dahulu.',
   },
 };
 

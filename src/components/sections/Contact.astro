@@ -3,9 +3,18 @@
  * Contact — REDESIGN 2026-09-06 (permintaan klien).
  *
  * Form dihapus total (client semua closing lewat WhatsApp). Section jadi
- * SATU LAYAR PENUH (min 100vh) berisi judul raksasa "How Can We Help" +
- * satu tombol WhatsApp, dipusatkan vertikal & horizontal — penutup situs
- * yang tegas. Nol kartu/kotak.
+ * SATU LAYAR PENUH (min 100vh) berisi judul raksasa + CTA WhatsApp,
+ * dipusatkan vertikal & horizontal — penutup situs yang tegas.
+ * Nol kartu/kotak.
+ *
+ * REVISI 2026-09-08 — copywriting resmi klien ("How We Can Help") masuk.
+ * Dulu section ini HANYA judul + tombol; sekarang lengkap sesuai dokumen:
+ *   eyebrow → judul section → headline → dua paragraf → CTA → teks sekunder
+ * Setiap bagian dijaga `!== null` supaya section tetap utuh (judul +
+ * tombol WhatsApp) kalau klien mencabut salah satunya — bukan pecah.
+ *
+ * Lebar teks dikunci 54ch: section ini rata tengah, dan paragraf rata
+ * tengah yang melebar penuh container jadi sangat sulit dibaca.
  *
  * Section TERAKHIR sebelum Footer.
  */
@@ -25,8 +34,25 @@ const { kontak } = site;
 
 <Container as="section" id={id} class="mv-kontak">
   <div class="mv-kontak__inner mv-reveal">
+    {kontak.eyebrow !== null && <p class="mv-kontak__eyebrow">{kontak.eyebrow}</p>}
+
     <SectionHeading judul={kontak.judul} align="center" />
-    <WhatsAppButton konteks="kontak" size="lg" />
+
+    {kontak.headline !== null && <p class="mv-kontak__headline">{kontak.headline}</p>}
+
+    {
+      kontak.paragraf.length > 0 && (
+        <div class="mv-kontak__teks">
+          {kontak.paragraf.map((t) => (
+            <p class="mv-kontak__paragraf">{t}</p>
+          ))}
+        </div>
+      )
+    }
+
+    <WhatsAppButton konteks="kontak" label={kontak.ctaLabel ?? undefined} size="lg" />
+
+    {kontak.teksSekunder !== null && <p class="mv-kontak__sekunder">{kontak.teksSekunder}</p>}
   </div>
 </Container>
 
@@ -51,5 +77,50 @@ const { kontak } = site;
     flex-direction: column;
     align-items: center;
     text-align: center;
+  }
+
+  .mv-kontak__eyebrow {
+    margin: 0 0 var(--space-3);
+    font-size: var(--fs-body-s);
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .mv-kontak__headline {
+    margin: var(--space-4) 0 0;
+    max-inline-size: 22ch;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.35rem, 1.2vw + 1.05rem, 2.1rem);
+    line-height: 1.2;
+    color: var(--color-text);
+    text-wrap: balance;
+  }
+
+  .mv-kontak__teks {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-block: var(--space-5) var(--space-6);
+    max-inline-size: 54ch;
+  }
+
+  .mv-kontak__paragraf {
+    margin: 0;
+    font-size: var(--fs-body-l);
+    line-height: var(--lh-body-l);
+    color: var(--color-text-2);
+    text-wrap: pretty;
+  }
+
+  .mv-kontak__sekunder {
+    margin: var(--space-5) 0 0;
+    max-inline-size: 48ch;
+    font-size: var(--fs-body-s);
+    line-height: var(--lh-body-s);
+    color: var(--color-text-2);
+    text-wrap: pretty;
   }
 </style>

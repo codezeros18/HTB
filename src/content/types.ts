@@ -94,14 +94,20 @@ export interface BarisSize {
 }
 
 export interface SizeChart {
+  /** Kode resmi klien: 'sc-01' .. 'sc-10'. Dirujuk `LayananDetail.sizeChartId`. */
   id: string;
   nama: string;
-  /** Header kolom, mis. ["S","M","L","XL","2XL","3XL","4XL"]. */
+  /**
+   * Daftar produk yang memakai tabel ini, apa adanya dari dokumen klien.
+   * `null` untuk tabel yang di dokumen tidak diberi keterangan "Untuk:".
+   */
+  untuk: string | null;
+  /** Header kolom, mis. ["S","M","L","XL","XXL","3XL"]. */
   sizes: string[];
   unit: UnitUkuran;
   baris: BarisSize[];
   toleransi: string | null;
-  /** Selama `'belum_diverifikasi'` komponen TIDAK merender tabel ini (blocker B3). */
+  /** Selama `'belum_diverifikasi'` komponen TIDAK merender tabel ini. */
   statusVerifikasi: StatusVerifikasi;
   /** Kode anomali BLUEPRINT §11 (A1–A9) yang relevan untuk tabel ini. */
   catatanAnomali: string[];
@@ -219,11 +225,14 @@ export interface JanjiNilai {
 }
 
 export interface AboutContent {
-  /**
-   * H2 SectionHeading — "Tentang Kami". Headline "KONVEKSI CUSTOM APPAREL
-   * & RACEPACK" dilepas dari sini karena sudah ada di hero.
-   */
+  /** Label section ("About Us") — SectionHeading. */
   judul: string;
+  /**
+   * Headline copywriting klien 2026-09-08 ("Produksi Lebih Mudah. Hasil
+   * Lebih Terjaga."). Terpisah dari `judul`: `judul` adalah LABEL section,
+   * ini KALIMATNYA. `null` → tidak dirender.
+   */
+  headline: string | null;
   /**
    * Tepat 2 paragraf, adaptasi PDF.
    * REDESIGN 2026-09-06: sempat dibuang saat section dibuat visual-driven,
@@ -331,6 +340,20 @@ export interface GaleriContent {
 
 /* ---------- contact (S08) ---------- */
 
+/* ---------- halaman detail produk (copywriting klien 2026-09-08) ---------- */
+
+export interface ProdukUiContent {
+  /**
+   * Blok "STANDARD CTA UNTUK SEMUA PRODUCT PAGE" dari dokumen klien —
+   * muncul di SETIAP halaman produk, di bawah size chart. Berbeda dari
+   * `LayananDetail.ctaLabel` yang spesifik per produk ("Konsultasikan
+   * Crewneck"); yang ini penutup halaman yang sama untuk semua produk.
+   */
+  ctaJudul: string;
+  ctaTeks: string;
+  ctaLabel: string;
+}
+
 export interface KontakContent {
   /**
    * H2 SectionHeading — BLUEPRINT §8 Section 9.
@@ -341,6 +364,16 @@ export interface KontakContent {
    */
   judul: string;
   subjudul: string | null;
+  /**
+   * Blok "How We Can Help" versi copywriting klien 2026-09-08.
+   * Semua `| null` supaya section tetap tayang (judul + tombol WA) kalau
+   * salah satu bagian dicabut klien — bukan pecah.
+   */
+  eyebrow: string | null;
+  headline: string | null;
+  paragraf: string[];
+  ctaLabel: string | null;
+  teksSekunder: string | null;
 }
 
 export interface SiteConfig {
@@ -368,5 +401,6 @@ export interface SiteConfig {
   prosesIntro: ProsesIntroContent;
   klienUi: KlienUiContent;
   galeri: GaleriContent;
+  produkUi: ProdukUiContent;
   kontak: KontakContent;
 }

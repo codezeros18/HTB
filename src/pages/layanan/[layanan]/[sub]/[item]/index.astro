@@ -3,6 +3,14 @@
  * /layanan/[layanan]/[sub]/[item]/ — detail satu produk.
  * REDESIGN 2026-08-30 — foto kiri, deskripsi kanan, CTA WhatsApp
  * ter-prefill nama produk. Lihat catatan di `/layanan/[layanan]/index.astro`.
+ *
+ * REVISI 2026-09-08 — copywriting resmi klien ("COPYWRITING WEBSITE
+ * MOTIVE PROJECT", public/docs/) diterapkan penuh:
+ *   - H1 pakai `judul` (nama panjang versi klien) bila ada
+ *   - deskripsi jadi DUA paragraf
+ *   - blok size chart / dimension guide + Size Note wajib (SizeChartBlock)
+ *   - label CTA spesifik per produk ("Konsultasikan Crewneck")
+ *   - blok CTA penutup yang sama di semua halaman produk (site.produkUi)
  */
 import type { Layanan, LayananDetail, LayananSub } from '../../../../../content/layanan';
 import { layanan } from '../../../../../content/layanan';
@@ -12,6 +20,7 @@ import Container from '../../../../../components/layout/Container.astro';
 import LayananCrumb from '../../../../../components/layanan/LayananCrumb.astro';
 import type { Crumb } from '../../../../../components/layanan/LayananCrumb.astro';
 import WhatsAppButton from '../../../../../components/ui/WhatsAppButton.astro';
+import SizeChartBlock from '../../../../../components/layanan/SizeChartBlock.astro';
 
 interface StaticProps {
   l: Layanan;
@@ -49,9 +58,15 @@ const trail: Crumb[] = [
 
 // Produk lain di kelompok yang sama — navigasi lanjut tanpa balik ke daftar.
 const lainnya = s.items.filter((x) => x.slug !== it.slug);
+
+/* `judul` = nama versi dokumen klien ("Custom Vest"), `nama` = nama
+   pendek untuk kartu/breadcrumb ("Rompi"). H1 & <title> pakai yang
+   panjang; pesan WhatsApp juga, supaya yang dibaca tim sama dengan yang
+   dilihat pengunjung. */
+const judulProduk = it.judul ?? it.nama;
 ---
 
-<BaseLayout title={`${it.nama} — ${l.nama} — ${site.brand}`} description={it.deskripsi}>
+<BaseLayout title={`${judulProduk} — ${l.nama} — ${site.brand}`} description={it.deskripsi}>
   <Container as="section" spacing="section">
     <LayananCrumb trail={trail} />
 
@@ -61,15 +76,28 @@ const lainnya = s.items.filter((x) => x.slug !== it.slug);
       </div>
       <div class="lyd__body">
         <p class="t-eyebrow lyd__eyebrow">{l.nama}</p>
-        <h1 class="t-h1 lyd__judul">{it.nama}</h1>
+        <h1 class="t-h1 lyd__judul">{judulProduk}</h1>
         <p class="t-body-l lyd__desc">{it.deskripsi}</p>
-        <WhatsAppButton
-          konteks="produk"
-          produk={it.nama}
-          label="Konsultasi via WhatsApp"
-          size="lg"
-        />
+        {it.deskripsi2 !== null && <p class="t-body-l lyd__desc lyd__desc--2">{it.deskripsi2}</p>}
+        <WhatsAppButton konteks="produk" produk={judulProduk} label={it.ctaLabel} size="lg" />
       </div>
+    </div>
+  </Container>
+
+  <Container as="section" spacing="section">
+    <SizeChartBlock it={it} />
+  </Container>
+
+  <Container as="section" spacing="section">
+    <div class="lyd__cta">
+      <h2 class="t-h2 lyd__cta-judul">{site.produkUi.ctaJudul}</h2>
+      <p class="t-body-l lyd__cta-teks">{site.produkUi.ctaTeks}</p>
+      <WhatsAppButton
+        konteks="produk"
+        produk={judulProduk}
+        label={site.produkUi.ctaLabel}
+        size="lg"
+      />
     </div>
   </Container>
 
@@ -139,6 +167,31 @@ const lainnya = s.items.filter((x) => x.slug !== it.slug);
     color: var(--color-text-2);
     margin: 0;
     max-inline-size: 52ch;
+  }
+
+  .lyd__desc--2 {
+    margin-block-start: calc(var(--space-2) * -1);
+  }
+
+  /* Blok CTA penutup — sama di semua halaman produk (dokumen klien). */
+  .lyd__cta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+    max-inline-size: 60ch;
+    padding-block-start: var(--space-5);
+    border-block-start: 2px solid var(--color-accent);
+  }
+
+  .lyd__cta-judul {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .lyd__cta-teks {
+    color: var(--color-text-2);
+    margin: 0;
   }
 
   .lyd__lainnya-judul {

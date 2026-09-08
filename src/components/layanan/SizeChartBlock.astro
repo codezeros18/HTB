@@ -1,0 +1,208 @@
+---
+/**
+ * SizeChartBlock — blok "ukuran" pada halaman detail produk.
+ * BARU 2026-09-08, mengikuti "COPYWRITING WEBSITE MOTIVE PROJECT".
+ *
+ * Dokumen klien memberi DUA bentuk panduan ukuran, dan produk hanya
+ * memakai salah satunya:
+ *
+ *   1. SIZE CHART BAKU (SC-01 … SC-10) — produk apparel berukuran S–3XL.
+ *      Dirender sebagai tabel semantik lewat `Table.astro` (kolom pertama
+ *      sticky, bisa digeser sendiri di 360px tanpa membuat body meluber).
+ *
+ *   2. SIZE / DIMENSION GUIDE — produk non-apparel (medali, bib, tas,
+ *      pin, tumbler, lanyard) dan produk fully-custom yang ukurannya
+ *      mengikuti tech pack. Tidak ada tabel; yang ada kalimat panduan
+ *      dan/atau satu baris "Measurement".
+ *
+ * "Size Note" di bawahnya WAJIB muncul di SEMUA halaman produk —
+ * permintaan eksplisit dokumen klien ("STANDARD NOTE UNTUK SEMUA
+ * PRODUCT PAGE") — jadi dirender di luar kedua cabang di atas.
+ *
+ * Guardrail 1 tetap dijaga: nol angka karangan. Seluruh nilai berasal
+ * dari `size-charts.ts` / `layanan.ts`; kalau sebuah produk tidak punya
+ * tabel MAUPUN panduan, blok ukurannya tidak dirender sama sekali —
+ * bukan diisi tabel kosong atau placeholder.
+ */
+import type { LayananDetail } from '../../content/layanan';
+import { sizeChartById, sizeChartDisclaimer, sizeNote } from '../../content/size-charts';
+import Table from '../ui/Table.astro';
+import type { TableRow } from '../ui/types';
+
+interface Props {
+  it: LayananDetail;
+}
+
+const { it }: Props = Astro.props;
+
+const chart = sizeChartById(it.sizeChartId);
+
+/* Tabel HANYA dirender kalau klien sudah memverifikasi angkanya.
+   Kontrak lama dari `size-charts.ts` sengaja dipertahankan walau kini
+   kesepuluh tabel berstatus 'terverifikasi' — supaya menambah tabel
+   baru yang masih mentah tidak diam-diam ikut tayang. */
+const tabelTayang = chart !== null && chart.statusVerifikasi === 'terverifikasi';
+
+const barisTabel: TableRow[] = tabelTayang
+  ? chart.baris.map((b) => ({
+      header: b.label,
+      sel: b.nilai.map((n) => (n === null ? null : `${n} ${chart.unit}`)),
+    }))
+  : [];
+
+const adaPanduan = it.panduanUkuran !== null || it.dimensi !== null;
+const adaBlok = tabelTayang || adaPanduan;
+---
+
+{
+  adaBlok && (
+    <section class="scb" aria-labelledby="scb-judul">
+      <h2 class="scb__judul" id="scb-judul">
+        {tabelTayang ? sizeChartDisclaimer.judul : (it.panduanJudul ?? 'Size Guide')}
+      </h2>
+
+      {tabelTayang && (
+        <>
+          <p class="scb__untuk">{chart.nama}</p>
+          {chart.untuk !== null && <p class="scb__berlaku">Untuk: {chart.untuk}</p>}
+
+          <Table
+            caption={`Panduan ukuran ${it.judul ?? it.nama} — ${chart.nama}`}
+            kolom={['Ukuran', ...chart.sizes]}
+            baris={barisTabel}
+            catatan={chart.toleransi === null ? null : `Toleransi produksi ${chart.toleransi}.`}
+            class="scb__tabel"
+          />
+
+          <p class="scb__metode">{sizeChartDisclaimer.metode}</p>
+        </>
+      )}
+
+      {adaPanduan && (
+        <div class="scb__panduan">
+          {it.panduanUkuran !== null && <p class="scb__panduan-teks">{it.panduanUkuran}</p>}
+          {it.dimensi !== null && (
+            <p class="scb__dimensi">
+              <span class="scb__dimensi-label">Measurement</span>
+              <span class="scb__dimensi-nilai">{it.dimensi}</span>
+            </p>
+          )}
+        </div>
+      )}
+
+      {it.catatanUkuran !== null && <p class="scb__catatan">{it.catatanUkuran}</p>}
+
+      <div class="scb__note">
+        <h3 class="scb__note-judul">{sizeNote.judul}</h3>
+        <p class="scb__note-teks">{sizeNote.isi}</p>
+        <p class="scb__note-teks">{sizeNote.ajakan}</p>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .scb {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    max-inline-size: 72ch;
+  }
+
+  .scb__judul {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: var(--fs-h3);
+    line-height: 1.2;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  /* Kode tabel (SC-03 dst.) — kecil, beraksen, jadi klien bisa merujuk
+     nomor tabel yang sama seperti di dokumen mereka. */
+  .scb__untuk {
+    margin: 0;
+    font-size: var(--fs-body-s);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .scb__berlaku,
+  .scb__metode,
+  .scb__panduan-teks,
+  .scb__note-teks {
+    margin: 0;
+    font-size: var(--fs-body-s);
+    line-height: var(--lh-body-s);
+    color: var(--color-text-2);
+    text-wrap: pretty;
+  }
+
+  .scb__tabel {
+    margin-block: var(--space-2);
+  }
+
+  .scb__panduan {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  /* Baris "Measurement" — pasangan label/nilai, bukan kalimat, jadi
+     dibedakan dengan garis emas supaya terbaca sebagai spesifikasi. */
+  .scb__dimensi {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--space-2) var(--space-4);
+    padding-block-start: var(--space-3);
+    border-block-start: 2px solid var(--color-accent);
+  }
+
+  .scb__dimensi-label {
+    font-size: var(--fs-body-s);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-accent);
+  }
+
+  .scb__dimensi-nilai {
+    font-size: var(--fs-body-m);
+    font-weight: 600;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scb__catatan {
+    margin: 0;
+    font-size: var(--fs-body-s);
+    line-height: var(--lh-body-s);
+    font-style: italic;
+    color: var(--color-text-2);
+  }
+
+  .scb__note {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: var(--border-width) solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .scb__note-judul {
+    margin: 0;
+    font-family: var(--font-body);
+    font-size: var(--fs-body-s);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-text);
+  }
+</style>
